@@ -6,7 +6,10 @@
 
 <body>
     {% if user.is_authenticated %}
-    <p>Vous êtes connecté en tant que {{ request.user }}. <a href="{% url 'logout' %}">Se déconnecter</a></p>
+    <p>
+        Vous êtes connecté en tant que {{ request.user }}. <a href="{% url 'logout' %}">Se déconnecter</a><br />
+        <a href="{% url 'password_change' %}">Changer de mot de passe</a>
+    </p>
     {% endif %}
     {% block content %}{% endblock content %}
 </body>
