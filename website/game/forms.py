@@ -4,5 +4,5 @@ from . import models
 
 class ChampionsForm(forms.ModelForm):
     class Meta:
-        model = models.Champions
+        model = models.Champion
         fields = ['code', 'nom']

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from game.models import Champions, Match
+from game.models import Champion, Match
 
-admin.site.register(Champions)
+admin.site.register(Champion)
 admin.site.register(Match)
