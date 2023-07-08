@@ -11,7 +11,10 @@ class Champion(models.Model):
         return f'{self.nom}'
 
 class Match(models.Model):
+    id_match = models.AutoField(primary_key=True)
     champion1 = models.ForeignKey(Champion, on_delete=models.CASCADE, related_name='champion1')
     champion2 = models.ForeignKey(Champion, on_delete=models.CASCADE, related_name='champion2')
-    id_match = models.IntegerField()
     gagnant = models.BooleanField(null=True)
+
+    def __str__(self) -> str:
+        return f"Match #{self.id_match} {self.champion1} vs {self.champion2}"
