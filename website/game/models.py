@@ -8,7 +8,7 @@ class Champion(models.Model):
     date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'{self.nom}'
+        return f'{self.nom}@{self.uploader}'
 
 class Match(models.Model):
     id_match = models.AutoField(primary_key=True)
