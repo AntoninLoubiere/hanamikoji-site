@@ -3,7 +3,7 @@ from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator, FileExtensionValidator
 
 class Champion(models.Model):
-    code = models.FileField(FileExtensionValidator(allowed_extensions=["py","c","ml"]))
+    code = models.FileField(validators = [FileExtensionValidator(allowed_extensions=["py","c","ml"])])
     nom = models.CharField(max_length=128, blank=False)
     uploader = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now_add=True)
