@@ -35,6 +35,8 @@ form {
     font-size: 1.2em;
     color: green;
     text-align: center;
+    position: relative;
+        left: 15%;
 }
 
 
