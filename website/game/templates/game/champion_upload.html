@@ -1,10 +1,10 @@
 {% extends 'base_game.html' %}
 {% block title %}Ajout champion{% endblock title %}
 {% block content %}
-<h2>Téléverser un champion</h2>
+<h1>Téléverser un champion</h1>
 <form method="post" enctype="multipart/form-data">
     {{ form.as_p }}
     {% csrf_token %}
-    <button type="submit">Envoyer</button>
+    <button type="submit" id="envoi">Envoyer</button>
 </form>
 {% endblock content %}
