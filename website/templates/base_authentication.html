@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block css%}
-<link rel="stylesheet" href="{% static 'game/styles.css' %}" />
+{% block css %}
+<link rel="stylesheet" href="{% static 'authentication/styles.css' %}" />
 {% endblock css %}
 
 {% block body %}
@@ -11,6 +11,7 @@
     <a href="{% url 'password_change' %}">Changer de mot de passe</a>
     <a href="{% url 'logout' %}">Se déconnecter</a>
 </nav>
-{% block content %}{% endblock content %}
 {% endif %}
+{% block content %}{% endblock content %}
+
 {% endblock body %}

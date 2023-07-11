@@ -1,3 +1,96 @@
+/*J'ai repris d'un projet que j'avais déjà fait pour ne pas reprendre à zéro*/
+
+/*Le général*/
+
+body {
+    /* background-image: url(.jpg); */
+    background-attachment: fixed;
+    background-size: cover;
+}
+
+/*La mise en forme des titres*/
 h1 {
     text-align: center;
+    font-size: 5.2em;
+    font-weight: normal;
+    text-decoration: underline;
+    color: crimson;
+}
+
+
+/*La mise en forme des sections en général*/
+form {
+    border: 6px solid black;
+    border-radius: 40px;
+    box-shadow: 20px 20px 6px black;
+    background-color: rgba(255, 255, 255, 0.75);
+    color: black;
+    width: 75%;
+    margin-left: 12.5%;
+    padding: 2% 2% 2% 2%;
+}
+
+#envoi {
+    font-size: 1.2em;
+    color: green;
+    text-align: center;
+}
+
+
+
+footer {
+    border: 1px solid black;
+    background-color: white;
+    position: fixed;
+    bottom: 3px;
+    right: 3px;
+    padding: 5px
+}
+
+/*La barre de navigation*/
+nav {
+    text-align: center;
+        margin: 0px 0px 0px 0px;
+        padding: 1% 1% 1% 1%;
+        background: red;
+        color: white;
+}
+
+nav a {
+    color: #FFF;
+    text-decoration: none;
+    font: 20px Raleway;
+    margin: 0px 10px;
+    padding: 10px 10px;
+    position: relative;
+    z-index: 0;
+    cursor: pointer;
+}
+    
+nav a:before,
+nav a:after {
+    position: absolute;
+    left: 0px;
+    width: 100%;
+    height: 2px;
+    background: #FFF;
+    content: "";
+    opacity: 0;
+    transition: all 0.3s;
+}
+
+nav a:before {
+    top: 0px;
+    transform: translateY(10px);
+}
+
+nav a:after {
+    bottom: 0px;
+    transform: translateY(-10px);
+}
+
+nav a:hover:before,
+nav a:hover:after {
+    opacity: 1;
+    transform: translateY(0px);
 }

@@ -1,6 +1,6 @@
-{% extends 'base.html' %}
+{% extends 'base_authentication.html' %}
 {% block title %}Inscription{% endblock title %}
-{% block body %}
+{% block content %}
 <h2>Inscription</h2>
 {% if form.errors %}
 {{ form.errors }}
@@ -8,6 +8,6 @@
 <form method="post">
     {{ form.as_p }}
     {% csrf_token %}
-    <button type="submit">S’inscrire</button>
+    <button type="submit" id="envoi">S’inscrire</button>
 </form>
-{% endblock body %}
+{% endblock content %}

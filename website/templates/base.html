@@ -3,7 +3,9 @@
 
 <head>
     <title>{% block title %}{% endblock title %}</title>
-    <link rel="stylesheet" href="{% static 'game/styles.css' %}" />
+    <link rel="stylesheet" href="{% static 'styles.css' %}" />
+    {% block css %}{% endblock css %}
+    {% block head %}{% endblock head %}
 </head>
 
 <body>
