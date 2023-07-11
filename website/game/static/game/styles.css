@@ -49,30 +49,48 @@ footer {
 
 /*La barre de navigation*/
 nav {
-    position: fixed;
-    background-color: #9e9e9e7a;
-    display: inline-block;
-    vertical-align: top;
+    text-align: center;
+        margin: 0px 0px 0px 0px;
+        padding: 1% 1% 1% 1%;
+        background: red;
+        color: white;
 }
 
-nav li {
-    list-style-type: none;
+nav a {
+    color: #FFF;
+    text-decoration: none;
+    font: 20px Raleway;
+    margin: 0px 10px;
+    padding: 10px 10px;
+    position: relative;
+    z-index: 0;
+    cursor: pointer;
+}
+    
+nav a:before,
+nav a:after {
+    position: absolute;
+    left: 0px;
+    width: 100%;
+    height: 2px;
+    background: #FFF;
+    content: "";
+    opacity: 0;
+    transition: all 0.3s;
 }
 
-
-
-
-/*La mise en forme des liens*/
-a {
-    color: green;
+nav a:before {
+    top: 0px;
+    transform: translateY(10px);
 }
 
-
-a:hover {
-    /*Si le lien a la souris dessus (a comme équivalent onmouseover en JS*/
-    color: navy;
+nav a:after {
+    bottom: 0px;
+    transform: translateY(-10px);
 }
 
-a:visited {
-    color: maroon;
+nav a:hover:before,
+nav a:hover:after {
+    opacity: 1;
+    transform: translateY(0px);
 }

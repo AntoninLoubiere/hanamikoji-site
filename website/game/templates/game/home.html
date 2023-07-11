@@ -1,5 +1,7 @@
 {% extends 'base_game.html' %}
 {% block content %}
+
 <h1>Tableau de bord</h1>
+Bonjour {{ request.user }} <br />
 <a href="{% url 'champion_upload' %}">Ajouter un champion</a>
 {% endblock content %}

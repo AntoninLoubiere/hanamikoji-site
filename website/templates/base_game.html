@@ -3,11 +3,9 @@
 {% block body %}
 {% if user.is_authenticated %}
 <nav>
-    <ul>
-        <li>Connecté en tant que {{ request.user }}</li>
-        <li><a href="{% url 'logout' %}">Se déconnecter</a></li>
-        <li><a href="{% url 'password_change' %}">Changer de mot de passe</a></li>
-    </ul>
+    <a href="{%url 'home' %}">Home</a>
+    <a href="{% url 'password_change' %}">Changer de mot de passe</a>
+    <a href="{% url 'logout' %}">Se déconnecter</a>
 </nav>
 {% block content %}{% endblock content %}
 {% endif %}
