@@ -6,6 +6,7 @@ body {
     /* background-image: url(.jpg); */
     background-attachment: fixed;
     background-size: cover;
+    background-image: url("BG.jpg");
 }
 
 /*La mise en forme des titres*/

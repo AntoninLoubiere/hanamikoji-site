@@ -8,12 +8,13 @@ Connexion
 <style type="text/css">
     body {
         background-image: url("{% static 'authentication/boite.jpg' %}");
+        background-size: contain;
     }
 </style>
 {% endblock head %}
 
 {% block content %}
-<h1>Connexion à hanamikoji</h1>
+<h1>Connexion à Hanamikoji</h1>
 <form method="post">
     <p>{{ message }}</p>
     {{ form.as_p }}
