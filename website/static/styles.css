@@ -97,3 +97,15 @@ nav a:hover:after {
     opacity: 1;
     transform: translateY(0px);
 }
+
+/* Les tableaux */
+table {
+    border-collapse: collapse;
+    margin: auto;
+}
+
+td,
+th {
+    border: 1px solid black;
+    padding: 15px;
+}

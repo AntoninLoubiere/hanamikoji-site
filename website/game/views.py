@@ -1,10 +1,15 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from . import forms
+from game.models import Champion, Match
+from  django.db.models import Q
 
 @login_required
 def home(request):
-    return render(request, 'game/home.html')
+    champions = Champion.objects.filter(
+        uploader_id=request.user.id
+    ).order_by("-date")
+    return render(request, 'game/home.html',context={'champions':champions})
 
 @login_required
 def champion_upload(request):
