@@ -3,3 +3,7 @@
     text-decoration: underline;
     font-weight: bold;
 }
+form strong {
+    color: red;
+    font-size: 1.5em;
+}

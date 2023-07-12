@@ -3,6 +3,13 @@
 
 {% block content %}
 <h1>Tous les matchs</h1>
+<form action="" method="post">
+    {% csrf_token %}
+    <strong>{{ message }}</strong><br />
+    Filtrer par :
+    {{ form }}
+    <input type="submit" value="Filtrer">
+</form>
 <table>
     <caption>Les matchs</caption>
     <tr>

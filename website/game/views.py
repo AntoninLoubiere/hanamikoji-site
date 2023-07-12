@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from . import forms
 from game.models import Champion, Match
 from  django.db.models import Q
+from game.forms import Filter_Champion
 
 @login_required
 def home(request):
@@ -36,5 +37,21 @@ def match_detail(request,id):
 
 @login_required
 def matchs(request):
-    matchs =  Match.objects.all()
-    return render(request,'game/matchs.html',context={'matchs':matchs})
+    message=''
+    if request.method == 'POST':
+        form = Filter_Champion(request.POST)
+        if form.is_valid():
+            try:
+                champion = Champion.objects.get(nom=form.cleaned_data["nom_du_champion"])
+                matchs = Match.objects.filter(
+                    Q(champion1=champion) |
+                    Q(champion2=champion)
+                ).order_by("-date")
+            except Champion.DoesNotExist:
+                message='Nom non trouvé !'
+                form = Filter_Champion() 
+                matchs =  Match.objects.all()
+    else:
+        form = Filter_Champion() 
+        matchs =  Match.objects.all()
+    return render(request,'game/matchs.html',context={'matchs':matchs,'form':form,'message':message})
