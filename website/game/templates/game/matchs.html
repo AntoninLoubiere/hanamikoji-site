@@ -7,15 +7,29 @@
     <caption>Les matchs</caption>
     <tr>
         <th>ID</th>
-        <th>Champion1</th>
-        <th>Champion2</th>
+        <th>Champion n°1</th>
+        <th>Champion n°2</th>
+        <th>Score</th>
         <th>Statut</th>
     </tr>
     {% for match in matchs %}
     <tr>
         <td><a href="{% url 'match_detail' match.id_match %}">{{ match.id_match }}</a></td>
+        {% if match.gagnant == 0 or match.gagnant == 1 %}
+        <td id='champion_win'>{{ match.champion1.nom }}</td>
+        {% else %}
         <td>{{ match.champion1.nom }}</td>
+        {% endif %}
+        {% if match.gagnant == 0 or match.gagnant == 2 %}
+        <td id='champion_win'>{{ match.champion2.nom }}</td>
+        {% else %}
         <td>{{ match.champion2.nom }}</td>
+        {% endif %}
+        {% if match.status == 'FI' %}
+        <td>{{ match.score1 }} à {{ match.score2 }}</td>
+        {% else %}
+        <td>Non fini</td>
+        {% endif %}
         <td>{{ match.get_status_display }}</td>
     </tr>
     {% endfor %}

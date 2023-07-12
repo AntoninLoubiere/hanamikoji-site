@@ -12,6 +12,7 @@
 <body>
     {% if user.is_authenticated %}
     <nav>
+        <strong>Bonjour {{ request.user }}</strong>
         <a href="{%url 'home' %}">Home</a>
         <a href="{% url 'matchs' %}">Matchs</a>
         <a href="{% url 'password_change' %}">Changer de mot de passe</a>
@@ -23,5 +24,15 @@
     {% endif %}
     {% block body %}{% endblock body %}
 </body>
+
+<footer>
+    Créé par
+    <ul>
+        <li>Antonin LOUBIERE</li>
+        <li>PAGEZY Tristan</li>
+        <li>Alex ONCEANU</li>
+    </ul>
+    Projet de Juillet/Août 2023
+</footer>
 
 </html>

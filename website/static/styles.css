@@ -59,6 +59,11 @@ nav {
         color: white;
 }
 
+nav strong {
+    position: absolute;
+    left: 3%;
+    height: 10px;
+}
 nav a {
     color: #FFF;
     text-decoration: none;
@@ -99,13 +104,60 @@ nav a:hover:after {
 }
 
 /* Les tableaux */
-table {
-    border-collapse: collapse;
-    margin: auto;
-}
-
+table,
 td,
 th {
-    border: 1px solid black;
+    border: 1px solid #000000;
+    text-align: center;
+    font-size: 18px;
+    text-transform: capitalize;
+}
+
+th {
+    background: #090f42d6;
+    color: #fff;
+}
+
+tr {
+    background: white;
+}
+table {
+    margin: auto;
+        margin-top: 3%;
+    border-collapse: collapse;
+    width: 75%;
+}
+
+th,
+td {
     padding: 15px;
+}
+table tbody tr:nth-child(odd) {
+    background: #eb6969cc;
+    color: #000;
+    font-weight: 500;
+}
+
+caption {
+    margin-bottom: 15px;
+    font-size: 2.5em;
+    text-decoration: underline;
+}
+
+/*Lien champion*/
+
+#ajout {
+    border: 5px solid red;
+    padding: 1%;
+    margin-left: 30%;
+    margin-right: auto;
+    width: 6em;
+    font-size: 3em;
+    border-radius: 10px;
+    box-shadow: 10px 10px 3px #000000;
+    color: red;
+    text-decoration: none;
+    font-variant: small-caps;
+    font-weight: bold;
+    background-color: white;
 }
