@@ -9,7 +9,11 @@ def home(request):
     champions = Champion.objects.filter(
         uploader_id=request.user.id
     ).order_by("-date")
-    return render(request, 'game/home.html',context={'champions':champions})
+    matchs = Match.objects.filter(
+        Q(champion1__in=champions) |
+        Q(champion2__in=champions)
+    ).order_by("-date").first(10)
+    return render(request, 'game/home.html',context={'champions':champions,'matchs':matchs})
 
 @login_required
 def champion_upload(request):

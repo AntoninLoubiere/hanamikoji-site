@@ -21,4 +21,21 @@ Bonjour {{ request.user }} <br />
     </tr>
     {% endfor %}
 </table>
+<table>
+    <caption>Les matchs</caption>
+    <tr>
+        <th>ID</th>
+        <th>Champion1</th>
+        <th>Champion2</th>
+        <th>Statut</th>
+    </tr>
+    {% for match in matchs %}
+    <tr>
+        <td>{{ match.id_match }}</td>
+        <td>{{ match.champion1.nom }}</td>
+        <td>{{ match.champion2.nom }}</td>
+        <td>{{ match.status }}</td>
+    </tr>
+    {% endfor %}
+</table>
 {% endblock content %}
