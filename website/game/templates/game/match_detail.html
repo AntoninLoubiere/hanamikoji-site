@@ -17,7 +17,7 @@
     <li>Vainqueur : {{ match.champion2.nom }}</li>
     <li>Score : {{match.score2}} à {{match.score1}}</li>
     {% endif %}
-    <li>Résumé : {{ match.dump }}</li>
+    <li>Résumé : <a href="{{ match.dump.url }}">{{ match.dump }}</a></li>
     {% endif %}
 </ul>
 {% endblock content %}

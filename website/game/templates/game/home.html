@@ -17,7 +17,7 @@ Bonjour {{ request.user }} <br />
     <tr>
         <td>{{ champion.nom }}</td>
         <td>{{ champion.date }}</td>
-        <td>{{ champion.code }}</td>
+        <td><a href="{{ champion.code.url }}">{{ champion.code }}</a></td>
     </tr>
     {% endfor %}
 </table>
