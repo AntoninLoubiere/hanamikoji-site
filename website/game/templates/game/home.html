@@ -12,12 +12,14 @@ Bonjour {{ request.user }} <br />
         <th>Nom</th>
         <th>Date de création</th>
         <th>Fichier</th>
+        <th>Statut de compilation</th>
     </tr>
     {% for champion in champions %}
     <tr>
         <td>{{ champion.nom }}</td>
         <td>{{ champion.date }}</td>
         <td><a href="{{ champion.code.url }}">{{ champion.code }}</a></td>
+        <td>{{ champion.get_compilation_status_display }}</td>
     </tr>
     {% endfor %}
 </table>
