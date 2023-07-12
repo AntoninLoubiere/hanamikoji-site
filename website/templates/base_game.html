@@ -5,12 +5,5 @@
 {% endblock css %}
 
 {% block body %}
-{% if user.is_authenticated %}
-<nav>
-    <a href="{%url 'home' %}">Home</a>
-    <a href="{% url 'password_change' %}">Changer de mot de passe</a>
-    <a href="{% url 'logout' %}">Se déconnecter</a>
-</nav>
 {% block content %}{% endblock content %}
-{% endif %}
 {% endblock body %}

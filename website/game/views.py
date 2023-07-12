@@ -12,7 +12,7 @@ def home(request):
     matchs = Match.objects.filter(
         Q(champion1__in=champions) |
         Q(champion2__in=champions)
-    ).order_by("-date").first(10)
+    ).order_by("-date")[:5]
     return render(request, 'game/home.html',context={'champions':champions,'matchs':matchs})
 
 @login_required
@@ -28,3 +28,13 @@ def champion_upload(request):
             champion.save()
             return redirect('home')
     return render(request, 'game/champion_upload.html', context={'form': form})
+
+@login_required
+def match_detail(request,id):
+    match_select = Match.objects.get(id_match=id)
+    return render(request, 'game/match_detail.html',context={'match':match_select})
+
+@login_required
+def matchs(request):
+    matchs =  Match.objects.all()
+    return render(request,'game/matchs.html',context={'matchs':matchs})

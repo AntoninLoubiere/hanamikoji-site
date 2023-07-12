@@ -41,7 +41,9 @@ urlpatterns = [
     #path('logout/',authentication.views.logout_user,name='logout'),
     path('home/',game.views.home,name='home'),
     path('signup/', authentication.views.signup_page, name='signup'),
-    path('upload/', game.views.champion_upload, name='champion_upload')
+    path('upload/', game.views.champion_upload, name='champion_upload'),
+    path('matchs/',game.views.matchs, name='matchs'),
+    path('matchs/<int:id>',game.views.match_detail, name='match_detail'),
 ]
 if settings.DEBUG:
     urlpatterns += static(

@@ -1,0 +1,23 @@
+{% extends 'base_game.html' %}
+{% block title %}Matchs{% endblock title %}
+
+{% block content %}
+<h1>Match N°{{ match.id_match }}</h1>
+<ul>
+    <li>Statut : {{ match.get_status_display }}</li>
+    <li>Champion 1 : {{ match.champion1.nom }} appartenant à {{ match.champion1.uploader }}</li>
+    <li>Champion 2 : {{ match.champion2.nom }} appartenant à {{ match.champion2.uploader }}</li>
+    {% if match.status == 'FI' %}
+    {% if match.gagnant == 0 %}
+    <li>Égalité</li>
+    {% elif match.gagnant == 1 %}
+    <li>Vainqueur : {{ match.champion1.nom }}</li>
+    <li>Score : {{match.score1}} à {{match.score2}}</li>
+    {% elif match.gagnant == 2 %}
+    <li>Vainqueur : {{ match.champion2.nom }}</li>
+    <li>Score : {{match.score2}} à {{match.score1}}</li>
+    {% endif %}
+    <li>Résumé : {{ match.dump }}</li>
+    {% endif %}
+</ul>
+{% endblock content %}

@@ -1,26 +1,8 @@
 {% extends 'base_game.html' %}
-{% block title %}Home{% endblock title %}
+{% block title %}Matchs{% endblock title %}
 
 {% block content %}
-
-<h1>Tableau de bord</h1>
-Bonjour {{ request.user }} <br />
-<a href="{% url 'champion_upload' %}">Ajouter un champion</a>
-<table>
-    <caption>Les champions</caption>
-    <tr>
-        <th>Nom</th>
-        <th>Date de création</th>
-        <th>Fichier</th>
-    </tr>
-    {% for champion in champions %}
-    <tr>
-        <td>{{ champion.nom }}</td>
-        <td>{{ champion.date }}</td>
-        <td>{{ champion.code }}</td>
-    </tr>
-    {% endfor %}
-</table>
+<h1>Tous les matchs</h1>
 <table>
     <caption>Les matchs</caption>
     <tr>

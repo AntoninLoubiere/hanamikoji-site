@@ -4,7 +4,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator, FileExt
 
 class Champion(models.Model):
     code = models.FileField(validators = [FileExtensionValidator(allowed_extensions=["py","c","ml","cpp","cc","zip","tgz","tar.gz"])])
-    nom = models.CharField(max_length=128, blank=False)
+    nom = models.CharField(max_length=128, blank=False,unique=True)
     uploader = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     date = models.DateTimeField(auto_now_add=True)
 
