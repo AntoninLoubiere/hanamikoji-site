@@ -1,0 +1,43 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (c) 2020 Association Prologin <association@prologin.org>
+
+# When running in server mode, simply take all the files extracted from the
+# archive.
+ifdef STECHEC_SERVER
+  CHAMPION_FILES = $(wildcard *)
+endif
+
+CXXFLAGS = -ggdb3 -Wall -std=c++17 -fPIC -O2
+JAVA_HOME ?= $(shell readlink -f /usr/bin/java | sed "s:/bin/java$$::")
+CXXFLAGS += -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -ggdb3
+LDFLAGS += -Wl,-rpath -Wl,$(JAVA_HOME)/lib/server/ -L$(JAVA_HOME)/lib/server/ -ljvm
+
+java_sources = $(filter %.java,$(CHAMPION_FILES))
+
+all: champion.so $(java_sources:.java=.class)
+
+cxx_sources = $(filter %.cc,$(CHAMPION_FILES))
+objs += $(cxx_sources:.cc=.o)
+to_clean = $(objs)
+
+%.class: %.java
+	javac -d . $<
+
+champion.so: $(objs)
+	$(CXX) -o $@ $^ -shared $(LDFLAGS)
+
+clean:
+	@$(RM) _lang # In case the tar rule was interrupted
+	$(RM) $(to_clean)
+
+distclean: clean
+	$(RM) champion.so $(java_sources:.java=.class) champion.tgz
+
+champion.tgz: $(CHAMPION_FILES)
+	@echo "java" > _lang
+	tar czf $@ $^ _lang
+	@rm _lang
+
+tar: champion.tgz
+
+.PHONY: tar clean distclean

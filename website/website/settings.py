@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'authentication',
     'game',
+    'django_q',
 ]
 
 MIDDLEWARE = [
@@ -141,3 +142,14 @@ LOGOUT_REDIRECT_URL = 'login'
 
 MEDIA_URL = '/codes/'
 MEDIA_ROOT = BASE_DIR / 'codes/'
+
+Q_CLUSTER = {
+    'name': 'DjangORM',
+    'workers': 4,
+    'timeout': 600,
+    'retry': 660,
+    'queue_limit': 50,
+    'max_attempts': 3,
+    # 'bulk': 10,
+    'orm': 'default'
+}
