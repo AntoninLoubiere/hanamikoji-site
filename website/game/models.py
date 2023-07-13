@@ -22,8 +22,7 @@ class Champion(models.Model):
     def save(self, force_insert: bool = False, force_update: bool = False, using: str | None = None, update_fields: Iterable[str] | None = None, compile=True) -> None:
         super().save(force_insert, force_update, using, update_fields)
         if compile:
-            from .tasks import compile_champion, on_end_compilation
-            async_task(compile_champion, self, hook=on_end_compilation)
+            async_task('game.tasks.compile_champion', self, hook='game.tasks.on_end_compilation')
 
 
 
@@ -67,9 +66,8 @@ class Match(models.Model):
 
         super().save(*args, **kwargs)
         if run:
-            from .tasks import run_match, on_end_match
-            async_task(run_match, self, hook=on_end_match)
-    
+            async_task('game.tasks.run_match', self, hook='game.tasks.on_end_match')
+
 
     def __str__(self) -> str:
         return f"Match #{self.id_match} {self.champion1} vs {self.champion2}"

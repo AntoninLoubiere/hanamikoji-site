@@ -155,7 +155,8 @@ Q_CLUSTER = {
 }
 
 MAX_ISOLATE = 1000
-MATCH_TIMEOUT = 1000
+MATCH_TIMEOUT = 1500
+MATCH_SERVER_TIMEOUT = 3000
 MATCH_RULES = '/usr/lib/libhanamikoji.so'
 STECHEC_SERVER = '/usr/bin/stechec2-server'
-STECHEC_SERVER = '/usr/bin/stechec2-client'
+STECHEC_CLIENT = '/usr/bin/stechec2-client'
