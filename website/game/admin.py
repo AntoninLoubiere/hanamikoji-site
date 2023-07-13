@@ -5,5 +5,6 @@ from game.models import Champion, Match
 class ChampionAdmin(admin.ModelAdmin):
     readonly_fields = ('compilation_status',)
 
-# admin.site.register(Champion)
-admin.site.register(Match)
+@admin.register(Match)
+class MatchAdmin(admin.ModelAdmin):
+    readonly_fields = ('status', 'score1', 'score2', 'gagnant')

@@ -153,3 +153,9 @@ Q_CLUSTER = {
     # 'bulk': 10,
     'orm': 'default'
 }
+
+MAX_ISOLATE = 1000
+MATCH_TIMEOUT = 1000
+MATCH_RULES = '/usr/lib/libhanamikoji.so'
+STECHEC_SERVER = '/usr/bin/stechec2-server'
+STECHEC_SERVER = '/usr/bin/stechec2-client'
