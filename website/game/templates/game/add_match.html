@@ -1,0 +1,11 @@
+{% extends 'base_game.html' %}
+{% block title %}Lancer un match{% endblock title %}
+{% block content %}
+<h1>Lancer un match</h1>
+<form method="post" enctype="multipart/form-data">
+    <strong>{{ message }}</strong><br />
+    {{ form.as_p }}
+    {% csrf_token %}
+    <button type="submit" id="envoi">Lancer le match</button>
+</form>
+{% endblock content %}

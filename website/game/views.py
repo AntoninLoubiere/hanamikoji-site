@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from . import forms
 from game.models import Champion, Match
 from  django.db.models import Q
-from game.forms import Filter_Champion, Filter_User
+from game.forms import Filter_Champion, Filter_User, Add_Match
 from authentication.models import User
 
 @login_required
@@ -51,7 +51,6 @@ def matchs(request):
             except Champion.DoesNotExist:
                 if form.cleaned_data["nom_du_champion"] != '':
                     message='Nom non trouvé !'
-                form = Filter_Champion() 
                 matchs =  Match.objects.all().order_by("-date")
     else:
         form = Filter_Champion() 
@@ -70,9 +69,25 @@ def champions(request):
     #         except User.DoesNotExist:
     #             if form.cleaned_data["utilisateur"] != '':
     #                 message='Utiilisateur non trouvé !'
-    #             form = Filter_User() 
     #             champions =  Champion.objects.all().order_by("-date")
     # else:
     form = Filter_User() 
     champions =  Champion.objects.all().order_by("-date")
     return render(request,'game/champions.html',context={'champions':champions,'form':form,'message':message})
+
+@login_required
+def add_match(request):
+    message=''
+    if request.method == 'POST':
+        form = Add_Match(request.POST)
+        if form.is_valid():
+            try:
+                champion1 = Champion.objects.get(nom=form.cleaned_data["champion_1"])
+                champion2 = Champion.objects.get(nom=form.cleaned_data["champion_2"])
+                # A COMPLETER ! LANCEMENT DU MATCH !
+                message="Match ajouté"#Si le match a bien été ajouté
+            except Champion.DoesNotExist:
+                message='Nom non trouvé !'
+    else:
+        form = Add_Match() 
+    return render(request,'game/add_match.html',context={'form':form,'message':message})

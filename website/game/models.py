@@ -69,7 +69,7 @@ class Match(models.Model):
         editable=False,
         validators=[MinValueValidator(0), MaxValueValidator(21)]
     )
-    dump = models.FileField(null=True,blank=True,validators=[FileExtensionValidator(allowed_extensions=["json"])])
+    #dump = models.FileField(null=True,blank=True,validators=[FileExtensionValidator(allowed_extensions=["json"])])
     date = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, run=True, **kwargs) -> None:
