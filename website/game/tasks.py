@@ -1,5 +1,6 @@
 import asyncio
 from asyncio.subprocess import PIPE
+from multiprocessing import current_process
 import os
 from pathlib import Path
 from random import shuffle
@@ -9,7 +10,7 @@ import shutil
 import tempfile
 from django_q.tasks import Task
 
-from website.settings import MATCH_RULES, MATCH_SERVER_TIMEOUT, MATCH_TIMEOUT, MEDIA_ROOT, STECHEC_CLIENT, STECHEC_SERVER
+from website.settings import ISOLATE_TIMEOUT, MATCH_RULES, MATCH_SERVER_TIMEOUT, SERVER_TIMEOUT, MEDIA_ROOT, STECHEC_CLIENT, STECHEC_SERVER, MAX_ISOLATE
 from .models import Champion, Match
 
 PATH_BUILD_DIR = Path('build').absolute()
@@ -34,6 +35,8 @@ LANGS = set(['python', 'c', 'cxx', 'caml'])
 IDS = set(range(1000))
 RE_MATCH_GAGNANT = re.compile('gagnant: (.*)', re.NOFLAG)
 RE_MATCH_SCORE = re.compile('score: (.*)', re.NOFLAG)
+MAX_ISOLATE_HALF = MAX_ISOLATE // 2
+MAX_ISOLATE_TRY = 10
 
 def get_build_dir(champion: Champion):
     return (PATH_BUILD_DIR / champion.code.name).with_suffix('')
@@ -152,14 +155,38 @@ async def run_match_async(match_dir, client1, client2):
     s_pubsub = 'ipc://' + f_pubsub
 
     server_task = await run_server(match_dir, s_reqrep, s_pubsub)
-    client_1 = await run_client(match_dir, client1_name, client1_dir, s_reqrep, s_pubsub, 0)
-    client_2 = await run_client(match_dir, client2_name, client2_dir, s_reqrep, s_pubsub, 1)
+
+    # On initialise les boite isolate
+    box_id_0 = isolate_init(0)
+    box_id_1 = isolate_init(1)
+
+    client_1 = await run_client(match_dir, client1_name, client1_dir, s_reqrep, s_pubsub, 0, box_id_0)
+    client_2 = await run_client(match_dir, client2_name, client2_dir, s_reqrep, s_pubsub, 1, box_id_1)
 
     server_out, _ = await server_task.communicate()
     await client_1.wait()
+    isolate_cleanup(box_id_0)
     await client_2.wait()
+    isolate_cleanup(box_id_1)
+
     return server_out
 
+
+def isolate_init(client_id):
+    box_id = 2 * (current_process().pid % MAX_ISOLATE_HALF) + client_id
+    tries = 0
+    while True:
+        r = subprocess.run(['isolate', '--init', '--box-id', str(box_id)], stderr=PIPE)
+        if r.returncode == 2 and 'Box already exists' in r.stderr:
+            tries += 1
+            if tries >= MAX_ISOLATE_TRY:
+                raise Exception("Impossible to find free box")
+            box_id = (box_id + 2) % MAX_ISOLATE
+        break
+    return box_id
+
+def isolate_cleanup(box_id):
+    subprocess.run(['isolate', '--cleanup', '--box-id', str(box_id)])
 
 
 async def run_server(match_dir, rep_addr, pub_addr):
@@ -177,20 +204,27 @@ async def run_server(match_dir, rep_addr, pub_addr):
         stdout=PIPE
     )
 
-async def run_client(match_dir, champion_name, champion_path: Path, req_addr, sub_addr, client_id):
+async def run_client(match_dir, champion_name, champion_path: Path, req_addr, sub_addr, client_id, box_id):
     return await asyncio.create_subprocess_exec(
-        STECHEC_CLIENT,
+        'isolate',
+        '--time', str(ISOLATE_TIMEOUT),
+        f'--dir=match={match_dir}',
+        f'--dir=champion={champion_path}',
+        '--dir=/tmp',
+        '--box-id', str(box_id),
+        '-p',
+        '-c', '/champion/',
+        '--run', '--', STECHEC_CLIENT,
         '--name', f'{champion_name}-{client_id + 1}',
         '--rules', MATCH_RULES,
-        '--time', str(MATCH_TIMEOUT),
-        '--champion', str(champion_path / 'champion.so'),
+        '--time', str(SERVER_TIMEOUT),
+        '--champion', '/champion/champion.so',
         '--req_addr', req_addr,
         '--sub_addr', sub_addr,
         '--socket_timeout', '45000',
         '--verbose', '1',
         '--client-id', str(client_id),
-        '--map', str(match_dir / 'map.txt'),
-        cwd=champion_path
+        '--map', '/match/map.txt',
     )
 
 
