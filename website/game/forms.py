@@ -8,4 +8,4 @@ class ChampionsForm(forms.ModelForm):
         fields = ['code', 'nom']
 
 class Filter_Champion(forms.Form):
-    nom_du_champion = forms.CharField(required=True)
+    nom_du_champion = forms.CharField(required=False)

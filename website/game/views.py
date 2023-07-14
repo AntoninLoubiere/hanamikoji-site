@@ -48,7 +48,8 @@ def matchs(request):
                     Q(champion2=champion)
                 ).order_by("-date")
             except Champion.DoesNotExist:
-                message='Nom non trouvé !'
+                if form.cleaned_data["nom_du_champion"] != '':
+                    message='Nom non trouvé !'
                 form = Filter_Champion() 
                 matchs =  Match.objects.all()
     else:
