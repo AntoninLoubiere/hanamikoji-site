@@ -22,7 +22,7 @@
     <tr>
         <td>{{ champion.nom }}</td>
         <td>{{ champion.date }}</td>
-        <td>{{ champion.uploader }}</td>
+        <td id="sans_casse">{{ champion.uploader }}</td>
         <td>{{ champion.get_compilation_status_display }}</td>
     </tr>
     {% endfor %}

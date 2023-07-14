@@ -144,6 +144,9 @@ caption {
     text-decoration: underline;
 }
 
+#sans_casse {
+    text-transform: none;
+}
 /*Lien champion*/
 
 #ajout {
