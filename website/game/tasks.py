@@ -80,7 +80,7 @@ def compile_champion(champion: Champion):
 
     if lang not in LANGS:
         raise Exception(f'Impossible de détecter le langage utilisé ({lang}), veuillez ajouter un'
-                         'fichier _lang avec le nom du language, seuls {LANGS} sont supportés.')
+                        f'fichier _lang avec le nom du language, seuls {LANGS} sont supportés.')
 
     # On copie l'interface.cc au besoin
     if not (out_dir / INTERFACE_FILE).exists():
@@ -89,16 +89,17 @@ def compile_champion(champion: Champion):
 
     # On compile
 
-    subprocess.run(['make', f'--makefile={MAKEFILES / ("Makefile-" + lang)}', '-C', out_dir,
-                    'STECHEC_SERVER=true', 'champion.so', 'clean'])
+    r = subprocess.run(['make', f'--makefile={MAKEFILES / ("Makefile-" + lang)}', '-C', out_dir,
+                    'STECHEC_SERVER=true', 'champion.so', 'clean'], stdout=PIPE, stderr=PIPE)
 
-    return lang
+    return f"Langue détecté: {lang}\n\n# Stdout: \n{r.stdout.decode()}\n\n# Stderr: \n{r.stderr.decode()}"
 
 
 
 def on_end_compilation(task: Task):
     c: Champion = task.args[0]
     c.compilation_status = Champion.Status.FINI if task.success else Champion.Status.ERREUR
+    c.compile_task = task
     c.save(compile=False)
 
 def run_match(match: Match):
@@ -130,20 +131,26 @@ def run_match(match: Match):
         print("Impossible de trouver le score ?")
 
     match.dump.name = f'match/{match.id_match}/dump.json'
+    return server_out
 
 
-async def run_match_async(match_dir, client1, client2):
+async def run_match_async(match_dir: Path, client1, client2):
     # On crée une map aléatoire
     match_dir.mkdir(exist_ok=True)
 
     client1_name, client1_dir = client1
     client2_name, client2_dir = client2
 
-    with open(match_dir / 'map.txt', 'w') as fiw:
-        cards = [0, 0, 1, 1, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 6]
-        for _ in range(3):
-            shuffle(cards)
-            fiw.write(" ".join(map(str, cards)) + "\n")
+    map_file = match_dir / 'map.txt'
+    if map_file.exists():
+        print("Réutilisation de la map précédente")
+    else:
+        print("Génération de la map")
+        with open(map_file, 'w') as fiw:
+            cards = [0, 0, 1, 1, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 6]
+            for _ in range(3):
+                shuffle(cards)
+                fiw.write(" ".join(map(str, cards)) + "\n")
 
     # Lancement du match
     # Build the domain sockets

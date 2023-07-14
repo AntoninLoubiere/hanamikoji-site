@@ -2,7 +2,15 @@ from typing import Iterable, Optional
 from django.db import models
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator, FileExtensionValidator
-from django_q.tasks import async_task
+from django_q.tasks import async_task, Task
+from django.contrib import admin
+from django.utils.html import format_html
+
+def task_link_view(t: Task):
+    if t is None:
+        return "-"
+    return format_html(f'<a href="/admin/django_q/{"success" if t.success else "failure"}/{t.id}/change/">{t}</a>')
+
 
 class Champion(models.Model):
     class Status(models.TextChoices):
@@ -15,6 +23,7 @@ class Champion(models.Model):
     uploader = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     date = models.DateTimeField(auto_now_add=True)
     compilation_status = models.CharField(choices=Status.choices, max_length=2, editable=False, default=Status.EN_ATTENTE)
+    compile_task = models.ForeignKey(Task, null=True, editable=False, on_delete=models.PROTECT)
 
     def __str__(self):
         return f'{self.nom}@{self.uploader}'
@@ -22,7 +31,11 @@ class Champion(models.Model):
     def save(self, force_insert: bool = False, force_update: bool = False, using: str | None = None, update_fields: Iterable[str] | None = None, compile=True) -> None:
         super().save(force_insert, force_update, using, update_fields)
         if compile:
-            async_task('game.tasks.compile_champion', self, hook='game.tasks.on_end_compilation')
+            async_task('game.tasks.compile_champion', self, hook='game.tasks.on_end_compilation', group="compile")
+
+    @admin.display(description="Compile task")
+    def task_link(self):
+        return task_link_view(self.compile_task)
 
 
 
@@ -66,7 +79,7 @@ class Match(models.Model):
 
         super().save(*args, **kwargs)
         if run:
-            async_task('game.tasks.run_match', self, hook='game.tasks.on_end_match')
+            async_task('game.tasks.run_match', self, hook='game.tasks.on_end_match', group="match")
 
 
     def __str__(self) -> str:
