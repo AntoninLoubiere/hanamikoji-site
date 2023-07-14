@@ -43,6 +43,7 @@ urlpatterns = [
     path('signup/', authentication.views.signup_page, name='signup'),
     path('upload/', game.views.champion_upload, name='champion_upload'),
     path('matchs/',game.views.matchs, name='matchs'),
+    path('champions/',game.views.champions, name='champions'),
     path('matchs/<int:id>',game.views.match_detail, name='match_detail'),
 ]
 if settings.DEBUG:

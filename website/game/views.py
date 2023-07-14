@@ -3,7 +3,8 @@ from django.contrib.auth.decorators import login_required
 from . import forms
 from game.models import Champion, Match
 from  django.db.models import Q
-from game.forms import Filter_Champion
+from game.forms import Filter_Champion, Filter_User
+from authentication.models import User
 
 @login_required
 def home(request):
@@ -44,15 +45,34 @@ def matchs(request):
             try:
                 champion = Champion.objects.get(nom=form.cleaned_data["nom_du_champion"])
                 matchs = Match.objects.filter(
-                    Q(champion1=champion) |
-                    Q(champion2=champion)
+                    Q(champion1__in=champion) |
+                    Q(champion2__in=champion)
                 ).order_by("-date")
             except Champion.DoesNotExist:
                 if form.cleaned_data["nom_du_champion"] != '':
                     message='Nom non trouvé !'
                 form = Filter_Champion() 
-                matchs =  Match.objects.all()
+                matchs =  Match.objects.all().order_by("-date")
     else:
         form = Filter_Champion() 
-        matchs =  Match.objects.all()
+        matchs =  Match.objects.all().order_by("-date")
     return render(request,'game/matchs.html',context={'matchs':matchs,'form':form,'message':message})
+
+@login_required
+def champions(request):
+    message=''
+    # if request.method == 'POST':
+    #     form = Filter_User(request.POST)
+    #     if form.is_valid():
+    #         try:
+    #             user = User.objects.get(username=form.cleaned_data["utilisateur"])
+    #             champions = Champion.objects.filters(uploader_id__in=user.id)#C'est là que ça marche pas
+    #         except User.DoesNotExist:
+    #             if form.cleaned_data["utilisateur"] != '':
+    #                 message='Utiilisateur non trouvé !'
+    #             form = Filter_User() 
+    #             champions =  Champion.objects.all().order_by("-date")
+    # else:
+    form = Filter_User() 
+    champions =  Champion.objects.all().order_by("-date")
+    return render(request,'game/champions.html',context={'champions':champions,'form':form,'message':message})

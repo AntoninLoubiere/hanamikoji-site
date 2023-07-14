@@ -1,0 +1,30 @@
+{% extends 'base_game.html' %}
+{% block title %}Les champions{% endblock title %}
+
+{% block content %}
+<h1>Tous les champions</h1>
+<form action="" method="post">
+    {% csrf_token %}
+    <strong>{{ message }}</strong><br />
+    Filtrer par :
+    {{ form }}
+    <input type="submit" value="Filtrer">
+</form>
+<table>
+    <caption>Les champions</caption>
+    <tr>
+        <th>Nom</th>
+        <th>Date de création</th>
+        <th>Auteur</th>
+        <th>Statut de compilation</th>
+    </tr>
+    {% for champion in champions %}
+    <tr>
+        <td>{{ champion.nom }}</td>
+        <td>{{ champion.date }}</td>
+        <td>{{ champion.uploader }}</td>
+        <td>{{ champion.get_compilation_status_display }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock content %}
