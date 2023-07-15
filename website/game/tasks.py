@@ -130,7 +130,6 @@ def run_match(match: Match):
     else:
         print("Impossible de trouver le score ?")
 
-    match.dump.name = f'match/{match.id_match}/dump.json'
     return server_out
 
 

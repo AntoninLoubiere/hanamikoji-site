@@ -82,10 +82,12 @@ def add_match(request):
         form = Add_Match(request.POST)
         if form.is_valid():
             try:
-                champion1 = Champion.objects.get(nom=form.cleaned_data["champion_1"])
-                champion2 = Champion.objects.get(nom=form.cleaned_data["champion_2"])
-                # A COMPLETER ! LANCEMENT DU MATCH !
-                message="Match ajouté"#Si le match a bien été ajouté
+                m = Match()
+                m.champion1 = Champion.objects.get(nom=form.cleaned_data["champion_1"])
+                m.champion2 = Champion.objects.get(nom=form.cleaned_data["champion_2"])
+                m.save()
+                return redirect(match_detail, m.id_match)
+                # message="Match ajouté"#Si le match a bien été ajouté
             except Champion.DoesNotExist:
                 message='Nom non trouvé !'
     else:
