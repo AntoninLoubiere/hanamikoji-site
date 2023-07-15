@@ -170,10 +170,16 @@ async def run_match_async(match_dir: Path, client1, client2):
     client_2 = await run_client(match_dir, client2_name, client2_dir, s_reqrep, s_pubsub, 1, box_id_1)
 
     server_out, _ = await server_task.communicate()
-    await client_1.wait()
-    isolate_cleanup(box_id_0)
-    await client_2.wait()
-    isolate_cleanup(box_id_1)
+    client1_out, _ = await client_1.communicate()
+    client2_out, _ = await client_2.communicate()
+    try:
+        with open(match_dir / 'champion1.out.txt', 'wb') as fiw:
+            fiw.write(client1_out)
+        with open(match_dir / 'champion2.out.txt', 'wb') as fiw:
+            fiw.write(client2_out)
+    finally:
+        isolate_cleanup(box_id_0)
+        isolate_cleanup(box_id_1)
 
     return server_out
 
@@ -218,6 +224,7 @@ async def run_client(match_dir, champion_name, champion_path: Path, req_addr, su
         f'--dir=champion={champion_path}',
         '--dir=/tmp',
         '--box-id', str(box_id),
+        '--stderr-to-stdout',
         '-p',
         '-c', '/champion/',
         '--run', '--', STECHEC_CLIENT,
@@ -231,6 +238,7 @@ async def run_client(match_dir, champion_name, champion_path: Path, req_addr, su
         '--verbose', '1',
         '--client-id', str(client_id),
         '--map', '/match/map.txt',
+        stdout=PIPE
     )
 
 
