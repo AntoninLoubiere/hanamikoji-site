@@ -54,7 +54,7 @@ def compile_champion(champion: Champion):
 
     # On vérifie déjà si c'est une archive
     if champion.code.name.endswith('.zip'):
-        subprocess.run(['unzip', '-f', champion.code.path, '-d', out_dir])
+        subprocess.run(['unzip', '-o', champion.code.path, '-d', out_dir])
     elif champion.code.name.endswith('.tar.gz') or champion.code.name.endswith('.tgz'):
         subprocess.run(['tar', '-xf', champion.code.path, '-C', out_dir])
     else:
@@ -92,7 +92,7 @@ def compile_champion(champion: Champion):
     r = subprocess.run(['make', f'--makefile={MAKEFILES / ("Makefile-" + lang)}', '-C', out_dir,
                     'STECHEC_SERVER=true', 'champion.so', 'clean'], stdout=PIPE, stderr=PIPE)
 
-    return f"Langue détecté: {lang}\n\n# Stdout: \n{r.stdout.decode()}\n\n# Stderr: \n{r.stderr.decode()}"
+    return f"Langue détecté: {lang}\n\n# Stdout: \n{r.stdout.decode()}\n# Stderr: \n{r.stderr.decode()}"
 
 
 

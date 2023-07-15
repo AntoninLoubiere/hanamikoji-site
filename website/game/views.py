@@ -45,15 +45,15 @@ def matchs(request):
             try:
                 champion = Champion.objects.get(nom=form.cleaned_data["nom_du_champion"])
                 matchs = Match.objects.filter(
-                    Q(champion1__in=champion) |
-                    Q(champion2__in=champion)
+                    Q(champion1=champion) |
+                    Q(champion2=champion)
                 ).order_by("-date")
             except Champion.DoesNotExist:
                 if form.cleaned_data["nom_du_champion"] != '':
                     message='Nom non trouvé !'
                 matchs =  Match.objects.all().order_by("-date")
     else:
-        form = Filter_Champion() 
+        form = Filter_Champion()
         matchs =  Match.objects.all().order_by("-date")
     return render(request,'game/matchs.html',context={'matchs':matchs,'form':form,'message':message})
 

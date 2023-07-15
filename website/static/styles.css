@@ -16,6 +16,8 @@ h1 {
     font-weight: normal;
     text-decoration: underline;
     color: crimson;
+    margin: 0;
+    margin-bottom: .5rem;
 }
 
 
@@ -27,7 +29,8 @@ form {
     background-color: rgba(255, 255, 255, 0.75);
     color: black;
     width: 75%;
-    margin-left: 12.5%;
+    margin-left: auto;
+    margin-right: auto;
     padding: 2% 2% 2% 2%;
 }
 
@@ -123,7 +126,7 @@ tr {
 }
 table {
     margin: auto;
-        margin-top: 3%;
+        margin-top: 1.5rem;
     border-collapse: collapse;
     width: 75%;
 }
@@ -149,13 +152,17 @@ caption {
 }
 /*Lien champion*/
 
-#ajout {
+.ajout-barre {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.ajout {
     border: 5px solid red;
-    padding: 1%;
-    margin-left: 30%;
-    margin-right: auto;
-    width: 6em;
-    font-size: 3em;
+    padding: .5rem 1rem;
+    font-size: 2em;
     border-radius: 10px;
     box-shadow: 10px 10px 3px #000000;
     color: red;

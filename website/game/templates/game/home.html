@@ -4,8 +4,10 @@
 {% block content %}
 
 <h1>Tableau de bord</h1>
-<a href="{% url 'champion_upload' %}" id="ajout">Ajouter un champion</a><br /><br /><br /><br />
-<a href="{% url 'add_match' %}" id="ajout">Lancer un match</a>
+<div class="ajout-barre">
+    <a href="{% url 'champion_upload' %}" class="ajout">Ajouter un champion</a>
+    <a href="{% url 'add_match' %}" class="ajout">Lancer un match</a>
+</div>
 <table>
     <caption>Les champions</caption>
     <tr>
