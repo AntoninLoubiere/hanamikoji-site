@@ -72,6 +72,7 @@ def champions(request):
     champions = None
     users = User.objects.all()
 
+    filter_id = -1
     if request.method == 'POST':
         filter_id = request.POST.get('filter', 'all')
         if filter_id != 'all':
