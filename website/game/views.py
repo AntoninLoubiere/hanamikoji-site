@@ -85,8 +85,9 @@ def champions(request):
         champions =  Champion.objects.all().order_by("-date")
     return render(request,'game/champions.html',context={'champions':champions, 'users': users, 'message':message, 'filter_id': filter_id})
 
-def get_champions_per_user(current_user=None):
-    champs = Champion.objects.all().order_by("-date")
+def get_champions_per_user(current_user=None, filter_champions=False):
+    champs = Champion.objects.filter(compilation_status=Champion.Status.FINI) if filter_champions else Champion.objects.all()
+    champs = champs.order_by('-date')
     users = {}
     for c in champs:
         l = users.get(c.uploader, None)
@@ -107,21 +108,22 @@ def get_champions_per_user(current_user=None):
 
 
 @login_required
-def add_match(request):
+def add_match(request: HttpRequest):
     message=''
+    list_champions = get_champions_per_user(request.user, True)
+
     if request.method == 'POST':
-        form = Add_Match(request.POST)
-        if form.is_valid():
-            try:
-                m = Match()
-                m.champion1 = Champion.objects.get(nom=form.cleaned_data["champion_1"])
-                m.champion2 = Champion.objects.get(nom=form.cleaned_data["champion_2"])
+        try:
+            m = Match()
+            m.champion1 = Champion.objects.get(id=int(request.POST.get('champion1')))
+            m.champion2 = Champion.objects.get(id=int(request.POST.get('champion2')))
+            if m.is_correct():
                 m.save()
-                if m.id_match is not None:
-                    return redirect('match_detail', m.id_match)
-                message="Impossible d'ajouter le match, vérifier que les deux champions sont bien valides et ont bien terminé leurs compilations."
-            except Champion.DoesNotExist:
-                message='Nom non trouvé !'
-    else:
-        form = Add_Match()
-    return render(request,'game/add_match.html',context={'form':form,'message':message})
+                return redirect('match_detail', m.id_match)
+            else:
+                message = "Match invalide (vérifier que tous les champions ont bien terminé leur compilation)"
+
+        except (ValueError, Champion.DoesNotExist):
+            message = "Champion inexistants."
+
+    return render(request,'game/add_match.html',context={'message':message, 'list_champions': list_champions})

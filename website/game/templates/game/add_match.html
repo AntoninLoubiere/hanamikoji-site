@@ -4,7 +4,30 @@
 <h1>Lancer un match</h1>
 <form method="post" class="form" enctype="multipart/form-data">
     <strong>{{ message }}</strong><br />
-    {{ form.as_p }}
+    <p>
+        <label>Champion 1: </label>
+        <select name="champion1">
+            {% for u, champs in list_champions %}
+                <optgroup label={{u.username}}>
+                    {% for c in champs %}
+                        <option value="{{c.id}}">{{c.nom}}</option>
+                    {% endfor %}
+                </optgroup>
+            {% endfor %}
+        </select>
+    </p>
+    <p>
+        <label>Champion 2: </label>
+        <select name="champion2">
+            {% for u, champs in list_champions %}
+                <optgroup label={{u.username}}>
+                    {% for c in champs %}
+                        <option value="{{c.id}}">{{c.nom}}</option>
+                    {% endfor %}
+                </optgroup>
+            {% endfor %}
+        </select>
+    </p>
     {% csrf_token %}
     <button type="submit" id="envoi">Lancer le match</button>
 </form>
