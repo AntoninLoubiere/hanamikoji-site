@@ -69,20 +69,21 @@ def matchs(request: HttpRequest):
 @login_required
 def champions(request):
     message=''
-    # if request.method == 'POST':
-    #     form = Filter_User(request.POST)
-    #     if form.is_valid():
-    #         try:
-    #             user = User.objects.get(username=form.cleaned_data["utilisateur"])
-    #             champions = Champion.objects.filters(uploader_id__in=user.id)#C'est là que ça marche pas
-    #         except User.DoesNotExist:
-    #             if form.cleaned_data["utilisateur"] != '':
-    #                 message='Utiilisateur non trouvé !'
-    #             champions =  Champion.objects.all().order_by("-date")
-    # else:
-    form = Filter_User()
-    champions =  Champion.objects.all().order_by("-date")
-    return render(request,'game/champions.html',context={'champions':champions,'form':form,'message':message})
+    champions = None
+    users = User.objects.all()
+
+    if request.method == 'POST':
+        filter_id = request.POST.get('filter', 'all')
+        if filter_id != 'all':
+            try:
+                filter_id = int(filter_id)
+                champions = Champion.objects.filter(uploader__id=filter_id).order_by("-date")
+            except ValueError:
+                pass
+
+    if champions is None:
+        champions =  Champion.objects.all().order_by("-date")
+    return render(request,'game/champions.html',context={'champions':champions, 'users': users, 'message':message, 'filter_id': filter_id})
 
 def get_champions_per_user(current_user=None):
     champs = Champion.objects.all().order_by("-date")
