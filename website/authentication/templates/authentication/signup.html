@@ -5,7 +5,7 @@
 {% if form.errors %}
 {{ form.errors }}
 {% endif %}
-<form method="post">
+<form method="post" class="form">
     {{ form.as_p }}
     {% csrf_token %}
     <button type="submit" id="envoi">S’inscrire</button>

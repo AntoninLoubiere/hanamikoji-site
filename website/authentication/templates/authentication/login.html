@@ -21,7 +21,7 @@ Connexion
 
 {% block content %}
 <h1>Connexion à Hanamikoji</h1>
-<form method="post">
+<form method="post" class="form">
     <p>{{ message }}</p>
     {{ form.as_p }}
     {% csrf_token %}

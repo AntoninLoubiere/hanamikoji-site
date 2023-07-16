@@ -3,15 +3,22 @@
 
 {% block content %}
 <h1>Tous les matchs</h1>
-<form action="" method="post">
-    {% csrf_token %}
-    <strong>{{ message }}</strong><br />
-    Filtrer par :
-    {{ form }}
-    <input type="submit" value="Filtrer">
-</form>
 <div class="ajout-barre">
     <a href="{% url 'add_match' %}" class="ajout">Lancer un match</a>
+    <form action="" method="post">
+        {% csrf_token %}
+        <select onchange="this.form.submit()" name="filter" class="ajout">
+            <option value="all">Tous les champions</option>
+            {% for u, champs in list_champions %}
+                <optgroup label={{u.username}}>
+                    <option value="user-{{u.id}}" {% if filter_type == "user" and filter_id == u.id %}selected{% endif %}>Champions de {{u.username}}</option>
+                    {% for c in champs %}
+                        <option value="champ-{{c.id}}" {% if filter_type == "champ" and filter_id == c.id %}selected{% endif %}>{{c.nom}}</option>
+                    {% endfor %}
+                </optgroup>
+            {% endfor %}
+        </select>
+    </form>
 </div>
 <table>
     <caption>Les matchs</caption>

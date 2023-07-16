@@ -1,3 +1,4 @@
+from django.http import HttpRequest
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from . import forms
@@ -36,26 +37,34 @@ def match_detail(request,id):
     match_select = Match.objects.get(id_match=id)
     return render(request, 'game/match_detail.html',context={'match':match_select})
 
+
 @login_required
-def matchs(request):
+def matchs(request: HttpRequest):
     message=''
+    list_champions = get_champions_per_user(request.user)
+    matchs = None
+
+    filt_type = "all"
+    filt_id = -1
     if request.method == 'POST':
-        form = Filter_Champion(request.POST)
-        if form.is_valid():
-            try:
-                champion = Champion.objects.get(nom=form.cleaned_data["nom_du_champion"])
-                matchs = Match.objects.filter(
-                    Q(champion1=champion) |
-                    Q(champion2=champion)
-                ).order_by("-date")
-            except Champion.DoesNotExist:
-                if form.cleaned_data["nom_du_champion"] != '':
-                    message='Nom non trouvé !'
-                matchs =  Match.objects.all().order_by("-date")
-    else:
-        form = Filter_Champion()
+        filt = request.POST.get('filter', 'all')
+        f = filt.split('-')
+        if len(f) >= 1:
+            filt_type = f[0]
+            if len(f) >= 2:
+                try:
+                    filt_id = int(f[1])
+                except ValueError:
+                    pass
+
+        if filt_type == 'user':
+            matchs = Match.objects.filter(Q(champion1__uploader__id=filt_id) | Q(champion2__uploader__id=filt_id)).order_by("-date")
+        elif filt_type == 'champ':
+            matchs = Match.objects.filter(Q(champion1__id=filt_id) | Q(champion2__id=filt_id)).order_by("-date")
+
+    if matchs is None:
         matchs =  Match.objects.all().order_by("-date")
-    return render(request,'game/matchs.html',context={'matchs':matchs,'form':form,'message':message})
+    return render(request,'game/matchs.html',context={'matchs':matchs,'message':message, 'list_champions': list_champions, 'filter_type': filt_type, 'filter_id': filt_id})
 
 @login_required
 def champions(request):
@@ -71,9 +80,30 @@ def champions(request):
     #                 message='Utiilisateur non trouvé !'
     #             champions =  Champion.objects.all().order_by("-date")
     # else:
-    form = Filter_User() 
+    form = Filter_User()
     champions =  Champion.objects.all().order_by("-date")
     return render(request,'game/champions.html',context={'champions':champions,'form':form,'message':message})
+
+def get_champions_per_user(current_user=None):
+    champs = Champion.objects.all().order_by("-date")
+    users = {}
+    for c in champs:
+        l = users.get(c.uploader, None)
+        if l is None:
+            l = []
+            users[c.uploader] = l
+        l.append(c)
+
+    r = []
+    if current_user in users:
+        r.append((current_user, users[current_user]))
+        del users[current_user]
+
+    for u in sorted(users, key=lambda u: u.username):
+        r.append((u, users[u]))
+
+    return r
+
 
 @login_required
 def add_match(request):
@@ -86,10 +116,11 @@ def add_match(request):
                 m.champion1 = Champion.objects.get(nom=form.cleaned_data["champion_1"])
                 m.champion2 = Champion.objects.get(nom=form.cleaned_data["champion_2"])
                 m.save()
-                return redirect(match_detail, m.id_match)
-                # message="Match ajouté"#Si le match a bien été ajouté
+                if m.id_match is not None:
+                    return redirect('match_detail', m.id_match)
+                message="Impossible d'ajouter le match, vérifier que les deux champions sont bien valides et ont bien terminé leurs compilations."
             except Champion.DoesNotExist:
                 message='Nom non trouvé !'
     else:
-        form = Add_Match() 
+        form = Add_Match()
     return render(request,'game/add_match.html',context={'form':form,'message':message})

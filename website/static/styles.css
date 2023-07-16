@@ -20,9 +20,13 @@ h1 {
     margin-bottom: .5rem;
 }
 
+form {
+    margin: 0;
+}
+
 
 /*La mise en forme des sections en général*/
-form {
+.form {
     border: 6px solid black;
     border-radius: 40px;
     box-shadow: 20px 20px 6px black;
@@ -169,5 +173,10 @@ caption {
     text-decoration: none;
     font-variant: small-caps;
     font-weight: bold;
+    font-family: serif;
     background-color: white;
+}
+
+.ajout option, .ajout optgroup {
+    font-size: 1rem;
 }
