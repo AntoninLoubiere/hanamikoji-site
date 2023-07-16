@@ -71,6 +71,7 @@ class Match(models.Model):
     )
     #dump = models.FileField(null=True,blank=True,validators=[FileExtensionValidator(allowed_extensions=["json"])])
     date = models.DateTimeField(auto_now_add=True)
+    match_task = models.ForeignKey(Task, null=True, editable=False, on_delete=models.PROTECT)
 
     def save(self, *args, run=True, **kwargs) -> None:
         if self.champion1.compilation_status != Champion.Status.FINI or self.champion2.compilation_status != Champion.Status.FINI:
@@ -80,6 +81,10 @@ class Match(models.Model):
         super().save(*args, **kwargs)
         if run:
             async_task('game.tasks.run_match', self, hook='game.tasks.on_end_match', group="match")
+
+    @admin.display(description="Match task")
+    def task_link(self):
+        return task_link_view(self.match_task)
 
 
     def __str__(self) -> str:

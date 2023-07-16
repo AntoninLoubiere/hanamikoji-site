@@ -245,4 +245,5 @@ async def run_client(match_dir, champion_name, champion_path: Path, req_addr, su
 def on_end_match(task: Task):
     m: Match = task.args[0]
     m.status = Match.Status.FINI if task.success else Match.Status.ERREUR
+    m.match_task = task
     m.save(run=False)

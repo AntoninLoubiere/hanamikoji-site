@@ -10,4 +10,4 @@ class ChampionAdmin(admin.ModelAdmin):
 
 @admin.register(Match)
 class MatchAdmin(admin.ModelAdmin):
-    readonly_fields = ('status', 'score1', 'score2', 'gagnant')
+    readonly_fields = ('status', 'score1', 'score2', 'gagnant', 'task_link')
