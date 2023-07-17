@@ -15,6 +15,7 @@
         <th>Date de création</th>
         <th>Fichier</th>
         <th>Statut de compilation</th>
+        <th>Supprimer</th>
     </tr>
     {% for champion in champions %}
     <tr>
@@ -22,6 +23,11 @@
         <td>{{ champion.date }}</td>
         <td><a href="{{ champion.code.url }}">{{ champion.code }}</a></td>
         <td>{{ champion.get_compilation_status_display }}</td>
+        {% if champion.supprimer %}
+        <td><a href="{% url 'delete_champion' champion.nom %}" class="supp">Supprimer</a></td>
+        {% else %}
+        <td>Impossible à supprimer</td>
+        {% endif %}
     </tr>
     {% endfor %}
 </table>

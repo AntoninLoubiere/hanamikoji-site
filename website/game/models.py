@@ -28,6 +28,7 @@ class Champion(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     compilation_status = models.CharField(choices=Status.choices, max_length=2, editable=False, default=Status.EN_ATTENTE)
     compile_task = models.ForeignKey(Task, null=True, editable=False, on_delete=models.PROTECT)
+    supprimer =  models.BooleanField(default=True)
 
     def __str__(self):
         return f'{self.nom}@{self.uploader}'

@@ -45,7 +45,8 @@ urlpatterns = [
     path('matchs/',game.views.matchs, name='matchs'),
     path('champions/',game.views.champions, name='champions'),
     path('matchs/<int:id>',game.views.match_detail, name='match_detail'),
-    path('add_match/',game.views.add_match,name='add_match')
+    path('add_match/',game.views.add_match,name='add_match'),
+    path('delete/<str:name>',game.views.delete_champion,name='delete_champion'),
 ]
 if settings.DEBUG:
     urlpatterns += static(

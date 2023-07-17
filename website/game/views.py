@@ -126,6 +126,8 @@ def add_match(request: HttpRequest):
             m.champion1 = Champion.objects.get(id=int(request.POST.get('champion1')))
             m.champion2 = Champion.objects.get(id=int(request.POST.get('champion2')))
             if m.is_correct():
+                m.champion1.supprimer = False
+                m.champion2.supprimer = False
                 m.save()
                 return redirect('match_detail', m.id_match)
             else:
@@ -135,3 +137,14 @@ def add_match(request: HttpRequest):
             message = "Champion inexistants."
 
     return render(request,'game/add_match.html',context={'message':message, 'list_champions': list_champions})
+
+@login_required
+def delete_champion(request,name):
+    champion = Champion.objects.get(nom=name) 
+
+    if request.method == 'POST':
+        champion.delete()
+        return redirect('home')
+    return render(request,
+                    'game/delete_champion.html',
+                    {'champion': champion})

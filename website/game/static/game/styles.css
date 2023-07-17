@@ -7,3 +7,10 @@ form strong {
     color: red;
     font-size: 1.5em;
 }
+.supp {
+    color: black;
+}
+
+.supp:hover {
+    color: black;
+}
