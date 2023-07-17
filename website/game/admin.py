@@ -12,7 +12,7 @@ class ChampionAdmin(admin.ModelAdmin):
 
 @admin.register(Match)
 class MatchAdmin(admin.ModelAdmin):
-    readonly_fields = ('status', 'score1', 'score2', 'gagnant', 'task_link')
+    readonly_fields = ('status', 'score1', 'score2', 'gagnant', 'task_link', 'map_link', 'champion_1_out', 'champion_2_out')
     list_display = ('__str__', 'status', 'score1', 'score2', 'gagnant', 'task_link')
     list_filter = ('status', 'gagnant', 'champion1', 'champion2')
 

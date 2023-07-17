@@ -180,3 +180,71 @@ caption {
 .ajout option, .ajout optgroup {
     font-size: 1rem;
 }
+
+.content-section {
+    background-color: rgba(255, 255, 255, 0.75);
+    box-shadow: 20px 20px 6px black;
+    padding: 1rem 2rem;
+    border-radius: 1rem;
+    border: solid 6px black;
+
+    margin: auto;
+    width: max-content;
+}
+
+.content-center {
+    display: block;
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 3rem;
+}
+
+.grid-2 {
+    justify-items: center;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    text-align: center;
+}
+
+.champion-name {
+    max-width: max-content;
+    margin-bottom: .5rem;
+    font: small-caps;
+    font-size: 2rem;
+}
+
+.champion-column {
+    display: grid;
+    padding: 1rem 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.winner {
+    border: 4px rgb(34, 222, 34) solid;
+    border-radius: 1rem;
+}
+
+.score {
+    margin: .5rem;
+    font-size: 2rem;
+}
+
+.map {
+    font-size: 1rem;
+    font-family: monospace;
+    white-space: pre;
+    margin: 1rem auto;
+    width: min-content;
+    padding: .5rem .8rem;
+
+    border: black solid 2px;
+    border-radius: .7rem;
+
+    background-color: white;
+}
+
+.nav-matchs {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+}

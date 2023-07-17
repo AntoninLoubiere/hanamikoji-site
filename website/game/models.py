@@ -9,7 +9,10 @@ from django.utils.html import format_html
 def task_link_view(t: Task):
     if t is None:
         return "-"
-    return format_html(f'<a href="/admin/django_q/{"success" if t.success else "failure"}/{t.id}/change/">{t}</a>')
+    return format_link(f"/admin/django_q/{'success' if t.success else 'failure'}/{t.id}/change/", t)
+
+def format_link(link, content):
+    return format_html(f'<a href="{link}">{content}</a>')
 
 
 class Champion(models.Model):
@@ -85,6 +88,18 @@ class Match(models.Model):
     @admin.display(description="Match task")
     def task_link(self):
         return task_link_view(self.match_task)
+
+    @admin.display(description="Map link")
+    def map_link(self):
+        return format_link(f"/codes/match/{self.id_match}/map.txt", "map")
+
+    @admin.display(description="Champion 1 out")
+    def champion_1_out(self):
+        return format_link(f"/codes/match/{self.id_match}/champion1.out.txt", "champion 1 out")
+
+    @admin.display(description="Champion 2 out")
+    def champion_2_out(self):
+        return format_link(f"/codes/match/{self.id_match}/champion2.out.txt", "champion 2 out")
 
     def is_correct(self):
         return self.champion1.compilation_status == Champion.Status.FINI and self.champion2.compilation_status == Champion.Status.FINI

@@ -1,10 +1,11 @@
 from django.http import HttpRequest
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
+from game.tasks import MATCH_OUT_DIR
+
 from . import forms
 from game.models import Champion, Match
 from  django.db.models import Q
-from game.forms import Filter_Champion, Filter_User, Add_Match
 from authentication.models import User
 
 @login_required
@@ -34,8 +35,14 @@ def champion_upload(request):
 
 @login_required
 def match_detail(request,id):
-    match_select = Match.objects.get(id_match=id)
-    return render(request, 'game/match_detail.html',context={'match':match_select})
+    match_select = get_object_or_404(Match, id_match=id)
+
+    map = ""
+    if match_select.status == Match.Status.FINI:
+        map = (MATCH_OUT_DIR / str(match_select.id_match) / 'map.txt').read_text()
+
+
+    return render(request, 'game/match_detail.html',context={'match':match_select, 'map': map})
 
 
 @login_required
