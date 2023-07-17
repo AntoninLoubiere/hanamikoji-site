@@ -5,6 +5,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator, FileExt
 from django_q.tasks import async_task, Task
 from django.contrib import admin
 from django.utils.html import format_html
+from django.db.models import Q
 
 def task_link_view(t: Task):
     if t is None:
@@ -39,6 +40,16 @@ class Champion(models.Model):
     @admin.display(description="Compile task")
     def task_link(self):
         return task_link_view(self.compile_task)
+
+    def nb_matchs(self):
+        return Match.objects.filter(Q(champion1=self)|Q(champion2=self)).count()
+
+    def win_rate(self):
+        nb = self.nb_matchs()
+        if nb <= 0:
+            return 0
+        else:
+            return Match.objects.filter(Q(champion1=self, gagnant=Match.Gagnant.CHAMPION_1)|Q(champion2=self, gagnant=Match.Gagnant.CHAMPION_2)).count() / nb * 100
 
 
 

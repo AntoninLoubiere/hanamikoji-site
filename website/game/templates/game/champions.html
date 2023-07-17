@@ -22,6 +22,7 @@
         <th>Date de création</th>
         <th>Auteur</th>
         <th>Statut de compilation</th>
+        <th>Nombre de matchs</th>
     </tr>
     {% for champion in champions %}
     <tr>
@@ -29,6 +30,7 @@
         <td>{{ champion.date }}</td>
         <td id="sans_casse">{{ champion.uploader }}</td>
         <td>{{ champion.get_compilation_status_display }}</td>
+        <td>{{ champion.nb_matchs }} ({{ champion.win_rate|floatformat }} %)</td>
     </tr>
     {% endfor %}
 </table>
