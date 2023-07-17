@@ -26,6 +26,16 @@
         <span class="content-center">Distribution des cartes</span>
         <div class="map">{{map}}</div>
         <a class="content-center" href="/codes/match/{{ match.id_match }}/dump.json">Résumé</a>
+        {% if match.champion1.uploader_id == request.user.id %}
+        <a class="content-center" href="/codes/match/{{ match.id_match }}/champion1.out.txt">Sortie du champion 1</a>
+        {% endif %}
+        {% if match.champion2.uploader_id == request.user.id %}
+        <a class="content-center" href="/codes/match/{{ match.id_match }}/champion2.out.txt">Sortie du champion 2</a>
+        {% endif %}
+        <p>
+        <h3>Détails</h3>
+        {{ match.match_task.result }}
+        </p>
     {% endif %}
 </ul>
 </div>
