@@ -1,4 +1,4 @@
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
 from game.tasks import MATCH_OUT_DIR
@@ -148,3 +148,23 @@ def delete_champion(request,name):
     return render(request,
                     'game/delete_champion.html',
                     {'champion': champion})
+
+@login_required
+def redirection_out(request,id,nb):
+    match_s = get_object_or_404(Match,id_match=id)
+    if nb == 1:
+        champion = match_s.champion1
+    elif nb == 2:
+        champion = match_s.champion2
+    else :
+        return HttpResponseBadRequest("Champion inexistant")
+    if champion.uploader_id == request.user.id :
+        return redirect(f'/codes/match/{id}/champion{nb}.out.txt')
+    return HttpResponseForbidden("Interdit")
+
+@login_required
+def redirection_code(request,name):
+    champion = get_object_or_404(Champion,nom=name)
+    if champion.uploader_id == request.user.id :
+        return redirect(champion.code.url)
+    return HttpResponseForbidden("Interdit")
