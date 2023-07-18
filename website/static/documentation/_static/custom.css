@@ -1,1 +1,9 @@
-/* This file intentionally left blank. */
+body {
+    background-attachment: fixed;
+    background-size: cover;
+    background-image: url("BG.jpg");
+}
+
+.retour {
+    text-decoration: underline;
+}

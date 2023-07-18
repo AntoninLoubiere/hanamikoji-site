@@ -3,7 +3,6 @@
 /*Le général*/
 
 body {
-    /* background-image: url(.jpg); */
     background-attachment: fixed;
     background-size: cover;
     background-image: url("BG.jpg");
