@@ -33,3 +33,9 @@ python manage.py qcluster
 
 
 Le site s’exécute à l'adresse <http://127.0.0.1:8000/>.
+
+### Déploiement
+
+Déployer /static/documentation sur l'URL /documentation.
+
+Quand lancé avec `python manage.py runserver`. La documentation se trouve sur /static/documentation
