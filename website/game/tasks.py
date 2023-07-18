@@ -33,8 +33,8 @@ FILE_EXT_MAPPERS = {
 LANGS = set(['python', 'c', 'cxx', 'caml'])
 
 IDS = set(range(1000))
-RE_MATCH_GAGNANT = re.compile('gagnant: (.*)', re.NOFLAG)
-RE_MATCH_SCORE = re.compile('score: (.*)', re.NOFLAG)
+RE_MATCH_GAGNANT = re.compile('gagnant: (.*)')
+RE_MATCH_SCORE = re.compile('score: (.*)')
 MAX_ISOLATE_HALF = MAX_ISOLATE // 2
 MAX_ISOLATE_TRY = 10
 
