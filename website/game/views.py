@@ -128,6 +128,8 @@ def add_match(request: HttpRequest):
             if m.is_correct():
                 m.champion1.supprimer = False
                 m.champion2.supprimer = False
+                m.champion1.save()
+                m.champion2.save()
                 m.save()
                 return redirect('match_detail', m.id_match)
             else:
