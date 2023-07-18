@@ -14,7 +14,7 @@
     <nav>
         <strong>Bonjour {{ request.user }}</strong>
         <a href="{%url 'home' %}">Home</a>
-        <a href="/static/documentation/index.html">Documentation</a>
+        <a href="{% static 'documentation/index.html' %}">Documentation</a>
         <a href="{% url 'champions' %}">Champions</a>
         <a href="{% url 'matchs' %}">Matchs</a>
         <a href="{% url 'password_change' %}">Changer de mot de passe</a>

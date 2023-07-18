@@ -1,4 +1,5 @@
 {% extends 'base_game.html' %}
+{% load static %}
 {% block title %}Home{% endblock title %}
 
 {% block content %}
@@ -7,6 +8,7 @@
 <div class="ajout-barre">
     <a href="{% url 'champion_upload' %}" class="ajout">Ajouter un champion</a>
     <a href="{% url 'add_match' %}" class="ajout">Lancer un match</a>
+    <a href="{% static 'rules.zip' %}" class="ajout">Télécharger la base du code</a>
 </div>
 <table>
     <caption>Les champions</caption>
