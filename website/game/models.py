@@ -45,14 +45,6 @@ class Champion(models.Model):
     def nb_matchs(self):
         return Match.objects.filter(Q(champion1=self)|Q(champion2=self)).count()
 
-    def win_rate(self):
-        nb = self.nb_matchs()
-        if nb <= 0:
-            return 0
-        else:
-            return Match.objects.filter(Q(champion1=self, gagnant=Match.Gagnant.CHAMPION_1)|Q(champion2=self, gagnant=Match.Gagnant.CHAMPION_2)).count() / nb * 100
-
-
 
 class Match(models.Model):
     class Status(models.TextChoices):
