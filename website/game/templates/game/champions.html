@@ -1,0 +1,37 @@
+{% extends 'base_game.html' %}
+{% block title %}Les champions{% endblock title %}
+
+{% block content %}
+<h1>Tous les champions</h1>
+<div class="ajout-barre">
+    <a href="{% url 'champion_upload' %}" class="ajout">Ajouter un champion</a>
+    <form action="" method="post">
+        {% csrf_token %}
+        <select onchange="this.form.submit()" name="filter" class="ajout">
+            <option value="all">Tous les utilisateurs</option>
+            {% for u in users %}
+                <option value="{{u.id}}" {% if filter_id == u.id %}selected{% endif %}>{{u.username}}</option>
+            {% endfor %}
+        </select>
+    </form>
+</div>
+<table>
+    <caption>Les champions</caption>
+    <tr>
+        <th>Nom</th>
+        <th>Date de création</th>
+        <th>Auteur</th>
+        <th>Statut de compilation</th>
+        <th>Nombre de matchs</th>
+    </tr>
+    {% for champion in champions %}
+    <tr>
+        <td title="{{champion}}">{{ champion.nom }}</td>
+        <td>{{ champion.date }}</td>
+        <td id="sans_casse">{{ champion.uploader }}</td>
+        <td>{{ champion.get_compilation_status_display }}</td>
+        <td>{{ champion.nb_matchs }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock content %}

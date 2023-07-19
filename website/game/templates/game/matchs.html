@@ -1,0 +1,47 @@
+{% extends 'base_game.html' %}
+{% block title %}Matchs{% endblock title %}
+
+{% block content %}
+<h1>Tous les matchs</h1>
+<div class="ajout-barre">
+    <a href="{% url 'add_match' %}" class="ajout">Lancer un match</a>
+    <form action="" method="post">
+        {% csrf_token %}
+        <select onchange="this.form.submit()" name="filter" class="ajout">
+            <option value="all">Tous les champions</option>
+            {% for u, champs in list_champions %}
+                <optgroup label={{u.username}}>
+                    <option value="user-{{u.id}}" {% if filter_type == "user" and filter_id == u.id %}selected{% endif %}>Champions de {{u.username}}</option>
+                    {% for c in champs %}
+                        <option value="champ-{{c.id}}" {% if filter_type == "champ" and filter_id == c.id %}selected{% endif %}>{{c.nom}}</option>
+                    {% endfor %}
+                </optgroup>
+            {% endfor %}
+        </select>
+    </form>
+</div>
+<table>
+    <caption>Les matchs</caption>
+    <tr>
+        <th>ID</th>
+        <th>Champion n°1</th>
+        <th>Champion n°2</th>
+        <th>Score</th>
+        <th>Statut</th>
+    </tr>
+    {% for match in matchs %}
+    <tr>
+        <td><a href="{% url 'match_detail' match.id_match %}">{{ match.id_match }}</a></td>
+        <td {% if match.gagnant == 0 or match.gagnant == 1 %}class='champion_win'{% endif %} title="{{match.champion1}}">{{ match.champion1.nom }}</td>
+
+        <td {% if match.gagnant == 0 or match.gagnant == 2 %}class='champion_win'{% endif %} title="{{match.champion2}}">{{ match.champion2.nom }}</td>
+        {% if match.status == 'FI' %}
+        <td>{{ match.score1 }} à {{ match.score2 }}</td>
+        {% else %}
+        <td>Non fini</td>
+        {% endif %}
+        <td>{{ match.get_status_display }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock content %}

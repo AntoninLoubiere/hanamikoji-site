@@ -1,0 +1,65 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (c) 2020 Association Prologin <association@prologin.org>
+
+# When running in server mode, simply take all the files extracted from the
+# archive.
+ifdef STECHEC_SERVER
+  CHAMPION_FILES = $(wildcard *)
+endif
+
+CXXFLAGS = -ggdb3 -Wall -std=c++17 -fPIC -O2
+OCAMLOPT ?= ocamlopt
+OCAML_PATH = $(shell $(OCAMLOPT) -where)
+OCAML_FLAGS = -g -no-unboxed-types
+
+CXXFLAGS += -I$(OCAML_PATH)
+LDFLAGS += -L$(OCAML_PATH) -Wl,-R$(OCAML_PATH) -lasmrun_shared -lcurses -lm
+
+all: champion.so
+
+cxx_sources = $(filter %.cc,$(CHAMPION_FILES))
+objs += $(cxx_sources:.cc=.o)
+to_clean = $(objs)
+
+ML_SOURCES = $(shell ocamldep -sort $(filter %.ml,$(CHAMPION_FILES)))
+ML_INTERFACES = $(filter %.mli,$(CHAMPION_FILES))
+ML_OBJS = $(ML_SOURCES:.ml=.cmx)
+
+objs += champion-ocaml.o
+to_clean += $(ML_OBJS) $(ML_OBJS:.cmx=.cmi) champion-ocaml.cds
+
+%.cmi: %.mli
+	$(OCAMLOPT) $(OCAML_FLAGS) -c $< -o $@
+
+%.cmi: %.ml
+	$(OCAMLOPT) $(OCAML_FLAGS) -c $< -o $@
+
+%.cmx: %.ml %.cmi
+	$(OCAMLOPT) $(OCAML_FLAGS) -c $< -o $@
+
+champion-ocaml.o: $(ML_OBJS)
+	$(OCAMLOPT) -output-obj $(OCAML_FLAGS) $^ -o $@
+
+.depend: $(ML_SOURCES) $(ML_INTERFACES)
+	ocamldep -all $^ > $@
+
+include .depend
+
+champion.so: $(objs)
+	$(CXX) -o $@ $^ -shared $(LDFLAGS)
+
+clean:
+	@$(RM) _lang # In case the tar rule was interrupted
+	$(RM) $(to_clean)
+
+distclean: clean
+	$(RM) champion.so champion.tgz
+
+champion.tgz: $(CHAMPION_FILES)
+	@echo "caml" > _lang
+	tar czf $@ $^ _lang
+	@rm _lang
+
+tar: champion.tgz
+
+.PHONY: tar clean distclean

@@ -1,0 +1,38 @@
+{% extends 'base_game.html' %}
+{% block title %}Matchs{% endblock title %}
+
+{% block content %}
+<div class="nav-matchs">
+    <a href="{{match.id_match|add:-1}}">Précédent</a>
+    <h1>Match N°{{ match.id_match }}</h1>
+    <a href="{{match.id_match|add:1}}">Suivant</a>
+
+</div>
+<div class="content-section">
+    <span class="content-center">{{ match.get_status_display }}</span>
+    <div class="grid-2">
+        <div class="champion-column {% if match.gagnant == 1 %}winner{% endif %}">
+            <span class="champion-name">{{match.champion1.nom}}</span>
+            <span>{{ match.champion1.uploader }}</span>
+            {% if match.status == 'FI' %}<span class="score">{{match.score1}}</span>{% endif %}
+        </div>
+        <div class="champion-column {% if match.gagnant == 2 %}winner{% endif %}">
+            <span class="champion-name">{{match.champion2.nom}}</span>
+            <span>{{ match.champion1.uploader }}</span>
+            {% if match.status == 'FI' %}<span class="score">{{match.score2}}</span>{% endif %}
+        </div>
+    </div>
+    {% if match.status == 'FI' %}
+        <span class="content-center">Distribution des cartes</span>
+        <div class="map">{{map}}</div>
+        <a class="content-center" href="/codes/match/{{ match.id_match }}/dump.json">Résumé</a>
+        {% if match.champion1.uploader_id == request.user.id %}
+            <a class="content-center" href="{% url 'redirection_out' id=match.id_match nb=1 %}">Sortie du champion 1</a>
+        {% endif %}
+        {% if match.champion2.uploader_id == request.user.id %}
+            <a class="content-center" href="{% url 'redirection_out' id=match.id_match nb=2 %}">Sortie du champion 2</a>
+        {% endif %}
+    {% endif %}
+</ul>
+</div>
+{% endblock content %}

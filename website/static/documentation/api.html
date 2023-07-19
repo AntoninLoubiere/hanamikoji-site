@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>API &#8212; Documentation Hanamikoji </title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/translations.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Recherche" href="search.html" />
+    <link rel="prev" title="Welcome to Hanamikoji’s documentation!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="api">
+<h1>API<a class="headerlink" href="#api" title="Lien permanent vers cette rubrique">¶</a></h1>
+<section id="constantes">
+<h2>Constantes<a class="headerlink" href="#constantes" title="Lien permanent vers cette rubrique">¶</a></h2>
+<dl class="c var">
+<dt class="sig sig-object c" id="c.NB_GEISHA">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">NB_GEISHA</span></span></span><a class="headerlink" href="#c.NB_GEISHA" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Valeur<span class="colon">:</span></dt>
+<dd class="field-odd"><p>7</p>
+</dd>
+<dt class="field-even">Description<span class="colon">:</span></dt>
+<dd class="field-even"><p>Les 7 geisha (2, 2, 2, 3, 3, 4, 5)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.NB_CARTES_TOTAL">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">NB_CARTES_TOTAL</span></span></span><a class="headerlink" href="#c.NB_CARTES_TOTAL" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Valeur<span class="colon">:</span></dt>
+<dd class="field-odd"><p>21</p>
+</dd>
+<dt class="field-even">Description<span class="colon">:</span></dt>
+<dd class="field-even"><p>Le nombre total de cartes (2 + 2 + 2 + 3 + 3 + 4 + 5)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.NB_CARTES_DEBUT">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">NB_CARTES_DEBUT</span></span></span><a class="headerlink" href="#c.NB_CARTES_DEBUT" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Valeur<span class="colon">:</span></dt>
+<dd class="field-odd"><p>6</p>
+</dd>
+<dt class="field-even">Description<span class="colon">:</span></dt>
+<dd class="field-even"><p>Le nombre de cartes que chaque personne a au début</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.NB_CARTES_ECARTEES">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">NB_CARTES_ECARTEES</span></span></span><a class="headerlink" href="#c.NB_CARTES_ECARTEES" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Valeur<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1</p>
+</dd>
+<dt class="field-even">Description<span class="colon">:</span></dt>
+<dd class="field-even"><p>Le nombre de cartes écartées au début du jeu</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.NB_ACTIONS">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">NB_ACTIONS</span></span></span><a class="headerlink" href="#c.NB_ACTIONS" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Valeur<span class="colon">:</span></dt>
+<dd class="field-odd"><p>4</p>
+</dd>
+<dt class="field-even">Description<span class="colon">:</span></dt>
+<dd class="field-even"><p>Le nombre total d’action que chaque joueur devra faire</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.NB_MANCHES_MAX">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">NB_MANCHES_MAX</span></span></span><a class="headerlink" href="#c.NB_MANCHES_MAX" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Valeur<span class="colon">:</span></dt>
+<dd class="field-odd"><p>3</p>
+</dd>
+<dt class="field-even">Description<span class="colon">:</span></dt>
+<dd class="field-even"><p>Le nombre total de manches avant la fin de la partie</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.GEISHA_VALEUR">
+<span class="kt"><span class="pre">string</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">GEISHA_VALEUR</span></span></span><a class="headerlink" href="#c.GEISHA_VALEUR" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Valeur<span class="colon">:</span></dt>
+<dd class="field-odd"><p>« 2|2|2|3|3|4|5 »</p>
+</dd>
+<dt class="field-even">Description<span class="colon">:</span></dt>
+<dd class="field-even"><p>La valeur (et le nombre de cartes) de chaque geisha séparée par des |</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="enumerations">
+<h2>Énumérations<a class="headerlink" href="#enumerations" title="Lien permanent vers cette rubrique">¶</a></h2>
+<dl class="c type">
+<dt class="sig sig-object c" id="c.action">
+<span class="k"><span class="pre">type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">action</span></span></span><a class="headerlink" href="#c.action" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Description<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Les actions de jeu</p>
+</dd>
+<dt class="field-even">Valeurs<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">VALIDER<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Valide une unique carte</p>
+</dd>
+<dt class="field-even">DEFAUSSER<span class="colon">:</span></dt>
+<dd class="field-even"><p>Defausse deux cartes</p>
+</dd>
+<dt class="field-odd">CHOIX_TROIS<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Donne le choix entre trois cartes</p>
+</dd>
+<dt class="field-even">CHOIX_PAQUETS<span class="colon">:</span></dt>
+<dd class="field-even"><p>Donne le choix entre deux paquets de deux cartes</p>
+</dd>
+<dt class="field-odd">PREMIER_JOUEUR<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Aucune action n’a été jouée (utilisé dans tour_precedent)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c type">
+<dt class="sig sig-object c" id="c.error">
+<span class="k"><span class="pre">type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">error</span></span></span><a class="headerlink" href="#c.error" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Description<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Enumeration contentant toutes les erreurs possibles</p>
+</dd>
+<dt class="field-even">Valeurs<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">OK<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pas d’erreur</p>
+</dd>
+<dt class="field-even">ACTION_DEJA_JOUEE<span class="colon">:</span></dt>
+<dd class="field-even"><p>l’action a déjà été jouée</p>
+</dd>
+<dt class="field-odd">CARTES_INVALIDES<span class="colon">:</span></dt>
+<dd class="field-odd"><p>vous ne pouvez pas jouer ces cartes</p>
+</dd>
+<dt class="field-even">PAQUET_INVALIDE<span class="colon">:</span></dt>
+<dd class="field-even"><p>ce paquet n’existe pas</p>
+</dd>
+<dt class="field-odd">GEISHA_INVALIDES<span class="colon">:</span></dt>
+<dd class="field-odd"><p>cette geisha n’existe pas (doit être un entier entre 0 et NB_GEISHA)</p>
+</dd>
+<dt class="field-even">JOUEUR_INVALIDE<span class="colon">:</span></dt>
+<dd class="field-even"><p>ce joueur n’existe pas</p>
+</dd>
+<dt class="field-odd">CHOIX_INVALIDE<span class="colon">:</span></dt>
+<dd class="field-odd"><p>vous ne pouvez pas repondre à ce choix</p>
+</dd>
+<dt class="field-even">ACTION_INVALIDE<span class="colon">:</span></dt>
+<dd class="field-even"><p>vous ne pouvez pas jouer cette action maintenant</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c type">
+<dt class="sig sig-object c" id="c.joueur">
+<span class="k"><span class="pre">type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">joueur</span></span></span><a class="headerlink" href="#c.joueur" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Description<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Enumeration représentant les différents joueurs</p>
+</dd>
+<dt class="field-even">Valeurs<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">JOUEUR_1<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Le joueur 1</p>
+</dd>
+<dt class="field-even">JOUEUR_2<span class="colon">:</span></dt>
+<dd class="field-even"><p>Le joueur 2</p>
+</dd>
+<dt class="field-odd">EGALITE<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Égalité, utilisé uniquement dans possession_geisha</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="structures">
+<h2>Structures<a class="headerlink" href="#structures" title="Lien permanent vers cette rubrique">¶</a></h2>
+<dl class="c type">
+<dt class="sig sig-object c" id="c.action_jouee">
+<span class="k"><span class="pre">type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">action_jouee</span></span></span><a class="headerlink" href="#c.action_jouee" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">action_jouee</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">action</span><span class="w"> </span><span class="n">act</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">c1</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">c2</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">c3</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">c4</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Description<span class="colon">:</span></dt>
+<dd class="field-odd"><p>La description d’une action jouée</p>
+</dd>
+<dt class="field-even">Champs<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">act<span class="colon">:</span></dt>
+<dd class="field-odd"><p>L’action jouée</p>
+</dd>
+<dt class="field-even">c1<span class="colon">:</span></dt>
+<dd class="field-even"><p>Si act==VALIDER ou act==DEFAUSSER, -1 sinon la première carte (du premier paquet)</p>
+</dd>
+<dt class="field-odd">c2<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Si act==V|D: -1 sinon la deuxième carte (du premier paquet)</p>
+</dd>
+<dt class="field-even">c3<span class="colon">:</span></dt>
+<dd class="field-even"><p>Si act==V|D: -1 sinon la troisième carte (ou la première carte du second paquet si act==choix paquet)</p>
+</dd>
+<dt class="field-odd">c4<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Si act!=choix paquet: -1 sinon la deuxième carte du second paquet</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="fonctions">
+<h2>Fonctions<a class="headerlink" href="#fonctions" title="Lien permanent vers cette rubrique">¶</a></h2>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.id_joueur">
+<a class="reference internal" href="#c.joueur" title="joueur"><span class="n"><span class="pre">joueur</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">id_joueur</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.id_joueur" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><p>Renvoie l’identifiant du joueur</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.id_adversaire">
+<a class="reference internal" href="#c.joueur" title="joueur"><span class="n"><span class="pre">joueur</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">id_adversaire</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.id_adversaire" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><p>Renvoie l’identifiant de l’adversaire</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.manche">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">manche</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.manche" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><p>Renvoie le numéro de la manche</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.tour">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">tour</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.tour" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><p>Renvoie le numéro de la manche</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.tour_precedent">
+<a class="reference internal" href="#c.action_jouee" title="action_jouee"><span class="n"><span class="pre">action_jouee</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">tour_precedent</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.tour_precedent" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><p>Renvoie l’action jouée par l’adversaire</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.nb_carte_validee">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">nb_carte_validee</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.joueur" title="joueur"><span class="n"><span class="pre">joueur</span></span></a><span class="w"> </span><span class="n"><span class="pre">j</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">g</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.nb_carte_validee" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><p>Renvoie le nombre de carte validée par le joueur pour la geisha</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – Le joueur</p></li>
+<li><p><strong>g</strong> – La geisha</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.possession_geisha">
+<a class="reference internal" href="#c.joueur" title="joueur"><span class="n"><span class="pre">joueur</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">possession_geisha</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">g</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.possession_geisha" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><p>Renvoie qui possède la geisha</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>g</strong> – La geisha</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.est_jouee_action">
+<span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">est_jouee_action</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.joueur" title="joueur"><span class="n"><span class="pre">joueur</span></span></a><span class="w"> </span><span class="n"><span class="pre">j</span></span>, <a class="reference internal" href="#c.action" title="action"><span class="n"><span class="pre">action</span></span></a><span class="w"> </span><span class="n"><span class="pre">a</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.est_jouee_action" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><p>Renvoie si l’action a déjà été jouée par le joueur</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – Le joueur</p></li>
+<li><p><strong>a</strong> – L’action</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.nb_cartes">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">nb_cartes</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.joueur" title="joueur"><span class="n"><span class="pre">joueur</span></span></a><span class="w"> </span><span class="n"><span class="pre">j</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.nb_cartes" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><p>Renvoie le nombre de carte que le joueur a</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – Le joueur</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.cartes_en_main">
+<span class="n"><span class="pre">int_array</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">cartes_en_main</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.cartes_en_main" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><p>Renvoie les cartes que vous avez</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.carte_pioche">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">carte_pioche</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.carte_pioche" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><p>Renvoie la carte que vous avez pioché au début du tour</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.action_valider">
+<a class="reference internal" href="#c.error" title="error"><span class="n"><span class="pre">error</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">action_valider</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">c</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.action_valider" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><p>Jouer l’action valider une carte</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>c</strong> – La carte à jouer</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.action_defausser">
+<a class="reference internal" href="#c.error" title="error"><span class="n"><span class="pre">error</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">action_defausser</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">c1</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">c2</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.action_defausser" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><p>Jouer l’action défausser deux cartes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>c1</strong> – La première carte à défausser</p></li>
+<li><p><strong>c2</strong> – La deuxième carte à défausser</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.action_choix_trois">
+<a class="reference internal" href="#c.error" title="error"><span class="n"><span class="pre">error</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">action_choix_trois</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">c1</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">c2</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">c3</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.action_choix_trois" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><p>Jouer l’action choisir entre trois cartes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>c1</strong> – La première carte à jouer</p></li>
+<li><p><strong>c2</strong> – La deuxième carte à jouer</p></li>
+<li><p><strong>c3</strong> – La troisième carte à jouer</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.action_choix_paquets">
+<a class="reference internal" href="#c.error" title="error"><span class="n"><span class="pre">error</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">action_choix_paquets</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">p1c1</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">p1c2</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">p2c1</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">p2c2</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.action_choix_paquets" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><p>Jouer l’action choisir entre deux paquets de deux cartes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p1c1</strong> – La première carte du premier paquet à jouer</p></li>
+<li><p><strong>p1c2</strong> – La deuxième carte du premier paquet à jouer</p></li>
+<li><p><strong>p2c1</strong> – La première carte du deuxième paquet à jouer</p></li>
+<li><p><strong>p2c2</strong> – La deuxième carte du deuxième paquet à jouer</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.repondre_choix_trois">
+<a class="reference internal" href="#c.error" title="error"><span class="n"><span class="pre">error</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">repondre_choix_trois</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">c</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.repondre_choix_trois" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><p>Choisir une des trois cartes proposées.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>c</strong> – Le numéro de la carte choisi (0, 1 ou 2)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.repondre_choix_paquets">
+<a class="reference internal" href="#c.error" title="error"><span class="n"><span class="pre">error</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">repondre_choix_paquets</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">p</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.repondre_choix_paquets" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><p>Choisir un des deux paquets proposés.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> – Le paquet choisi (0 ou 1)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.afficher_action">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">afficher_action</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.action" title="action"><span class="n"><span class="pre">action</span></span></a><span class="w"> </span><span class="n"><span class="pre">v</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.afficher_action" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><p>Affiche le contenu d’une valeur de type action</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>v</strong> – The value to display</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.afficher_error">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">afficher_error</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.error" title="error"><span class="n"><span class="pre">error</span></span></a><span class="w"> </span><span class="n"><span class="pre">v</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.afficher_error" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><p>Affiche le contenu d’une valeur de type error</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>v</strong> – The value to display</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.afficher_joueur">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">afficher_joueur</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.joueur" title="joueur"><span class="n"><span class="pre">joueur</span></span></a><span class="w"> </span><span class="n"><span class="pre">v</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.afficher_joueur" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><p>Affiche le contenu d’une valeur de type joueur</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>v</strong> – The value to display</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.afficher_action_jouee">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">afficher_action_jouee</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.action_jouee" title="action_jouee"><span class="n"><span class="pre">action_jouee</span></span></a><span class="w"> </span><span class="n"><span class="pre">v</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.afficher_action_jouee" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><p>Affiche le contenu d’une valeur de type action_jouee</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>v</strong> – The value to display</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="fonctions-utilisateur">
+<h2>Fonctions utilisateur<a class="headerlink" href="#fonctions-utilisateur" title="Lien permanent vers cette rubrique">¶</a></h2>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.init_jeu">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">init_jeu</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.init_jeu" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><p>Fonction appelée au début du jeu</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.jouer_tour">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">jouer_tour</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.jouer_tour" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><p>Fonction appelée au début du tour</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.repondre_action_choix_trois">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">repondre_action_choix_trois</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.repondre_action_choix_trois" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><p>Fonction appelée lors du choix entre les trois cartes lors de l’action de l’adversaire (cf tour_precedent)</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.repondre_action_choix_paquets">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">repondre_action_choix_paquets</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.repondre_action_choix_paquets" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><p>Fonction appelée lors du choix entre deux paquet lors de l’action de l’adversaire (cf tour_precedent)</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.fin_jeu">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">fin_jeu</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.fin_jeu" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<dd><p>Fonction appelée à la fin du jeu</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Hanamikoji</a></h1>
+
+<h3 class="retour"><a href="/">Tableau de bord</a></h3>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#constantes">Constantes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#enumerations">Énumérations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#structures">Structures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fonctions">Fonctions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fonctions-utilisateur">Fonctions utilisateur</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="Chapitre précédent">Welcome to Hanamikoji’s documentation!</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Antonin LOUBIERE, Tristan PAGEZY & Alex ONCEANU.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/api.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

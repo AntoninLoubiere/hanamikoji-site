@@ -1,0 +1,43 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (c) 2020 Association Prologin <association@prologin.org>
+
+# When running in server mode, simply take all the files extracted from the
+# archive.
+ifdef STECHEC_SERVER
+  CHAMPION_FILES = $(wildcard *)
+endif
+
+CXXFLAGS = -ggdb3 -Wall -std=c++17 -fPIC -O2
+MCS_FLAGS = -target:library -nowarn:0169,0649
+CXXFLAGS += $(shell pkg-config --cflags glib-2.0 mono-2)
+LDFLAGS = -lm $(shell pkg-config --libs glib-2.0 mono-2)
+
+all: champion.so champion.dll
+
+cxx_sources = $(filter %.cc,$(CHAMPION_FILES))
+objs += $(cxx_sources:.cc=.o)
+to_clean = $(objs)
+
+cs_sources = $(filter %.cs,$(CHAMPION_FILES))
+
+champion.dll: $(cs_sources)
+	mcs $(MCS_FLAGS) -out:$@ $^
+
+champion.so: $(objs)
+	$(CXX) -o $@ $^ -shared $(LDFLAGS)
+
+clean:
+	@$(RM) _lang # In case the tar rule was interrupted
+	$(RM) $(to_clean)
+
+distclean: clean
+	$(RM) champion.so champion.dll champion.tgz
+
+champion.tgz: $(CHAMPION_FILES)
+	@echo "cs" > _lang
+	tar czf $@ $^ _lang
+	@rm _lang
+
+tar: champion.tgz
+
+.PHONY: tar clean distclean

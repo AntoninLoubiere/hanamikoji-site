@@ -1,0 +1,13 @@
+{% extends 'base_game.html' %}
+{% block title %}Supprimer champion{% endblock title %}
+
+{% block content %}
+<h1>Supprimer le champion {{ champion.nom }}</h1>
+
+<form action="" method="post" class="form">
+    <p>Êtes-vous sûr de vouloir supprimer le champion : {{ champion.nom }} ?</p>
+    {% csrf_token %}
+    <input type="submit" id="envoi" value="Supprimer">
+</form>
+
+{% endblock content %}

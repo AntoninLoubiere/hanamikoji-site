@@ -1,5 +1,67 @@
-{% extends 'base.html' %}
+{% extends 'base_game.html' %}
+{% load static %}
+{% block title %}Home{% endblock title %}
+
 {% block content %}
+
 <h1>Tableau de bord</h1>
-<a href="{% url 'champion_upload' %}">Ajouter un champion</a>
+<div class="ajout-barre">
+    <a href="{% url 'champion_upload' %}" class="ajout">Ajouter un champion</a>
+    <a href="{% url 'add_match' %}" class="ajout">Lancer un match</a>
+    <a href="{% static 'rules.zip' %}" class="ajout">Télécharger la base du code</a>
+</div>
+<table>
+    <caption>Les champions</caption>
+    <tr>
+        <th>Nom</th>
+        <th>Date de création</th>
+        <th>Fichier</th>
+        <th>Statut de compilation</th>
+        <th>Supprimer</th>
+    </tr>
+    {% for champion in champions %}
+    <tr>
+        <td>{{ champion.nom }}</td>
+        <td>{{ champion.date }}</td>
+        <td><a href="{% url 'redirection_code' champion.nom %}">{{ champion.code }}</a></td>
+        <td>{{ champion.get_compilation_status_display }}</td>
+        {% if champion.supprimer %}
+        <td><a href="{% url 'delete_champion' champion.nom %}" class="supp">Supprimer</a></td>
+        {% else %}
+        <td>Impossible à supprimer</td>
+        {% endif %}
+    </tr>
+    {% endfor %}
+</table>
+<table>
+    <caption>Les matchs</caption>
+    <tr>
+        <th>ID</th>
+        <th>Champion n°1</th>
+        <th>Champion n°2</th>
+        <th>Score</th>
+        <th>Statut</th>
+    </tr>
+    {% for match in matchs %}
+    <tr>
+        <td><a href="{% url 'match_detail' match.id_match %}">{{ match.id_match }}</a></td>
+        {% if match.gagnant == 0 or match.gagnant == 1 %}
+        <td id='champion_win'>{{ match.champion1.nom }}</td>
+        {% else %}
+        <td>{{ match.champion1.nom }}</td>
+        {% endif %}
+        {% if match.gagnant == 0 or match.gagnant == 2 %}
+        <td id='champion_win'>{{ match.champion2.nom }}</td>
+        {% else %}
+        <td>{{ match.champion2.nom }}</td>
+        {% endif %}
+        {% if match.status == 'FI' %}
+        <td>{{ match.score1 }} à {{ match.score2 }}</td>
+        {% else %}
+        <td>Non fini</td>
+        {% endif %}
+        <td>{{ match.get_status_display }}</td>
+    </tr>
+    {% endfor %}
+</table>
 {% endblock content %}

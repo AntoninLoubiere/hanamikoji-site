@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'authentication',
     'game',
+    'django_q',
 ]
 
 MIDDLEWARE = [
@@ -57,7 +58,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            BASE_DIR.joinpath('templates'),
+            BASE_DIR / 'templates',
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -120,6 +121,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+    "static/",
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -137,3 +142,22 @@ LOGOUT_REDIRECT_URL = 'login'
 
 MEDIA_URL = '/codes/'
 MEDIA_ROOT = BASE_DIR / 'codes/'
+
+Q_CLUSTER = {
+    'name': 'DjangORM',
+    'workers': 4,
+    'timeout': 600,
+    'retry': 660,
+    'queue_limit': 50,
+    'max_attempts': 1,
+    # 'bulk': 10,
+    'orm': 'default'
+}
+
+MAX_ISOLATE = 1000
+SERVER_TIMEOUT = 1500
+MATCH_SERVER_TIMEOUT = 4000
+ISOLATE_TIMEOUT = 90
+MATCH_RULES = '/usr/lib/libhanamikoji.so'
+STECHEC_SERVER = '/usr/bin/stechec2-server'
+STECHEC_CLIENT = '/usr/bin/stechec2-client'

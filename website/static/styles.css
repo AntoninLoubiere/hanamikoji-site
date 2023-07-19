@@ -1,0 +1,245 @@
+/*J'ai repris d'un projet que j'avais déjà fait pour ne pas reprendre à zéro*/
+
+/*Le général*/
+
+body {
+    background-attachment: fixed;
+    background-size: cover;
+    background-image: url("BG.jpg");
+}
+
+/*La mise en forme des titres*/
+h1 {
+    text-align: center;
+    font-size: 5.2em;
+    font-weight: normal;
+    text-decoration: underline;
+    color: crimson;
+    margin: 0;
+    margin-bottom: .5rem;
+}
+
+form {
+    margin: 0;
+}
+
+
+/*La mise en forme des sections en général*/
+.form {
+    border: 6px solid black;
+    border-radius: 40px;
+    box-shadow: 20px 20px 6px black;
+    background-color: rgba(255, 255, 255, 0.75);
+    color: black;
+    width: 75%;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 2% 2% 2% 2%;
+}
+
+#envoi {
+    font-size: 1.2em;
+    color: green;
+    text-align: center;
+    position: relative;
+        left: 15%;
+}
+
+
+
+footer {
+    border: 1px solid black;
+    background-color: white;
+    position: fixed;
+    bottom: 3px;
+    right: 3px;
+    padding: 5px
+}
+
+/*La barre de navigation*/
+nav {
+    text-align: center;
+        margin: 0px 0px 0px 0px;
+        padding: 1% 1% 1% 1%;
+        background: red;
+        color: white;
+}
+
+
+nav a {
+    color: #FFF;
+    text-decoration: none;
+    font: 20px Raleway;
+    margin: 0px 10px;
+    padding: 10px 10px;
+    position: relative;
+    z-index: 0;
+    cursor: pointer;
+}
+    
+nav a:before,
+nav a:after {
+    position: absolute;
+    left: 0px;
+    width: 100%;
+    height: 2px;
+    background: #FFF;
+    content: "";
+    opacity: 0;
+    transition: all 0.3s;
+}
+
+nav a:before {
+    top: 0px;
+    transform: translateY(10px);
+}
+
+nav a:after {
+    bottom: 0px;
+    transform: translateY(-10px);
+}
+
+nav a:hover:before,
+nav a:hover:after {
+    opacity: 1;
+    transform: translateY(0px);
+}
+
+/* Les tableaux */
+table,
+td,
+th {
+    border: 1px solid #000000;
+    text-align: center;
+    font-size: 18px;
+    text-transform: capitalize;
+}
+
+th {
+    background: #090f42d6;
+    color: #fff;
+}
+
+tr {
+    background: white;
+}
+table {
+    margin: auto;
+        margin-top: 1.5rem;
+    border-collapse: collapse;
+    width: 75%;
+}
+
+th,
+td {
+    padding: 15px;
+}
+table tbody tr:nth-child(odd) {
+    background: #eb6969cc;
+    color: #000;
+    font-weight: 500;
+}
+
+caption {
+    margin-bottom: 15px;
+    font-size: 2.5em;
+    text-decoration: underline;
+}
+
+#sans_casse {
+    text-transform: none;
+}
+/*Lien champion*/
+
+.ajout-barre {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.ajout {
+    border: 5px solid red;
+    padding: .5rem 1rem;
+    font-size: 2em;
+    border-radius: 10px;
+    box-shadow: 10px 10px 3px #000000;
+    color: red;
+    text-decoration: none;
+    font-variant: small-caps;
+    font-weight: bold;
+    font-family: serif;
+    background-color: white;
+}
+
+.ajout option, .ajout optgroup {
+    font-size: 1rem;
+}
+
+.content-section {
+    background-color: rgba(255, 255, 255, 0.75);
+    box-shadow: 20px 20px 6px black;
+    padding: 1rem 2rem;
+    border-radius: 1rem;
+    border: solid 6px black;
+
+    margin: auto;
+    width: max-content;
+}
+
+.content-center {
+    display: block;
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 3rem;
+}
+
+.grid-2 {
+    justify-items: center;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    text-align: center;
+}
+
+.champion-name {
+    max-width: max-content;
+    margin-bottom: .5rem;
+    font: small-caps;
+    font-size: 2rem;
+}
+
+.champion-column {
+    display: grid;
+    padding: 1rem 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.winner {
+    border: 4px rgb(34, 222, 34) solid;
+    border-radius: 1rem;
+}
+
+.score {
+    margin: .5rem;
+    font-size: 2rem;
+}
+
+.map {
+    font-size: 1rem;
+    font-family: monospace;
+    white-space: pre;
+    margin: 1rem auto;
+    width: min-content;
+    padding: .5rem .8rem;
+
+    border: black solid 2px;
+    border-radius: .7rem;
+
+    background-color: white;
+}
+
+.nav-matchs {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+}

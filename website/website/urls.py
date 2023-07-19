@@ -41,7 +41,14 @@ urlpatterns = [
     #path('logout/',authentication.views.logout_user,name='logout'),
     path('home/',game.views.home,name='home'),
     path('signup/', authentication.views.signup_page, name='signup'),
-    path('upload/', game.views.champion_upload, name='champion_upload')
+    path('upload/', game.views.champion_upload, name='champion_upload'),
+    path('matchs/',game.views.matchs, name='matchs'),
+    path('champions/',game.views.champions, name='champions'),
+    path('matchs/<int:id>',game.views.match_detail, name='match_detail'),
+    path('add_match/',game.views.add_match,name='add_match'),
+    path('delete/<str:name>',game.views.delete_champion,name='delete_champion'),
+    path('matchs/<int:id>/out/<int:nb>',game.views.redirection_out,name='redirection_out'),
+    path('champions/code/<str:name>',game.views.redirection_code,name='redirection_code'),
 ]
 if settings.DEBUG:
     urlpatterns += static(

@@ -1,15 +1,31 @@
-{% extends 'base.html' %}
-
+{% extends 'base_authentication.html' %}
+{% load static %}
 {% block title %}
 Connexion
 {% endblock title %}
 
+{% block head %}
+<style type="text/css">
+    body {
+        background-image: url("{% static 'authentication/boite.jpg' %}");
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-color: #29343a;
+        background-position: center;
+    }
+    h1{
+        color:white;
+    }
+</style>
+{% endblock head %}
+
 {% block content %}
-<p>{{ message }}</p>
-<form method="post">
+<h1>Connexion à Hanamikoji</h1>
+<form method="post" class="form">
+    <p>{{ message }}</p>
     {{ form.as_p }}
     {% csrf_token %}
-    <button type="submit">Se connecter</button>
+    <button type="submit" id="envoi">Se connecter</button><br /><br />
+    <a href="{% url 'signup' %}">Inscrivez-vous !</a>
 </form>
-<p>Pas encore membre ? <a href="{% url 'signup' %}">Inscrivez-vous maintenant !</a></p>
 {% endblock content %}

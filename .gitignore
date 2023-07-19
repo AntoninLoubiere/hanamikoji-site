@@ -161,3 +161,6 @@ cython_debug/
 
 # Vscode
 .vscode
+
+# Node modules
+node_modules
