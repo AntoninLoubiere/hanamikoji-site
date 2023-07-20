@@ -24,7 +24,7 @@ class Champion(models.Model):
         FINI = 'FI'
         ERREUR = 'ER'
     code = models.FileField(validators = [FileExtensionValidator(allowed_extensions=["py","c","ml","cpp","cc","zip","tgz","tar.gz"])])
-    nom = models.CharField(max_length=128, blank=False,unique=True, validators=[RegexValidator("^[a-zA-Z-_0-9]$", "Les seuls caractères valides sont les lettres, les chiffres, - et _.")])
+    nom = models.CharField(max_length=128, blank=False,unique=True, validators=[RegexValidator("^[a-zA-Z-_0-9]*$", "Les seuls caractères valides sont les lettres, les chiffres, - et _.")])
     uploader = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     date = models.DateTimeField(auto_now_add=True)
     compilation_status = models.CharField(choices=Status.choices, max_length=2, editable=False, default=Status.EN_ATTENTE)
