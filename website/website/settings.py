@@ -141,8 +141,8 @@ LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'login'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = '/var/www/hanamikoji/media/'
-STATIC_ROOT = "/var/www/hanamikoji/static"
+MEDIA_ROOT = Path('/var/www/hanamikoji/media/')
+STATIC_ROOT = Path("/var/www/hanamikoji/static")
 # STATIC_ROOT = BASE_DIR / "static"
 
 Q_CLUSTER = {
