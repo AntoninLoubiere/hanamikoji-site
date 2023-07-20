@@ -1,4 +1,4 @@
-from django.http import HttpRequest, HttpResponseBadRequest, HttpResponseForbidden
+from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
 from game.tasks import MATCH_OUT_DIR
@@ -7,6 +7,18 @@ from . import forms
 from game.models import Champion, Match
 from  django.db.models import Q
 from authentication.models import User
+
+MIMES_TYPES = {
+    '.tar': 'application/x-tar',
+    '.gz': 'application/gzip',
+    '.tgz': 'application/gzip',
+    '.zip': 'application/zip',
+    '.cc': 'text/x-c++src',
+    '.cpp': 'text/x-c++src',
+    '.ml': 'text/x-ocaml',
+    '.c': 'text/x-csrc',
+    '.py': 'text/x-python',
+}
 
 @login_required
 def home(request):
@@ -153,7 +165,7 @@ def delete_champion(request,name):
 
 @login_required
 def redirection_out(request,id,nb):
-    match_s = get_object_or_404(Match,id_match=id)
+    match_s = get_object_or_404(Match, id_match=id)
     if nb == 1:
         champion = match_s.champion1
     elif nb == 2:
@@ -161,12 +173,26 @@ def redirection_out(request,id,nb):
     else :
         return HttpResponseBadRequest("Champion inexistant")
     if champion.uploader_id == request.user.id :
-        return redirect(f'/codes/match/{id}/champion{nb}.out.txt')
+        response = HttpResponse()
+        response["Content-Type"] = "text/plain"
+        response["Content-Disposition"] = f"attachment; filename={id}champion{nb}.out.txt"
+        response["X-Accel-Redirect"] = f"/codes/match/{id}/champion{nb}.out.txt"
+        return response
     return HttpResponseForbidden("Interdit")
 
 @login_required
 def redirection_code(request,name):
     champion = get_object_or_404(Champion,nom=name)
     if champion.uploader_id == request.user.id :
-        return redirect(champion.code.url)
+        response = HttpResponse()
+
+        for ext, mime in MIMES_TYPES.items():
+            if champion.code.name.endswith(ext):
+                response["Content-Type"] = mime
+                break
+        else:
+            response["Content-Type"] = "application/octet-stream"
+        response["Content-Disposition"] = "attachment; filename=" + champion.code.name
+        response["X-Accel-Redirect"] = champion.code.url
+        return response
     return HttpResponseForbidden("Interdit")
