@@ -26,10 +26,10 @@
         <span class="content-center">Distribution des cartes</span>
         <div class="map">{{map}}</div>
         <a class="content-center" href="/media/match/{{ match.id_match }}/dump.json">Résumé</a>
-        {% if match.champion1.uploader_id == request.user.id %}
+        {% if match.champion1.uploader_id == request.user.id or user.is_superuser %}
             <a class="content-center" href="{% url 'redirection_out' id=match.id_match nb=1 %}">Sortie du champion 1</a>
         {% endif %}
-        {% if match.champion2.uploader_id == request.user.id %}
+        {% if match.champion2.uploader_id == request.user.id or user.is_superuser %}
             <a class="content-center" href="{% url 'redirection_out' id=match.id_match nb=2 %}">Sortie du champion 2</a>
         {% endif %}
     {% endif %}
