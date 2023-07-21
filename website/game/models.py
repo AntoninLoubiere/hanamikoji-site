@@ -100,7 +100,7 @@ class Match(models.Model):
 
     @admin.display(description="Map link")
     def map_link(self):
-        return format_link(f"/codes/match/{self.id_match}/map.txt", "map")
+        return format_link(f"/media/match/{self.id_match}/map.txt", "map")
 
     @admin.display(description="Champion 1 out")
     def champion_1_out(self):
