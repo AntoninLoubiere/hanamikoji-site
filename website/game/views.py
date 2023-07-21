@@ -48,13 +48,17 @@ def champion_upload(request):
 @login_required
 def match_detail(request,id):
     match_select = get_object_or_404(Match, id_match=id)
-
+    suiv = True
+    try : 
+        match_suiv = Match.objects.get(id_match=id+1)
+    except Match.DoesNotExist :
+        suiv = False
     map = ""
     if match_select.status == Match.Status.FINI:
         map = (MATCH_OUT_DIR / str(match_select.id_match) / 'map.txt').read_text()
 
 
-    return render(request, 'game/match_detail.html',context={'match':match_select, 'map': map})
+    return render(request, 'game/match_detail.html',context={'match':match_select, 'map': map, 'suivant':suiv})
 
 
 @login_required
