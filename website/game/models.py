@@ -34,7 +34,7 @@ class Champion(models.Model):
     def __str__(self):
         return f'{self.nom}@{self.uploader}'
 
-    def save(self, force_insert: bool = False, force_update: bool = False, using: str | None = None, update_fields: Iterable[str] | None = None, compile=True) -> None:
+    def save(self, force_insert: bool = False, force_update: bool = False, using = None, update_fields = None, compile=True) -> None:
         super().save(force_insert, force_update, using, update_fields)
         if compile:
             async_task('game.tasks.compile_champion', self, hook='game.tasks.on_end_compilation', group="compile")

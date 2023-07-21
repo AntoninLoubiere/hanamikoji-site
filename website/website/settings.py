@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-lekz6(#zrsb6xw@t5g9cs3excx(+o&75p)g$go)_8x3z)@y3th'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["localhost"]
 
 
 # Application definition
@@ -141,7 +141,9 @@ LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'login'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'codes/'
+MEDIA_ROOT = Path('/var/www/hanamikoji/media/')
+STATIC_ROOT = Path("/var/www/hanamikoji/static")
+# STATIC_ROOT = BASE_DIR / "static"
 
 Q_CLUSTER = {
     'name': 'DjangORM',
