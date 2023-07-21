@@ -3,9 +3,13 @@
 
 {% block content %}
 <div class="nav-matchs">
+    {% if match.id_match != 0 %}
     <a href="{{match.id_match|add:-1}}">Précédent</a>
+    {% endif %}
     <h1>Match N°{{ match.id_match }}</h1>
+    {% if suivant %}
     <a href="{{match.id_match|add:1}}">Suivant</a>
+    {% endif %}
 
 </div>
 <div class="content-section">
