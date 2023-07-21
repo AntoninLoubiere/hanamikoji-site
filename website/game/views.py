@@ -172,18 +172,18 @@ def redirection_out(request,id,nb):
         champion = match_s.champion2
     else :
         return HttpResponseBadRequest("Champion inexistant")
-    if champion.uploader_id == request.user.id :
+    if champion.uploader_id == request.user.id or request.user.is_superuser:
         response = HttpResponse()
         response["Content-Type"] = "text/plain"
-        response["Content-Disposition"] = f"attachment; filename={id}champion{nb}.out.txt"
+        response["Content-Disposition"] = f"attachment; filename=match_{id}_champion{nb}.out.txt"
         response["X-Accel-Redirect"] = f"/codes/match/{id}/champion{nb}.out.txt"
         return response
     return HttpResponseForbidden("Interdit")
 
 @login_required
-def redirection_code(request,name):
+def redirection_code(request, name):
     champion = get_object_or_404(Champion,nom=name)
-    if champion.uploader_id == request.user.id :
+    if champion.uploader_id == request.user.id or request.user.is_superuser:
         response = HttpResponse()
 
         for ext, mime in MIMES_TYPES.items():

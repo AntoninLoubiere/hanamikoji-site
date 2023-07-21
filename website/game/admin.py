@@ -5,7 +5,7 @@ from game.models import Champion, Match
 
 @admin.register(Champion)
 class ChampionAdmin(admin.ModelAdmin):
-    readonly_fields = ('compilation_status', 'task_link')
+    readonly_fields = ('compilation_status', 'task_link', 'code_link')
     list_display = ('__str__', 'compilation_status', 'task_link')
     list_filter = ('compilation_status', 'uploader')
 

@@ -43,6 +43,10 @@ class Champion(models.Model):
     def task_link(self):
         return task_link_view(self.compile_task)
 
+    @admin.display(description="Code")
+    def code_link(self):
+        return format_link(f"/champions/code/{self.nom}", self.nom)
+
     def nb_matchs(self):
         return Match.objects.filter(Q(champion1=self)|Q(champion2=self)).count()
 
@@ -100,11 +104,11 @@ class Match(models.Model):
 
     @admin.display(description="Champion 1 out")
     def champion_1_out(self):
-        return format_link(f"/codes/match/{self.id_match}/champion1.out.txt", "champion 1 out")
+        return format_link(f"/matchs/{self.id_match}/out/1", "champion 1 out")
 
     @admin.display(description="Champion 2 out")
     def champion_2_out(self):
-        return format_link(f"/codes/match/{self.id_match}/champion2.out.txt", "champion 2 out")
+        return format_link(f"/matchs/{self.id_match}/out/2", "champion 2 out")
 
     def is_correct(self):
         return self.champion1.compilation_status == Champion.Status.FINI and self.champion2.compilation_status == Champion.Status.FINI
