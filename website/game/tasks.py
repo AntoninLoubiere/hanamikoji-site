@@ -10,13 +10,13 @@ import shutil
 import tempfile
 from django_q.tasks import Task
 
-from website.settings import ISOLATE_TIMEOUT, MATCH_RULES, MATCH_SERVER_TIMEOUT, SERVER_TIMEOUT, MEDIA_ROOT, STECHEC_CLIENT, STECHEC_SERVER, MAX_ISOLATE, BASE_DIR
+from website.settings import ISOLATE_TIMEOUT, MATCH_RULES, MATCH_SERVER_TIMEOUT, SERVER_TIMEOUT, MEDIA_ROOT, STECHEC_CLIENT, STECHEC_SERVER, MAX_ISOLATE
 from .models import Champion, Match
 
-PATH_BUILD_DIR = Path('/var/www/hanamikoji/build_champion')
-PATH_BUILD_DIR.mkdir(exist_ok=True, parents=True)
-MAKEFILES = (BASE_DIR / 'game' / 'makefiles').absolute()
-INTERFACES = (BASE_DIR / 'game' / 'interface').absolute()
+PATH_BUILD_DIR = Path('build').absolute()
+PATH_BUILD_DIR.mkdir(exist_ok=True)
+MAKEFILES = (Path('game') / 'makefiles').absolute()
+INTERFACES = (Path('game') / 'interface').absolute()
 INTERFACE_FILE = 'interface.cc'
 
 MATCH_OUT_DIR = (MEDIA_ROOT / 'match').absolute()

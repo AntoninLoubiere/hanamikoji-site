@@ -176,7 +176,7 @@ def redirection_out(request,id,nb):
         response = HttpResponse()
         response["Content-Type"] = "text/plain"
         response["Content-Disposition"] = f"attachment; filename={id}champion{nb}.out.txt"
-        response["X-Accel-Redirect"] = f"/media/match/{id}/champion{nb}.out.txt"
+        response["X-Accel-Redirect"] = f"/codes/match/{id}/champion{nb}.out.txt"
         return response
     return HttpResponseForbidden("Interdit")
 
