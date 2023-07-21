@@ -50,7 +50,7 @@ def match_detail(request,id):
     match_select = get_object_or_404(Match, id_match=id)
     suiv = True
     try : 
-        match_suiv = Match.object.get(id_match=id+1)
+        match_suiv = Match.objects.get(id_match=id+1)
     except Match.DoesNotExist :
         suiv = False
     map = ""
