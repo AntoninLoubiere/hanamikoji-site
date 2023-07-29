@@ -19,9 +19,9 @@
     </tr>
     {% for tournoi in tournois %}
     <tr>
-        <td>{{ tournoi.id_tournoi }}</td>
+        <td><a href="{% url 'tournoi_detail' tournoi.id_tournoi %}">{{ tournoi.id_tournoi }}</a></td>
         <td>{{ tournoi.date_lancement }}</td>
-        <td>{{ tournoi.get_compilation_status_display }}</td>
+        <td>{{ tournoi.get_status_display }}</td>
         <td>{{ tournoi.nb_champions }}</td>
     </tr>
     {% endfor %}

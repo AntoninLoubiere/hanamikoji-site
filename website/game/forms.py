@@ -16,3 +16,13 @@ class Filter_User(forms.Form):
 class Add_Match(forms.Form):
     champion_1 = forms.CharField(required=True)
     champion_2 = forms.CharField(required=True)
+
+
+
+
+class TournoisForm(forms.ModelForm):
+    class Meta:
+        model = models.Tournoi
+        fields = ['max_champions','date_lancement']
+        widgets = {'date_lancement': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+}

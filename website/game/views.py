@@ -40,9 +40,7 @@ def champion_upload(request):
         form = forms.ChampionsForm(request.POST, request.FILES)
         if form.is_valid():
             champion = form.save(commit=False)
-            # set the uploader to the user before saving the model
             champion.uploader = request.user
-            # now we can save
             champion.save()
             return redirect('home')
     return render(request, 'game/champion_upload.html', context={'form': form})
@@ -140,7 +138,7 @@ def get_champions_per_user(current_user=None, filter_champions=False):
 
 @login_required
 def tournois(request):
-    tournois = Tournoi.objects.all()
+    tournois = Tournoi.objects.all().order_by("date_lancement")
     paginator = Paginator(tournois,10)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
@@ -223,7 +221,17 @@ def prochain_tournoi(request):
 
 @login_required
 def add_tournoi(request):
-    return render(request,'game/add_tournoi.html')
+    if request.user.create_tournament :
+        form = forms.TournoisForm()
+        if request.method == 'POST':
+            form = forms.TournoisForm(request.POST)
+            if form.is_valid():
+                tournoi = form.save(commit=False)
+                tournoi.save()
+                return redirect('tournoi_detail',tournoi.id_tournoi)
+        return render(request,'game/add_tournoi.html',context={'form':form})
+    else:
+        return HttpResponseForbidden("Interdit")
 
 @login_required
 def tournoi_detail(request,id):
