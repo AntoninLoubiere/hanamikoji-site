@@ -34,4 +34,21 @@
     </tr>
     {% endfor %}
 </table>
+<div class="pagination">
+    <span class="step-links">
+        {% if champions.has_previous %}
+        <a href="?page=1">&laquo; Première page</a>
+        <a href="?page={{ champions.previous_page_number }}">Précédent</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ champions.number }} sur {{ champions.paginator.num_pages }}.
+        </span>
+
+        {% if champions.has_next %}
+        <a href="?page={{ champions.next_page_number }}">Suivant</a>
+        <a href="?page={{ champions.paginator.num_pages }}">Dernière page &raquo;</a>
+        {% endif %}
+    </span>
+</div>
 {% endblock content %}

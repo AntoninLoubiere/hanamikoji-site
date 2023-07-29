@@ -8,6 +8,8 @@ from game.models import Champion, Match
 from  django.db.models import Q
 from authentication.models import User
 
+from django.core.paginator import Paginator
+
 MIMES_TYPES = {
     '.tar': 'application/x-tar',
     '.gz': 'application/gzip',
@@ -87,7 +89,10 @@ def matchs(request: HttpRequest):
 
     if matchs is None:
         matchs =  Match.objects.all().order_by("-date")
-    return render(request,'game/matchs.html',context={'matchs':matchs,'message':message, 'list_champions': list_champions, 'filter_type': filt_type, 'filter_id': filt_id})
+    paginator = Paginator(matchs,25)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    return render(request,'game/matchs.html',context={'matchs':page_obj,'message':message, 'list_champions': list_champions, 'filter_type': filt_type, 'filter_id': filt_id})
 
 @login_required
 def champions(request):
@@ -107,7 +112,10 @@ def champions(request):
 
     if champions is None:
         champions =  Champion.objects.all().order_by("-date")
-    return render(request,'game/champions.html',context={'champions':champions, 'users': users, 'message':message, 'filter_id': filter_id})
+    paginator = Paginator(champions,25)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    return render(request,'game/champions.html',context={'champions':page_obj, 'users': users, 'message':message, 'filter_id': filter_id})
 
 def get_champions_per_user(current_user=None, filter_champions=False):
     champs = Champion.objects.filter(compilation_status=Champion.Status.FINI) if filter_champions else Champion.objects.all()
