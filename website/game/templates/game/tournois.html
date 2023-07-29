@@ -1,0 +1,65 @@
+{% extends 'base_game.html' %}
+{% block title %}Les tournois{% endblock title %}
+
+{% block content %}
+<h1>Tous les tournois</h1>
+<div class="ajout-barre">
+    <a href="{% url 'prochain_tournoi' %}" class="ajout">Voir le prochain tournoi</a>
+    {% if user.create_tournament %}
+    <a href="{% url 'add_tournoi' %}" class="ajout">Ajouter un tournoi</a>
+    {% endif %}
+</div>
+<table>
+    <caption>Les tournois</caption>
+    <tr>
+        <th>ID</th>
+        <th>Date de lancement</th>
+        <th>Statut</th>
+        <th>Nombre de champions inscrits</th>
+    </tr>
+    {% for tournoi in tournois %}
+    <tr>
+        <td>{{ tournoi.id_tournoi }}</td>
+        <td>{{ tournoi.date_lancement }}</td>
+        <td>{{ tournoi.get_compilation_status_display }}</td>
+        <td>{{ tournoi.nb_champions }}</td>
+    </tr>
+    {% endfor %}
+</table>
+<div class="pagination">
+    <div class="side-pagination">
+        {% if tournois.has_previous %}
+        <a href="?page=1"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor" class="icon">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5" />
+            </svg> Première page</a>
+        <a href="?page={{ tournois.previous_page_number }}"><svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg> Précédent</a>
+        {% endif %}
+    </div>
+
+    <span class="current">
+        Page {{ tournois.number }} sur {{ tournois.paginator.num_pages }}
+    </span>
+
+    <div class="side-pagination pagination-right">
+        {% if tournois.has_next %}
+        <a href="?page={{ tournois.next_page_number }}">Suivant
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor" class="icon">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg></a>
+        <a href="?page={{ tournois.paginator.num_pages }}">Dernière page
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor" class="icon">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M11.25 4.5l7.5 7.5-7.5 7.5m-6-15l7.5 7.5-7.5 7.5" />
+            </svg>
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock content %}
