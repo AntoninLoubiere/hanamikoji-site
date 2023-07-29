@@ -7,8 +7,8 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.db.models import Q
 from django.core.validators import RegexValidator
-import datetime
 from django.core.exceptions import ValidationError
+import datetime
 
 def task_link_view(t: Task):
     if t is None:
@@ -63,18 +63,17 @@ class Tournoi(models.Model):
         ERREUR = 'ER'
         LANCEMENT_PROGRAMME = 'LP'
 
+    def valide_date(date):
+        if date.timestamp() < datetime.datetime.now().timestamp():
+                raise ValidationError("Vous ne pouvez pas lancer le tournoi avant qu'il soit créé !")
+
     id_tournoi = models.AutoField(primary_key=True, unique=True)
     status = models.CharField(choices=Status.choices,max_length=2, default=Status.EN_ATTENTE,)
     max_champions = models.IntegerField(default=3)
-    date_lancement = models.DateTimeField()
+    date_lancement = models.DateTimeField(validators=[valide_date])
 
     def nb_champions(self):
         return Inscrit.objects.filter(tournoi=self).count()
-    
-    def save(self, *args, **kwargs):
-        # if self.date_lancement < datetime.datetime.now():
-        #     raise ValidationError("Vous ne pouvez pas lancer le tournoi avant qu'il soit créé !")
-        super(Tournoi, self).save(*args, **kwargs)
 
     def __str__(self) -> str:
         return f"Tournoi #{self.id_tournoi} {self.date_lancement}"
