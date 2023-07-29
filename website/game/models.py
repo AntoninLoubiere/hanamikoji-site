@@ -61,7 +61,7 @@ class Tournoi(models.Model):
         EN_COURS = 'EC'
         FINI = 'FI'
         ERREUR = 'ER'
-        LANCEMENT_PROGRAMME = 'LP'
+        LANCEMENT_PROGRAMMÉ = 'LP'
 
     def valide_date(date):
         if date.timestamp() < datetime.datetime.now().timestamp():

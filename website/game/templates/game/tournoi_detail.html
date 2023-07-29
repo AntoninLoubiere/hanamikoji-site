@@ -1,0 +1,21 @@
+{% extends 'base_game.html' %}
+{% block title %}Tournoi n°{{ tournoi.id_tournoi }}{% endblock title %}
+
+{% block content %}
+<h1>Tournoi n°{{ tournoi.id_tournoi }}</h1>
+<div class="content-section">
+    <span class="content-center">{{ tournoi.get_status_display }}</span>
+    <span class="content-center">Lancement : {{ tournoi.date_lancement }}</span>
+    {% if tournoi.status == 'LP' %}
+    Choix des champions <br />
+    {% elif tournoi.status == 'EC' %}
+    Nombres de matchs terminés : {{ termine }} sur {{ nb_matchs }}
+    {% elif tournoi.status == 'FI' %}
+    Résultat du tournoi
+    {% endif %}
+    {% if tournoi.status == 'LP' and user.create_tournament %}
+    <a href="{% url 'update_tournoi' tournoi.id_tournoi %}" class="content-center">Lancer ou changer la date du
+        tournoi</a>
+    {% endif %}
+</div>
+{% endblock content %}

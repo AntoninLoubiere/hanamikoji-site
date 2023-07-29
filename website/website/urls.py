@@ -51,6 +51,7 @@ urlpatterns = [
     path('tournois/ajouter/',game.views.add_tournoi,name='add_tournoi'),
     path('tournois/prochain/',game.views.prochain_tournoi,name='prochain_tournoi'),
     path('tournois/<int:id>/',game.views.tournoi_detail,name='tournoi_detail'),
+    path('tournois/<int:id>/change',game.views.update_tournoi,name='update_tournoi'),
 ]
 if settings.DEBUG:
     urlpatterns += static(

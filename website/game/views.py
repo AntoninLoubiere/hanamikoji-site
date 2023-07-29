@@ -9,6 +9,7 @@ from  django.db.models import Q
 from authentication.models import User
 
 from django.core.paginator import Paginator
+import datetime
 
 MIMES_TYPES = {
     '.tar': 'application/x-tar',
@@ -217,7 +218,11 @@ def redirection_code(request, name):
 
 @login_required
 def prochain_tournoi(request):
-    return render(request,'game/prochain_tournoi.html')
+    prochains = Tournoi.objects.all().order_by("date_lancement")
+    for prochain in prochains:
+        if prochain.date_lancement.timestamp() > datetime.datetime.now().timestamp():
+            return redirect('tournoi_detail',prochain.id_tournoi)
+    return redirect('tournois')
 
 @login_required
 def add_tournoi(request):
@@ -235,4 +240,27 @@ def add_tournoi(request):
 
 @login_required
 def tournoi_detail(request,id):
-    return render(request,'game/tournoi_detail.html')
+    tournoi = get_object_or_404(Tournoi,id_tournoi=id)
+    inscrits = Inscrit.objects.filter(tournoi=tournoi)
+    matchs = Match.objects.filter(tournoi=tournoi)
+    termine = 0
+    nb_matchs = matchs.count()
+    if tournoi.status == 'EC':
+        for m in matchs:
+            if m.status == 'FI':
+                termine += 1
+    return render(request,'game/tournoi_detail.html',context={'tournoi':tournoi,'inscrits':inscrits,'matchs':matchs,'termine':termine,'nb_matchs':nb_matchs})
+
+@login_required
+def update_tournoi(request,id):
+    if request.user.create_tournament :
+        tournoi = get_object_or_404(Tournoi,id_tournoi=id)
+        form = forms.TournoisForm(instance=tournoi) #Le préremplissage ne marche pas avec la date à cause du changement d'attrubut
+        if request.method == 'POST':
+            form = forms.TournoisForm(request.POST, instance=tournoi)
+            if form.is_valid():
+                form.save()
+                return redirect('tournoi_detail',tournoi.id_tournoi)
+        return render(request,'game/update_tournoi.html',context={'form':form,'id':id})
+    else:
+        return HttpResponseForbidden("Interdit")
