@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from game.tasks import MATCH_OUT_DIR
 
 from . import forms
-from game.models import Champion, Match
+from game.models import Champion, Match, Tournoi, Inscrit
 from  django.db.models import Q
 from authentication.models import User
 
@@ -89,7 +89,7 @@ def matchs(request: HttpRequest):
 
     if matchs is None:
         matchs =  Match.objects.all().order_by("-date")
-    paginator = Paginator(matchs,25)
+    paginator = Paginator(matchs,15)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
     return render(request,'game/matchs.html',context={'matchs':page_obj,'message':message, 'list_champions': list_champions, 'filter_type': filt_type, 'filter_id': filt_id})
@@ -112,7 +112,7 @@ def champions(request):
 
     if champions is None:
         champions =  Champion.objects.all().order_by("-date")
-    paginator = Paginator(champions,25)
+    paginator = Paginator(champions,15)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
     return render(request,'game/champions.html',context={'champions':page_obj, 'users': users, 'message':message, 'filter_id': filter_id})
@@ -137,6 +137,14 @@ def get_champions_per_user(current_user=None, filter_champions=False):
         r.append((u, users[u]))
 
     return r
+
+@login_required
+def tournois(request):
+    tournois = Tournoi.objects.all()
+    paginator = Paginator(tournois,10)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    return render(request,'game/tournois.html',context={'tournois': page_obj})
 
 
 @login_required
@@ -208,3 +216,15 @@ def redirection_code(request, name):
         response["X-Accel-Redirect"] = champion.code.url
         return response
     return HttpResponseForbidden("Interdit")
+
+@login_required
+def prochain_tournoi(request):
+    return render(request,'game/prochain_tournoi.html')
+
+@login_required
+def add_tournoi(request):
+    return render(request,'game/add_tournoi.html')
+
+@login_required
+def tournoi_detail(request,id):
+    return render(request,'game/tournoi_detail.html')

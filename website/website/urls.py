@@ -49,6 +49,10 @@ urlpatterns = [
     path('delete/<str:name>',game.views.delete_champion,name='delete_champion'),
     path('matchs/<int:id>/out/<int:nb>',game.views.redirection_out,name='redirection_out'),
     path('champions/code/<str:name>',game.views.redirection_code,name='redirection_code'),
+    path('tournois/', game.views.tournois,name='tournois'),
+    path('add_tournois/',game.views.add_tournoi,name='add_tournoi'),
+    path('tournois/prochain',game.views.prochain_tournoi,name='prochain_tournoi'),
+    path('tournois/<int:id>',game.views.tournoi_detail,name='tournoi_detail'),
 ]
 if settings.DEBUG:
     urlpatterns += static(
