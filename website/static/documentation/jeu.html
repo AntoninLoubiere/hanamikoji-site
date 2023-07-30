@@ -39,7 +39,7 @@
 <p>Chaque participant conçoit un programme capable de jouer au jeu
 <em>Hanamikoji</em>, ensuite un tournoi est organisé entre ces programmes.</p>
 <p>Pour exécuter votre code, en local il faudra télécharger stechec (cf
-<a class="reference external" href="utilisation-local.html">Utilisation Locale</a>) sinon vous pouvez le site (cf
+<a class="reference external" href="utilisation-local.html">Utilisation Locale</a>) sinon vous pouvez utiliser le site (cf
 <a class="reference external" href="utilisation-serveur.html">Utilisation Serveur</a>).</p>
 <section id="id1">
 <h3>Le jeu, Hanamikoji<a class="headerlink" href="#id1" title="Lien permanent vers cette rubrique">¶</a></h3>
@@ -54,12 +54,12 @@ nombre de cartes de cette Geisha disponible (2 cartes pour la Geisha 0,
 2 pour la 1, 5 pour la 6…).</p>
 <p>Le jeu se joue en au plus 3 manches (cf <a class="reference external" href="#conditions-de-victoires">conditions de
 victoires</a>) durant lesquels chaque joueur
-jouera une et une seule fois chacune des 4 quatre actions (cf
+jouera une et une seule fois chacune des quatre actions (cf
 <a class="reference external" href="#actions">actions</a>), qui permettent de valider des cartes Geisha. À
 la fin de chaque manche, pour chaque Geisha, si un joueur a strictement
-plus de cartes Geisha validé que l’adversaire, il prend possession de
+plus de cartes Geisha validées que l’adversaire, il prend possession de
 celle-ci (même si l’adversaire la possédait déjà depuis la manche
-précédente; au départ les Geisha ne sont possédés par aucun des
+précédente; au départ les Geisha ne sont possédées par aucun des
 joueurs).</p>
 </section>
 <section id="actions">
@@ -88,23 +88,28 @@ restant.</p>
 </section>
 <section id="deroulement-dune-manche">
 <h2>Déroulement d’une manche<a class="headerlink" href="#deroulement-dune-manche" title="Lien permanent vers cette rubrique">¶</a></h2>
-<p>Les cartes sont mélangés, une carte est écarté de la manche, chaque
+<p>Les cartes sont mélangées, une carte est écartée de la manche, chaque
 joueur reçoit 6 cartes. Au début de leur tour, les joueurs piochent une
 carte.</p>
 <p>À la fin de la manche, la possession des Geisha est mise à jour : pour
 chaque Geisha, si un joueur a validé strictement plus de cartes de cette
-Geisha que l’autre alors il prends possession de celle-ci.</p>
+Geisha que l’autre alors il prend possession de celle-ci.</p>
 <p>Les <a class="reference external" href="#conditions-de-victoires">conditions de victoires</a> sont
 vérifiées, s’il n’y a pas de gagnant, on passe à la manche suivante (les
 possessions des Geisha ne sont pas réinitialisées).</p>
 </section>
 <section id="conditions-de-victoires">
 <h2>Conditions de victoires<a class="headerlink" href="#conditions-de-victoires" title="Lien permanent vers cette rubrique">¶</a></h2>
-<p>Un joueur est gagnant dans l’ordre : - Si la somme des valeurs des
-geisha qu’il possède est supérieur à 11 - S’il possède au moins quatre
-carte Geisha - À la fin des trois manches, la partie s’arrête, le
+<p>Un joueur est gagnant dans l’ordre :</p>
+<ul class="simple">
+<li><p>Si la somme des valeurs des
+geisha qu’il possède est supérieur à 11</p></li>
+<li><p>S’il possède au moins quatre
+carte Geisha</p></li>
+<li><p>À la fin des trois manches, la partie s’arrête, le
 gagnant est celui totalisant le plus grand score (somme des valeurs des
-geisha qu’il possède), le cas échéant il y a égalité.</p>
+geisha qu’il possède), dans le cas échéant il y a égalité.</p></li>
+</ul>
 </section>
 </section>
 

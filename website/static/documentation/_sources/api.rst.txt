@@ -9,11 +9,11 @@ API
 Introduction
 ============
 
-Les `Geishas <jeu.html#description-generale>`_ sont représentés par des entiers de 0
+Les `Geishas <jeu.html#description-generale>`_ sont représentées par des entiers de 0
 à 6 représentant dans l'ordre les trois Geishas à deux cartes, les deux Geishas à trois cartes, la
 Geisha à quatre cartes et la Geisha à cinq cartes.
 
-Les cartes sont représentés par des entiers de 0 à 6 correspondant à la Geisha représenté par la
+Les cartes sont représentées par des entiers de 0 à 6 correspondant à la Geisha représentée par la
 carte.
 
 

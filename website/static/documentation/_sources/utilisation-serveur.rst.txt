@@ -18,13 +18,13 @@ serveur sur la `page ajouter un champion </upload/>`_.
 .. note::
    Si le serveur ne détecte pas le langage, vous pouvez ajouter un fichier texte
    nommé ``_lang`` avec le nom du langage dedans (i.e. le nom du dossier de
-   l’archive).
+   l’archive des patrons de code).
 
 Lancer un match
 ===============
 
 Une fois que les champions ont été téléversés et que le serveur a
-terminé de compilé votre code, il suffit de se rendre sur la `page lancer
+terminé de compiler votre code, il suffit de se rendre sur la `page lancer
 un match </add_match/>`_.
 
 

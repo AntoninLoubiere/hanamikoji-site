@@ -7,7 +7,7 @@ L'installation en local peut être rude, vous pouvez aussi lancer les matchs sur
 Installation
 ============
 
-Télécharger
+Téléchargez
 `stechec2 <https://gitlab.com/prologin/tech/tools/stechec2/>`__
 
 ::
@@ -24,7 +24,7 @@ Téléchargez le code d’Hanamikoji
 Installez les paquets requis par stechec2: cf
 https://gitlab.com/prologin/tech/tools/stechec2/-/blob/main/README.rst#requirements
 
-Configurer le projet :
+Configurez le projet :
 
 ::
 
@@ -44,7 +44,7 @@ Construisez et installez :
 Génération du patron de code
 ============================
 
-Pour générer le patron pour le champion :
+Pour générer les patrons de code pour les champions :
 
 ::
 

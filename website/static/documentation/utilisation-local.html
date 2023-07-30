@@ -14,7 +14,7 @@
     <script src="_static/translations.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Recherche" href="search.html" />
-    <link rel="next" title="API" href="api.html" />
+    <link rel="next" title="Utilisation avec le serveur" href="utilisation-serveur.html" />
     <link rel="prev" title="Coder un champion" href="champion.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -37,7 +37,7 @@
 <p>L’installation en local peut être rude, vous pouvez aussi lancer les matchs sur le serveur.</p>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Lien permanent vers cette rubrique">¶</a></h2>
-<p>Télécharger
+<p>Téléchargez
 <a class="reference external" href="https://gitlab.com/prologin/tech/tools/stechec2/">stechec2</a></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">gitlab</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">prologin</span><span class="o">/</span><span class="n">tech</span><span class="o">/</span><span class="n">tools</span><span class="o">/</span><span class="n">stechec2</span><span class="o">.</span><span class="n">git</span>
 <span class="n">cd</span> <span class="n">stechec2</span>
@@ -49,7 +49,7 @@
 </div>
 <p>Installez les paquets requis par stechec2: cf
 <a class="reference external" href="https://gitlab.com/prologin/tech/tools/stechec2/-/blob/main/README.rst#requirements">https://gitlab.com/prologin/tech/tools/stechec2/-/blob/main/README.rst#requirements</a></p>
-<p>Configurer le projet :</p>
+<p>Configurez le projet :</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">waf</span><span class="o">.</span><span class="n">py</span> <span class="n">configure</span> <span class="o">--</span><span class="k">with</span><span class="o">-</span><span class="n">games</span><span class="o">=</span><span class="n">hanamikoji</span> <span class="o">--</span><span class="n">prefix</span><span class="o">=/</span><span class="n">usr</span>
 </pre></div>
 </div>
@@ -63,7 +63,7 @@ python3 waf.py)</p>
 </section>
 <section id="generation-du-patron-de-code">
 <h2>Génération du patron de code<a class="headerlink" href="#generation-du-patron-de-code" title="Lien permanent vers cette rubrique">¶</a></h2>
-<p>Pour générer le patron pour le champion :</p>
+<p>Pour générer les patrons de code pour les champions :</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">stechec2</span><span class="o">-</span><span class="n">generator</span> <span class="n">player</span> <span class="n">hanamikoji</span> <span class="o">&lt;</span><span class="n">dossier</span><span class="o">&gt;</span>
 </pre></div>
 </div>
@@ -119,6 +119,7 @@ correspondant <code class="docutils literal notranslate"><span class="pre">make<
 <li class="toctree-l2"><a class="reference internal" href="#lancement-dun-match">Lancement d’un match</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="utilisation-serveur.html">Utilisation avec le serveur</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
 </ul>
 
@@ -127,7 +128,7 @@ correspondant <code class="docutils literal notranslate"><span class="pre">make<
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="champion.html" title="Chapitre précédent">Coder un champion</a></li>
-      <li>Next: <a href="api.html" title="Chapitre suivant">API</a></li>
+      <li>Next: <a href="utilisation-serveur.html" title="Chapitre suivant">Utilisation avec le serveur</a></li>
   </ul></li>
 </ul>
 </div>
