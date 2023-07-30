@@ -1,5 +1,5 @@
 import asyncio
-from asyncio.subprocess import PIPE
+from asyncio.subprocess import PIPE, STDOUT
 from multiprocessing import current_process
 import os
 from pathlib import Path
@@ -213,7 +213,8 @@ async def run_server(match_dir, rep_addr, pub_addr):
         '--dump', str(match_dir / 'dump.json'),
         '--map', str(match_dir / 'map.txt'),
         '--verbose', '1',
-        stdout=PIPE
+        stdout=PIPE,
+        stderr=STDOUT
     )
 
 async def run_client(match_dir, champion_name, champion_path: Path, req_addr, sub_addr, client_id, box_id):

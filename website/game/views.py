@@ -166,8 +166,8 @@ def add_match(request: HttpRequest):
             if m.is_correct():
                 m.champion1.supprimer = False
                 m.champion2.supprimer = False
-                m.champion1.save()
-                m.champion2.save()
+                m.champion1.save(compile=False)
+                m.champion2.save(compile=False)
                 m.save()
                 return redirect('match_detail', m.id_match)
             else:
@@ -202,6 +202,7 @@ def redirection_out(request,id,nb):
         response = HttpResponse()
         response["Content-Type"] = "text/plain"
         response["Content-Disposition"] = f"attachment; filename=match_{id}_champion{nb}.out.txt"
+        print(id, f"/media/match/{id}/champion{nb}.out.txt")
         response["X-Accel-Redirect"] = f"/media/match/{id}/champion{nb}.out.txt"
         return response
     return HttpResponseForbidden("Interdit")
