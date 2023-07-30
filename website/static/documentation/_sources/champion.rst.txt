@@ -49,8 +49,8 @@ terminée, la fonction ``fin_jeu`` sera appelée.
 .. warning::
   Ne pas jouer d'action ou ne pas répondre à un choix entraîne la perte **immédiate** du match.
 
-Les `Geishas <jeu.html#description-generale>`_ sont représentées par des entiers de 0
-à 6 représentant dans l'ordre les trois Geishas à deux cartes, les deux Geishas à trois cartes, la
+Les `Geisha <jeu.html#description-generale>`_ sont représentées par des entiers de 0
+à 6 représentant dans l'ordre les trois Geisha à deux cartes, les deux Geisha à trois cartes, la
 Geisha à quatre cartes et la Geisha à cinq cartes.
 
 Les cartes sont représentées par des entiers de 0 à 6 correspondant à la Geisha représentée par la

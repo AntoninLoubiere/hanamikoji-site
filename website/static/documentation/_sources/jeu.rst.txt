@@ -18,8 +18,8 @@ Le jeu, Hanamikoji
 Description générale
 ====================
 
-Le jeu est composé de 7 *Geishas* et de 21 cartes représentant chacune
-une Geisha. Il y a 3 Geishas de valeur 2, 2 Geishas de valeur 3, 1 Geisha
+Le jeu est composé de 7 *Geisha* et de 21 cartes représentant chacune
+une Geisha. Il y a 3 Geisha de valeur 2, 2 Geisha de valeur 3, 1 Geisha
 de valeur 4 et 1 Geisha de valeur 5. La valeur d’une Geisha est aussi le
 nombre de cartes de cette Geisha disponible (2 cartes pour la Geisha 0,
 2 pour la 1, 5 pour la 6…).
@@ -31,7 +31,7 @@ jouera une et une seule fois chacune des quatre actions (cf
 la fin de chaque manche, pour chaque Geisha, si un joueur a strictement
 plus de cartes validées que l’adversaire, il prend possession de
 celle-ci (même si l’adversaire la possédait déjà depuis la manche
-précédente; au départ les Geishas ne sont possédées par aucun des
+précédente; au départ les Geisha ne sont possédées par aucun des
 joueurs).
 
 Actions
@@ -75,7 +75,7 @@ Geisha que l’autre alors il prend possession de celle-ci.
 
 Les `conditions de victoires <#conditions-de-victoires>`__ sont
 vérifiées, s’il n’y a pas de gagnant, on passe à la manche suivante (les
-possessions des Geishas ne sont pas réinitialisées).
+possessions des Geisha ne sont pas réinitialisées).
 
 Conditions de victoires
 =======================
@@ -84,7 +84,7 @@ Un joueur est gagnant dans l’ordre :
 
 - Si la somme des valeurs des
   geisha qu’il possède est supérieur à 11
-- S’il possède au moins quatre cartes Geishas
+- S’il possède au moins quatre cartes Geisha
 - À la fin des trois manches, la partie s’arrête, le
   gagnant est celui totalisant le plus grand score (somme des valeurs des
   geisha qu’il possède), dans le cas échéant il y a égalité.
