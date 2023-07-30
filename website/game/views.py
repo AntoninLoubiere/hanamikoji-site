@@ -13,6 +13,8 @@ from authentication.models import User
 from django.core.paginator import Paginator
 import datetime
 
+from django.db.models import Count
+
 MIMES_TYPES = {
     '.tar': 'application/x-tar',
     '.gz': 'application/gzip',
@@ -141,7 +143,7 @@ def get_champions_per_user(current_user=None, filter_champions=False):
 
 @login_required
 def tournois(request):
-    tournois = Tournoi.objects.all().order_by("date_lancement")
+    tournois = Tournoi.objects.all().annotate(null_date=Count('date_lancement')).order_by("-null_date","date_lancement")
     paginator = Paginator(tournois,10)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)

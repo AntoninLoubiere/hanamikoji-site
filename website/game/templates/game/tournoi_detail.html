@@ -5,15 +5,18 @@
 <h1>Tournoi n°{{ tournoi.id_tournoi }}</h1>
 <div class="content-section">
     <span class="content-center">{{ tournoi.get_status_display }}</span>
+    {% if tournoi.status != 'EA' %}
     <span class="content-center">Lancement : {{ tournoi.date_lancement }}</span>
-    {% if tournoi.status == 'LP' %}
+    {% endif %}
+    {% if tournoi.status == 'LP' or tournoi.status == 'EA' %}
     Choix des champions <br />
     {% elif tournoi.status == 'EC' %}
     Nombres de matchs terminés : {{ termine }} sur {{ nb_matchs }}
     {% elif tournoi.status == 'FI' %}
     Résultat du tournoi
     {% endif %}
-    {% if tournoi.status == 'LP' and user.create_tournament %}
+    {% if tournoi.status == 'LP' and user.create_tournament or tournoi.status == 'EA' and user.create_tournament %}
+    {# J'ai pas trouvé mieux #}
     <a href="{% url 'update_tournoi' tournoi.id_tournoi %}" class="content-center">Lancer ou changer la date du
         tournoi</a>
     {% endif %}
