@@ -75,6 +75,9 @@ class Tournoi(models.Model):
     def nb_champions(self):
         return Inscrit.objects.filter(tournoi=self).count()
 
+    def nb_champions_user(self, user):
+        return Inscrit.objects.filter(tournoi=self, champion__uploader=user).count()
+
     def __str__(self) -> str:
         return f"Tournoi #{self.id_tournoi} {self.date_lancement}"
 

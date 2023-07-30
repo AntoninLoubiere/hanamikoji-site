@@ -1,3 +1,5 @@
+from datetime import datetime
+from django.utils import timezone
 from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
@@ -143,7 +145,12 @@ def tournois(request):
     paginator = Paginator(tournois,10)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
-    return render(request,'game/tournois.html',context={'tournois': page_obj})
+
+    print(Tournoi.objects.filter(date_lancement__gt=timezone.now()))
+    prochain_tournoi = Tournoi.objects.filter(date_lancement__gt=timezone.now()).order_by("date_lancement").first()
+    dateiso = prochain_tournoi.date_lancement.isoformat() if prochain_tournoi else ''
+    nb_champs_user = prochain_tournoi.nb_champions_user(request.user) if prochain_tournoi else 0
+    return render(request,'game/tournois.html',context={'tournois': page_obj, 'prochain_tournoi': prochain_tournoi, 'timer': dateiso, 'nb_champs_user': nb_champs_user})
 
 
 @login_required
@@ -218,10 +225,9 @@ def redirection_code(request, name):
 
 @login_required
 def prochain_tournoi(request):
-    prochains = Tournoi.objects.all().order_by("date_lancement")
-    for prochain in prochains:
-        if prochain.date_lancement.timestamp() > datetime.datetime.now().timestamp():
-            return redirect('tournoi_detail',prochain.id_tournoi)
+    prochain_tournoi = Tournoi.objects.filter(date_lancement__gt=datetime.now()).order_by("date_lancement").first()
+    if prochain_tournoi:
+        return redirect('tournoi_detail', prochain_tournoi.id_tournoi)
     return redirect('tournois')
 
 @login_required

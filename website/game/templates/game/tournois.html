@@ -1,14 +1,41 @@
 {% extends 'base_game.html' %}
 {% block title %}Les tournois{% endblock title %}
-
+{% load static %}
 {% block content %}
 <h1>Tous les tournois</h1>
-<div class="ajout-barre">
-    <a href="{% url 'prochain_tournoi' %}" class="ajout">Voir le prochain tournoi</a>
+<div class="ajout-barre space-bottom">
     {% if user.create_tournament %}
     <a href="{% url 'add_tournoi' %}" class="ajout">Ajouter un tournoi</a>
     {% endif %}
 </div>
+
+{% if prochain_tournoi %}
+    <div class="content-section">
+        <a class="content-center" href="{% url 'tournoi_detail' prochain_tournoi.id_tournoi %}">Prochain tournoi</a>
+        <div id="timer" data-time="{{ timer }}">
+            <div id="timer-days" class="timer-nbs">
+                <div class="digit digit-2" id="timer-days-2"><span class="from">0</span><span class="to"></span></div><div class="digit" id="timer-days-1"><span class="from">0</span><span class="to"></span></div>
+                <div class="timer-caption">jours</div>
+            </div>
+            <div id="timer-days" class="timer-nbs">
+                <div class="digit digit-2" id="timer-hours-2"><span class="from">0</span><span class="to"></span></div><div class="digit" id="timer-hours-1"><span class="from">0</span><span class="to"></span></div>
+                <div class="timer-caption">heures</div>
+            </div>
+            <div id="timer-days" class="timer-nbs">
+                <div class="digit digit-2" id="timer-minutes-2"><span class="from">0</span><span class="to"></span></div><div class="digit" id="timer-minutes-1"><span class="from">0</span><span class="to"></span></div>
+                <div class="timer-caption">minutes</div>
+            </div>
+            <div id="timer-days" class="timer-nbs">
+                <div class="digit digit-2" id="timer-seconds-2"><span class="from">0</span><span class="to"></span></div><div class="digit" id="timer-seconds-1"><span class="from">0</span><span class="to"></span></div>
+                <div class="timer-caption">secondes</div>
+            </div>
+        </div>
+        <div class="content-section-caption">{{ prochain_tournoi.nb_champions }} champions inscrits</div>
+        <div class="content-section-caption {% if nb_champs_user <= 0 %}content-red{% endif %}">Vous avez inscrit {{ nb_champs_user }}/{{ prochain_tournoi.max_champions }} champions</div>
+        <script src="{% static 'game/timer.js' %}"></script>
+    </div>
+{% endif %}
+
 <table>
     <caption>Les tournois</caption>
     <tr>

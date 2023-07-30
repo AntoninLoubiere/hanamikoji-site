@@ -19,6 +19,12 @@ h1 {
     margin-bottom: .5rem;
 }
 
+.h2 {
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 2rem;
+}
+
 form {
     margin: 0;
 }
@@ -261,8 +267,9 @@ caption {
     display: grid;
     grid-template-columns: 2fr 1fr 2fr;
     border: 2px red solid;
-    border-radius: 50rem;
+    border-radius: .5rem;
     padding: .5rem;
+    text-align: center;
 
     background-color: white;
 }
@@ -285,4 +292,77 @@ caption {
 
 .pagination-right {
     justify-self: end;
+}
+
+.content-section-caption {
+    text-align: center;
+    font-size: 1.7rem;
+}
+
+.space-bottom {
+    margin-bottom: 2rem;
+}
+
+#timer {
+    margin: 1rem 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+}
+
+.timer-nbs {
+    text-align: center;
+    border: black solid 2px;
+    border-radius: .5rem;
+    padding: .5rem 1rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.timer-caption {
+    margin-top: .75rem;
+    font-size: 1.5rem;
+}
+
+.digit {
+    display: inline;
+    font-size: 4rem;
+    margin: 0;
+    position: relative;
+}
+
+.digit .from {
+    display: inline-block;
+}
+.digit .to {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0;
+}
+
+.digit-2 .from {
+    transition: color .2s;
+}
+
+.content-red {
+    color: red;
+    font-weight: bold;
+}
+
+.t42 {
+    color: red;
+}
+
+@media screen and (max-width: 700px) {
+    /* :root {
+        font-size: 0.75em;
+    } */
+
+    #timer {
+        gap: 1rem;
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
