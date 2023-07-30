@@ -29,7 +29,11 @@
             <span>{{ match.champion1.uploader }}</span>
             {% if match.status == 'FI' %}<span class="score">{{match.score2}}</span>{% endif %}
         </div>
+        
     </div>
+    {% if match.tournoi != None %}<span class="champion-name">Ce match compte pour <a
+            href=" {% url 'tournoi_detail' match.tournoi.id_tournoi %}">le tournoi
+            n°{{match.tournoi.id_tournoi}}</a></span>{% endif %}
     {% if match.status == 'FI' %}
         <span class="content-center">Distribution des cartes</span>
         <div class="map">{{map}}</div>

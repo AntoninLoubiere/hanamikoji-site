@@ -79,7 +79,7 @@ class Tournoi(models.Model):
         return Inscrit.objects.filter(tournoi=self, champion__uploader=user).count()
 
     def __str__(self) -> str:
-        return f"Tournoi #{self.id_tournoi} {self.date_lancement:%d/%m/%y %H:%M}"
+        return f"Tournoi #{self.id_tournoi} {self.date_lancement}" #{self.date_lancement:%d/%m/%y %H:%M}"
 
 class Inscrit(models.Model):
     tournoi = models.ForeignKey(Tournoi,on_delete=models.CASCADE)

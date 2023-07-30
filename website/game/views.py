@@ -247,15 +247,19 @@ def add_tournoi(request):
 @login_required
 def tournoi_detail(request,id):
     tournoi = get_object_or_404(Tournoi,id_tournoi=id)
-    inscrits = Inscrit.objects.filter(tournoi=tournoi)
-    matchs = Match.objects.filter(tournoi=tournoi)
+    inscrits = Inscrit.objects.filter(tournoi=tournoi).order_by("classement")
+    matchs = Match.objects.filter(tournoi=tournoi).order_by("champion1","champion2")
+    # champions_select = Champion.objects.filter(nom__in=inscrits.champion.name, uploader=request.user)
+    # champions_non_select = Champion.objects.filter(Q(uploader=request.user) | ~Q(nom__in=inscrits.champion.name))
+    form = forms.ChoiceChampions(user=request.user, id=id)
+    
     termine = 0
     nb_matchs = matchs.count()
     if tournoi.status == 'EC':
         for m in matchs:
             if m.status == 'FI':
                 termine += 1
-    return render(request,'game/tournoi_detail.html',context={'tournoi':tournoi,'inscrits':inscrits,'matchs':matchs,'termine':termine,'nb_matchs':nb_matchs})
+    return render(request,'game/tournoi_detail.html',context={'tournoi':tournoi,'inscrits':inscrits,'matchs':matchs,'termine':termine,'nb_matchs':nb_matchs,'form':form})
 
 @login_required
 def update_tournoi(request,id):

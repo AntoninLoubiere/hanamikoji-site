@@ -10,10 +10,32 @@
     {% endif %}
     {% if tournoi.status == 'LP' or tournoi.status == 'EA' %}
     Choix des champions <br />
+    <form method="post" class="form">
+        {{ form.as_p }}
+        {% csrf_token %}
+        <button type="submit" id="envoi">Envoyer</button>
+    </form>
     {% elif tournoi.status == 'EC' %}
     Nombres de matchs terminés : {{ termine }} sur {{ nb_matchs }}
     {% elif tournoi.status == 'FI' %}
-    Résultat du tournoi
+    <table>
+        <caption>Classement</caption>
+        <tr>
+            <th>Classement</th>
+            <th>Nom</th>
+            <th>Auteur</th>
+            <th>Nombre de points</th>
+        </tr>
+        {% for champion in inscrits %}
+        <tr>
+            <td>{{ champion.classement }}</td>
+            <td title="{{champion}}">{{ champion.nom }}</td>
+            <td id="sans_casse">{{ champion.uploader }}</td>
+            <td>{{ champion.nb_points }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    RESUME DES MATCHS ICI
     {% endif %}
     {% if tournoi.status == 'LP' and user.create_tournament or tournoi.status == 'EA' and user.create_tournament %}
     {# J'ai pas trouvé mieux #}
