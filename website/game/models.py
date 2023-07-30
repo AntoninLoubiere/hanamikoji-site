@@ -70,7 +70,7 @@ class Tournoi(models.Model):
     id_tournoi = models.AutoField(primary_key=True, unique=True)
     status = models.CharField(choices=Status.choices,max_length=2, default=Status.EN_ATTENTE,)
     max_champions = models.IntegerField(default=3)
-    date_lancement = models.DateTimeField(validators=[valide_date])
+    date_lancement = models.DateTimeField(validators=[valide_date], null=True, blank=True)
 
     def nb_champions(self):
         return Inscrit.objects.filter(tournoi=self).count()

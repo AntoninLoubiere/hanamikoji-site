@@ -146,7 +146,7 @@ def tournois(request):
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
-    print(Tournoi.objects.filter(date_lancement__gt=timezone.now()))
+    #print(Tournoi.objects.filter(date_lancement__gt=timezone.now()))
     prochain_tournoi = Tournoi.objects.filter(date_lancement__gt=timezone.now()).order_by("date_lancement").first()
     dateiso = prochain_tournoi.date_lancement.isoformat() if prochain_tournoi else ''
     nb_champs_user = prochain_tournoi.nb_champions_user(request.user) if prochain_tournoi else 0
@@ -223,12 +223,6 @@ def redirection_code(request, name):
         return response
     return HttpResponseForbidden("Interdit")
 
-@login_required
-def prochain_tournoi(request):
-    prochain_tournoi = Tournoi.objects.filter(date_lancement__gt=datetime.now()).order_by("date_lancement").first()
-    if prochain_tournoi:
-        return redirect('tournoi_detail', prochain_tournoi.id_tournoi)
-    return redirect('tournois')
 
 @login_required
 def add_tournoi(request):
@@ -238,6 +232,10 @@ def add_tournoi(request):
             form = forms.TournoisForm(request.POST)
             if form.is_valid():
                 tournoi = form.save(commit=False)
+                if tournoi.date_lancement == None:
+                    tournoi.status = 'EA'
+                else:
+                    tournoi.status = 'LP'
                 tournoi.save()
                 return redirect('tournoi_detail',tournoi.id_tournoi)
         return render(request,'game/add_tournoi.html',context={'form':form})
@@ -265,7 +263,12 @@ def update_tournoi(request,id):
         if request.method == 'POST':
             form = forms.TournoisForm(request.POST, instance=tournoi)
             if form.is_valid():
-                form.save()
+                tournoi = form.save(commit=False)
+                if tournoi.date_lancement == None:
+                    tournoi.status = 'EA'
+                else:
+                    tournoi.status = 'LP'
+                tournoi.save()
                 return redirect('tournoi_detail',tournoi.id_tournoi)
         return render(request,'game/update_tournoi.html',context={'form':form,'id':id})
     else:
