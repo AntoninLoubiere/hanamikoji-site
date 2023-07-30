@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Le jeu : Hanamikoji &#8212; Documentation Hanamikoji </title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/translations.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Recherche" href="search.html" />
+    <link rel="next" title="Coder un champion" href="champion.html" />
+    <link rel="prev" title="Compétition Hanamikoji façon Prologin" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="le-jeu-hanamikoji">
+<h1>Le jeu : Hanamikoji<a class="headerlink" href="#le-jeu-hanamikoji" title="Lien permanent vers cette rubrique">¶</a></h1>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Lien permanent vers cette rubrique">¶</a></h2>
+<p>Chaque participant conçoit un programme capable de jouer au jeu
+<em>Hanamikoji</em>, ensuite un tournoi est organisé entre ces programmes.</p>
+<p>Pour exécuter votre code, en local il faudra télécharger stechec (cf
+<a class="reference external" href="utilisation-local.html">Utilisation Locale</a>) sinon vous pouvez le site (cf
+<a class="reference external" href="utilisation-serveur.html">Utilisation Serveur</a>).</p>
+<section id="id1">
+<h3>Le jeu, Hanamikoji<a class="headerlink" href="#id1" title="Lien permanent vers cette rubrique">¶</a></h3>
+</section>
+</section>
+<section id="description-generale">
+<h2>Description générale<a class="headerlink" href="#description-generale" title="Lien permanent vers cette rubrique">¶</a></h2>
+<p>Le jeu est composé de 7 <em>Geisha</em> et de 21 cartes représentant chacune
+une Geisha. Il y a 3 Geisha de valeur 2, 2 Geisha de valeur 3, 1 Geisha
+de valeur 4 et 1 Geisha de valeur 5. La valeur d’une Geisha est aussi le
+nombre de cartes de cette Geisha disponible (2 cartes pour la Geisha 0,
+2 pour la 1, 5 pour la 6…).</p>
+<p>Le jeu se joue en au plus 3 manches (cf <a class="reference external" href="#conditions-de-victoires">conditions de
+victoires</a>) durant lesquels chaque joueur
+jouera une et une seule fois chacune des 4 quatre actions (cf
+<a class="reference external" href="#actions">actions</a>), qui permettent de valider des cartes Geisha. À
+la fin de chaque manche, pour chaque Geisha, si un joueur a strictement
+plus de cartes Geisha validé que l’adversaire, il prend possession de
+celle-ci (même si l’adversaire la possédait déjà depuis la manche
+précédente; au départ les Geisha ne sont possédés par aucun des
+joueurs).</p>
+</section>
+<section id="actions">
+<h2>Actions<a class="headerlink" href="#actions" title="Lien permanent vers cette rubrique">¶</a></h2>
+<section id="valider-une-carte">
+<h3>Valider une carte<a class="headerlink" href="#valider-une-carte" title="Lien permanent vers cette rubrique">¶</a></h3>
+<p>Vous validez secrètement une carte en main</p>
+</section>
+<section id="defausser-une-carte">
+<h3>Défausser une carte<a class="headerlink" href="#defausser-une-carte" title="Lien permanent vers cette rubrique">¶</a></h3>
+<p>Vous défaussez secrètement deux de vos cartes en main, elles sont
+désormais exclus de la manche.</p>
+</section>
+<section id="choix-trois-cartes">
+<h3>Choix trois cartes<a class="headerlink" href="#choix-trois-cartes" title="Lien permanent vers cette rubrique">¶</a></h3>
+<p>Vous choisissez trois cartes de votre main que vous présentez à
+l’adversaire, celui-ci en choisi une qu’il valide, tandis que vous
+validez les deux autres.</p>
+</section>
+<section id="choix-paquets">
+<h3>Choix paquets<a class="headerlink" href="#choix-paquets" title="Lien permanent vers cette rubrique">¶</a></h3>
+<p>Vous présentez deux paquets de deux cartes de votre main à l’adversaire,
+il valide le paquet de son choix tandis que vous validez le paquet
+restant.</p>
+</section>
+</section>
+<section id="deroulement-dune-manche">
+<h2>Déroulement d’une manche<a class="headerlink" href="#deroulement-dune-manche" title="Lien permanent vers cette rubrique">¶</a></h2>
+<p>Les cartes sont mélangés, une carte est écarté de la manche, chaque
+joueur reçoit 6 cartes. Au début de leur tour, les joueurs piochent une
+carte.</p>
+<p>À la fin de la manche, la possession des Geisha est mise à jour : pour
+chaque Geisha, si un joueur a validé strictement plus de cartes de cette
+Geisha que l’autre alors il prends possession de celle-ci.</p>
+<p>Les <a class="reference external" href="#conditions-de-victoires">conditions de victoires</a> sont
+vérifiées, s’il n’y a pas de gagnant, on passe à la manche suivante (les
+possessions des Geisha ne sont pas réinitialisées).</p>
+</section>
+<section id="conditions-de-victoires">
+<h2>Conditions de victoires<a class="headerlink" href="#conditions-de-victoires" title="Lien permanent vers cette rubrique">¶</a></h2>
+<p>Un joueur est gagnant dans l’ordre : - Si la somme des valeurs des
+geisha qu’il possède est supérieur à 11 - S’il possède au moins quatre
+carte Geisha - À la fin des trois manches, la partie s’arrête, le
+gagnant est celui totalisant le plus grand score (somme des valeurs des
+geisha qu’il possède), le cas échéant il y a égalité.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Hanamikoji</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Le jeu : Hanamikoji</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#description-generale">Description générale</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#actions">Actions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#deroulement-dune-manche">Déroulement d’une manche</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#conditions-de-victoires">Conditions de victoires</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="champion.html">Coder un champion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utilisation-local.html">Utilisation en local</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utilisation-serveur.html">Utilisation avec le serveur</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="Chapitre précédent">Compétition Hanamikoji façon Prologin</a></li>
+      <li>Next: <a href="champion.html" title="Chapitre suivant">Coder un champion</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Antonin LOUBIERE, Tristan PAGEZY & Alex ONCEANU.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/jeu.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
