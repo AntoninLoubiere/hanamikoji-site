@@ -79,7 +79,7 @@ class Tournoi(models.Model):
         return Inscrit.objects.filter(tournoi=self, champion__uploader=user).count()
 
     def __str__(self) -> str:
-        return f"Tournoi #{self.id_tournoi} {self.date_lancement}"
+        return f"Tournoi #{self.id_tournoi} {self.date_lancement:%d/%m/%y %H:%M}"
 
 class Inscrit(models.Model):
     tournoi = models.ForeignKey(Tournoi,on_delete=models.CASCADE)
@@ -93,6 +93,9 @@ class Inscrit(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['tournoi', 'champion'], name='champion unique dans un tournoi')
         ]
+
+    def __str__(self) -> str:
+        return f"Inscrit {self.champion} #{self.tournoi.id_tournoi}"
 
 
 
@@ -129,7 +132,7 @@ class Match(models.Model):
     )
     date = models.DateTimeField(auto_now_add=True, editable = False)
     match_task = models.ForeignKey(Task, null=True, editable=False, on_delete=models.PROTECT)
-    tournoi = models.ForeignKey(Tournoi,null=True,on_delete=models.CASCADE)
+    tournoi = models.ForeignKey(Tournoi, null=True,on_delete=models.CASCADE, blank=True)
 
     def save(self, *args, run=True, **kwargs) -> None:
         if not self.is_correct():
