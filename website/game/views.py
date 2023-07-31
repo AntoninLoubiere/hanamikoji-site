@@ -254,12 +254,28 @@ def tournoi_detail(request,id):
     form = forms.ChoiceChampions(user=request.user, id=id)
     
     termine = 0
+    match_matrix = None
     nb_matchs = matchs.count()
-    if tournoi.status == 'EC':
+    if tournoi.status == Tournoi.Status.EN_COURS:
+        termine = Match.objects.filter(tournoi=tournoi, status=Match.Status.FINI).count()
+    elif tournoi.status == Tournoi.Status.FINI:
+        nb_ins = inscrits.count()
+
+        match_matrix = []
+        user_to_classement = {}
+        for i in inscrits:
+            user_to_classement[i.champion.pk] = len(match_matrix)
+            match_matrix.append((i, [None] * nb_ins))
+
         for m in matchs:
-            if m.status == 'FI':
-                termine += 1
-    return render(request,'game/tournoi_detail.html',context={'tournoi':tournoi,'inscrits':inscrits,'matchs':matchs,'termine':termine,'nb_matchs':nb_matchs,'form':form})
+            match_matrix[user_to_classement[m.champion1.pk]][1][user_to_classement[m.champion2.pk]] = m
+
+        print(match_matrix)
+
+
+    return render(request,'game/tournoi_detail.html',context={
+        'tournoi':tournoi,'inscrits':inscrits, 'matchs':matchs,'termine':termine,'nb_matchs':nb_matchs,
+        'form':form,'match_matrix': match_matrix})
 
 @login_required
 def update_tournoi(request,id):

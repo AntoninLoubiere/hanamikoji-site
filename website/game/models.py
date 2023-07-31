@@ -2,7 +2,7 @@ from typing import Iterable, Optional
 from django.db import models
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator, FileExtensionValidator
-from django_q.tasks import async_task, Task
+from django_q.tasks import async_task, Task, Schedule, schedule
 from django.contrib import admin
 from django.utils.html import format_html
 from django.db.models import Q
@@ -30,7 +30,7 @@ class Champion(models.Model):
     uploader = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     date = models.DateTimeField(auto_now_add=True, editable = False)
     compilation_status = models.CharField(choices=Status.choices, max_length=2, editable=False, default=Status.EN_ATTENTE)
-    compile_task = models.ForeignKey(Task, null=True, editable=False, on_delete=models.PROTECT)
+    compile_task = models.ForeignKey(Task, null=True, editable=False, on_delete=models.SET_NULL)
     supprimer =  models.BooleanField(default=True)
 
     def __str__(self):
@@ -71,6 +71,28 @@ class Tournoi(models.Model):
     status = models.CharField(choices=Status.choices,max_length=2, default=Status.EN_ATTENTE,)
     max_champions = models.IntegerField(default=3)
     date_lancement = models.DateTimeField(validators=[valide_date], null=True, blank=True)
+    schedule = models.ForeignKey(Schedule, blank=True, null=True, default=None, on_delete=models.SET_NULL)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.status == self.Status.LANCEMENT_PROGRAMMÉ:
+            if self.schedule is not None:
+                self.schedule.next_run = self.date_lancement
+                self.schedule.save()
+            else:
+                self.schedule = schedule(
+                    'game.tasks.launch_tournoi',
+                    str(self.id_tournoi),
+                    schedule_type=Schedule.ONCE,
+                    name=f"launch-tournoi-{self.id_tournoi}",
+                    next_run=self.date_lancement,
+                )
+
+        elif self.status == self.Status.EN_ATTENTE:
+            if self.schedule is not None:
+                self.schedule.delete()
+                self.schedule = None
+
 
     def nb_champions(self):
         return Inscrit.objects.filter(tournoi=self).count()
@@ -131,7 +153,7 @@ class Match(models.Model):
         validators=[MinValueValidator(0), MaxValueValidator(21)]
     )
     date = models.DateTimeField(auto_now_add=True, editable = False)
-    match_task = models.ForeignKey(Task, null=True, editable=False, on_delete=models.PROTECT)
+    match_task = models.ForeignKey(Task, null=True, editable=False, on_delete=models.SET_NULL)
     tournoi = models.ForeignKey(Tournoi, null=True,on_delete=models.CASCADE, blank=True)
 
     def save(self, *args, run=True, **kwargs) -> None:

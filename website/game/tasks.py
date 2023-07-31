@@ -8,10 +8,10 @@ import re
 import subprocess
 import shutil
 import tempfile
-from django_q.tasks import Task
+from django_q.tasks import Task, async_task
 
 from website.settings import ISOLATE_TIMEOUT, MATCH_RULES, MATCH_SERVER_TIMEOUT, SERVER_TIMEOUT, MEDIA_ROOT, STECHEC_CLIENT, STECHEC_SERVER, MAX_ISOLATE
-from .models import Champion, Match
+from .models import Champion, Inscrit, Match, Tournoi
 
 PATH_BUILD_DIR = Path('build').absolute()
 PATH_BUILD_DIR.mkdir(exist_ok=True)
@@ -247,3 +247,30 @@ def on_end_match(task: Task):
     m.status = Match.Status.FINI if task.success else Match.Status.ERREUR
     m.match_task = task
     m.save(run=False)
+
+def on_end_match_tournoi(task: Task):
+    on_end_match(task)
+    print("END TOURNOI")
+
+def launch_tournoi(tournoi_id: str):
+    tournoi = Tournoi.objects.get(id_tournoi=int(tournoi_id))
+    inscrits = Inscrit.objects.filter(tournoi=tournoi)
+    nb = inscrits.count()
+    matchs = []
+    for i in range(nb):
+        for j in range(i + 1, nb):
+            ins1 = inscrits[i]
+            ins2 = inscrits[j]
+            matchs.append(Match(champion1=ins1.champion, champion2=ins2.champion, tournoi=tournoi))
+            matchs.append(Match(champion1=ins2.champion, champion2=ins1.champion, tournoi=tournoi))
+
+    tournoi.status = Tournoi.Status.EN_COURS
+    tournoi.save()
+
+
+    Match.objects.bulk_create(matchs)
+    for m in matchs:
+        async_task('game.tasks.run_match', m, hook='game.tasks.on_end_match_tournoi', group=f"tournoi-{tournoi.id_tournoi}")
+
+def end_launch_tournoi(task: Task):
+    print("ON END LAUNCH")

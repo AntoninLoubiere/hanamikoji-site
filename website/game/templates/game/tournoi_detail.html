@@ -26,16 +26,41 @@
             <th>Auteur</th>
             <th>Nombre de points</th>
         </tr>
-        {% for champion in inscrits %}
+        {% for ins in inscrits %}
         <tr>
-            <td>{{ champion.classement }}</td>
-            <td title="{{champion}}">{{ champion.nom }}</td>
-            <td id="sans_casse">{{ champion.uploader }}</td>
-            <td>{{ champion.nb_points }}</td>
+            <td>{{ ins.classement }}</td>
+            <td title="{{ins.champion}}">{{ ins.champion.nom }}</td>
+            <td id="sans_casse">{{ ins.champion.uploader }}</td>
+            <td>{{ ins.nb_points }}</td>
         </tr>
         {% endfor %}
     </table>
-    RESUME DES MATCHS ICI
+
+    <table>
+        <caption>Matchs</caption>
+        <tr>
+            <th>Champions</th>
+            {% for i, _ in match_matrix %}
+                <th title="{{ i.champion }}">{{ i.champion.nom }}</th>
+            {% endfor %}
+        </tr>
+        {% for i, ms in match_matrix %}
+            <tr>
+                <th title="{{ i.champion }}">{{ i.champion.nom }}</th>
+                {% for m in ms %}
+                {% if m %}
+                    <td class="match {% if m.gagnant == 1 %} match-won {% elif m.gagnant == 2 %} match-lost {% else %} match-egalite {% endif %}">
+                        <a href="{% url 'match_detail' m.id_match %}">{{ m.score1 }} à {{ m.score2 }}</a>
+                    </td>
+                    {% else %}
+                        <td class="match-inexistant"></td>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+
+
     {% endif %}
     {% if tournoi.status == 'LP' and user.create_tournament or tournoi.status == 'EA' and user.create_tournament %}
     {# J'ai pas trouvé mieux #}
