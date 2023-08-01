@@ -14,7 +14,7 @@
     <script src="_static/translations.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Recherche" href="search.html" />
-    <link rel="prev" title="Welcome to Hanamikoji’s documentation!" href="index.html" />
+    <link rel="prev" title="Utilisation avec le serveur" href="utilisation-serveur.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -33,6 +33,14 @@
             
   <section id="api">
 <h1>API<a class="headerlink" href="#api" title="Lien permanent vers cette rubrique">¶</a></h1>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Lien permanent vers cette rubrique">¶</a></h2>
+<p>Les <a class="reference external" href="jeu.html#description-generale">Geisha</a> sont représentées par des entiers de 0
+à 6 représentant dans l’ordre les trois Geisha à deux cartes, les deux Geisha à trois cartes, la
+Geisha à quatre cartes et la Geisha à cinq cartes.</p>
+<p>Les cartes sont représentées par des entiers de 0 à 6 correspondant à la Geisha représentée par la
+carte.</p>
+</section>
 <section id="constantes">
 <h2>Constantes<a class="headerlink" href="#constantes" title="Lien permanent vers cette rubrique">¶</a></h2>
 <dl class="c var">
@@ -115,7 +123,7 @@
 
 <dl class="c var">
 <dt class="sig sig-object c" id="c.GEISHA_VALEUR">
-<span class="kt"><span class="pre">string</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">GEISHA_VALEUR</span></span></span><a class="headerlink" href="#c.GEISHA_VALEUR" title="Lien permanent vers cette définition">¶</a><br /></dt>
+<span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">GEISHA_VALEUR</span></span></span><a class="headerlink" href="#c.GEISHA_VALEUR" title="Lien permanent vers cette définition">¶</a><br /></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Valeur<span class="colon">:</span></dt>
 <dd class="field-odd"><p>« 2|2|2|3|3|4|5 »</p>
@@ -278,13 +286,13 @@
 <dl class="c function">
 <dt class="sig sig-object c" id="c.manche">
 <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">manche</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.manche" title="Lien permanent vers cette définition">¶</a><br /></dt>
-<dd><p>Renvoie le numéro de la manche</p>
+<dd><p>Renvoie le numéro de la manche (indexé à 0)</p>
 </dd></dl>
 
 <dl class="c function">
 <dt class="sig sig-object c" id="c.tour">
 <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">tour</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.tour" title="Lien permanent vers cette définition">¶</a><br /></dt>
-<dd><p>Renvoie le numéro de la manche</p>
+<dd><p>Renvoie le numéro de la manche (indexé à 0)</p>
 </dd></dl>
 
 <dl class="c function">
@@ -540,7 +548,7 @@
         <div class="sphinxsidebarwrapper">
 <h1 class="logo"><a href="index.html">Hanamikoji</a></h1>
 
-<h3 class="retour"><a href="/">Tableau de bord</a></h3>
+
 
 
 
@@ -549,7 +557,12 @@
 
 <h3>Navigation</h3>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="jeu.html">Le jeu : Hanamikoji</a></li>
+<li class="toctree-l1"><a class="reference internal" href="champion.html">Coder un champion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utilisation-local.html">Utilisation en local</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utilisation-serveur.html">Utilisation avec le serveur</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#constantes">Constantes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#enumerations">Énumérations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#structures">Structures</a></li>
@@ -563,7 +576,7 @@
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="index.html" title="Chapitre précédent">Welcome to Hanamikoji’s documentation!</a></li>
+      <li>Previous: <a href="utilisation-serveur.html" title="Chapitre précédent">Utilisation avec le serveur</a></li>
   </ul></li>
 </ul>
 </div>

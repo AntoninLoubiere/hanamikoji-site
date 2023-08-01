@@ -1,0 +1,10 @@
+{% extends 'base_game.html' %}
+{% block title %}Créer tournoi{% endblock title %}
+{% block content %}
+<h1>Créer un tournoi</h1>
+<form method="post" class="form">
+    {{ form.as_p }}
+    {% csrf_token %}
+    <button type="submit" id="envoi">Créer</button>
+</form>
+{% endblock content %}

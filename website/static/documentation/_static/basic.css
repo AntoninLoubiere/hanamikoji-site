@@ -635,7 +635,7 @@ div.citation > p:last-of-type:after {
 
 dl.field-list {
     display: grid;
-    grid-template-columns: fit-content(41%) auto;
+    grid-template-columns: fit-content(30%) auto;
 }
 
 dl.field-list > dt {

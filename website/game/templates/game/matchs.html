@@ -44,4 +44,34 @@
     </tr>
     {% endfor %}
 </table>
+<div class="pagination">
+    <div class="side-pagination">
+        {% if matchs.has_previous %}
+        <a href="?page=1"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5" />
+            </svg> Première page</a>
+        <a href="?page={{ matchs.previous_page_number }}"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg> Précédent</a>
+        {% endif %}
+    </div>
+
+    <span class="current">
+        Page {{ matchs.number }} sur {{ matchs.paginator.num_pages }}
+    </span>
+
+    <div class="side-pagination pagination-right">
+        {% if matchs.has_next %}
+        <a href="?page={{ matchs.next_page_number }}">Suivant
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg></a>
+        <a href="?page={{ matchs.paginator.num_pages }}">Dernière page
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 4.5l7.5 7.5-7.5 7.5m-6-15l7.5 7.5-7.5 7.5" />
+            </svg>
+        </a>
+        {% endif %}
+    </div>
+</div>
 {% endblock content %}

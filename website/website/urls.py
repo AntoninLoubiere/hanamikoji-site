@@ -37,18 +37,21 @@ urlpatterns = [
         template_name='authentication/password_change_done.html'),
          name='password_change_done'
          ),
-    #path('', authentication.views.login_page, name='login'),
-    #path('logout/',authentication.views.logout_user,name='logout'),
     path('home/',game.views.home,name='home'),
     path('signup/', authentication.views.signup_page, name='signup'),
     path('upload/', game.views.champion_upload, name='champion_upload'),
     path('matchs/',game.views.matchs, name='matchs'),
     path('champions/',game.views.champions, name='champions'),
-    path('matchs/<int:id>',game.views.match_detail, name='match_detail'),
+    path('matchs/<int:id>/',game.views.match_detail, name='match_detail'),
     path('add_match/',game.views.add_match,name='add_match'),
-    path('delete/<str:name>',game.views.delete_champion,name='delete_champion'),
-    path('matchs/<int:id>/out/<int:nb>',game.views.redirection_out,name='redirection_out'),
-    path('champions/code/<str:name>',game.views.redirection_code,name='redirection_code'),
+    path('delete/<str:name>/',game.views.delete_champion,name='delete_champion'),
+    path('matchs/<int:id>/out/<int:nb>/',game.views.redirection_out,name='redirection_out'),
+    path('champions/code/<str:name>/',game.views.redirection_code,name='redirection_code'),
+    path('tournois/', game.views.tournois,name='tournois'),
+    path('tournois/ajouter/',game.views.add_tournoi,name='add_tournoi'),
+    path('tournois/prochain/',game.views.prochain_tournoi,name='prochain_tournoi'),
+    path('tournois/<int:id>/',game.views.tournoi_detail,name='tournoi_detail'),
+    path('tournois/<int:id>/change',game.views.update_tournoi,name='update_tournoi'),
 ]
 if settings.DEBUG:
     urlpatterns += static(

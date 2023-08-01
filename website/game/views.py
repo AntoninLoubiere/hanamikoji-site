@@ -1,12 +1,17 @@
+from datetime import datetime
+from django.utils import timezone
 from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
 from game.tasks import MATCH_OUT_DIR
 
 from . import forms
-from game.models import Champion, Match
+from game.models import Champion, Match, Tournoi, Inscrit
 from  django.db.models import Q
 from authentication.models import User
+
+from django.core.paginator import Paginator
+import datetime
 
 MIMES_TYPES = {
     '.tar': 'application/x-tar',
@@ -38,9 +43,7 @@ def champion_upload(request):
         form = forms.ChampionsForm(request.POST, request.FILES)
         if form.is_valid():
             champion = form.save(commit=False)
-            # set the uploader to the user before saving the model
             champion.uploader = request.user
-            # now we can save
             champion.save()
             return redirect('home')
     return render(request, 'game/champion_upload.html', context={'form': form})
@@ -87,7 +90,10 @@ def matchs(request: HttpRequest):
 
     if matchs is None:
         matchs =  Match.objects.all().order_by("-date")
-    return render(request,'game/matchs.html',context={'matchs':matchs,'message':message, 'list_champions': list_champions, 'filter_type': filt_type, 'filter_id': filt_id})
+    paginator = Paginator(matchs,15)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    return render(request,'game/matchs.html',context={'matchs':page_obj,'message':message, 'list_champions': list_champions, 'filter_type': filt_type, 'filter_id': filt_id})
 
 @login_required
 def champions(request):
@@ -107,7 +113,10 @@ def champions(request):
 
     if champions is None:
         champions =  Champion.objects.all().order_by("-date")
-    return render(request,'game/champions.html',context={'champions':champions, 'users': users, 'message':message, 'filter_id': filter_id})
+    paginator = Paginator(champions,15)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    return render(request,'game/champions.html',context={'champions':page_obj, 'users': users, 'message':message, 'filter_id': filter_id})
 
 def get_champions_per_user(current_user=None, filter_champions=False):
     champs = Champion.objects.filter(compilation_status=Champion.Status.FINI) if filter_champions else Champion.objects.all()
@@ -130,6 +139,19 @@ def get_champions_per_user(current_user=None, filter_champions=False):
 
     return r
 
+@login_required
+def tournois(request):
+    tournois = Tournoi.objects.all().order_by("date_lancement")
+    paginator = Paginator(tournois,10)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    print(Tournoi.objects.filter(date_lancement__gt=timezone.now()))
+    prochain_tournoi = Tournoi.objects.filter(date_lancement__gt=timezone.now()).order_by("date_lancement").first()
+    dateiso = prochain_tournoi.date_lancement.isoformat() if prochain_tournoi else ''
+    nb_champs_user = prochain_tournoi.nb_champions_user(request.user) if prochain_tournoi else 0
+    return render(request,'game/tournois.html',context={'tournois': page_obj, 'prochain_tournoi': prochain_tournoi, 'timer': dateiso, 'nb_champs_user': nb_champs_user})
+
 
 @login_required
 def add_match(request: HttpRequest):
@@ -144,8 +166,8 @@ def add_match(request: HttpRequest):
             if m.is_correct():
                 m.champion1.supprimer = False
                 m.champion2.supprimer = False
-                m.champion1.save()
-                m.champion2.save()
+                m.champion1.save(compile=False)
+                m.champion2.save(compile=False)
                 m.save()
                 return redirect('match_detail', m.id_match)
             else:
@@ -180,6 +202,7 @@ def redirection_out(request,id,nb):
         response = HttpResponse()
         response["Content-Type"] = "text/plain"
         response["Content-Disposition"] = f"attachment; filename=match_{id}_champion{nb}.out.txt"
+        print(id, f"/media/match/{id}/champion{nb}.out.txt")
         response["X-Accel-Redirect"] = f"/media/match/{id}/champion{nb}.out.txt"
         return response
     return HttpResponseForbidden("Interdit")
@@ -200,3 +223,51 @@ def redirection_code(request, name):
         response["X-Accel-Redirect"] = champion.code.url
         return response
     return HttpResponseForbidden("Interdit")
+
+@login_required
+def prochain_tournoi(request):
+    prochain_tournoi = Tournoi.objects.filter(date_lancement__gt=datetime.now()).order_by("date_lancement").first()
+    if prochain_tournoi:
+        return redirect('tournoi_detail', prochain_tournoi.id_tournoi)
+    return redirect('tournois')
+
+@login_required
+def add_tournoi(request):
+    if request.user.create_tournament :
+        form = forms.TournoisForm()
+        if request.method == 'POST':
+            form = forms.TournoisForm(request.POST)
+            if form.is_valid():
+                tournoi = form.save(commit=False)
+                tournoi.save()
+                return redirect('tournoi_detail',tournoi.id_tournoi)
+        return render(request,'game/add_tournoi.html',context={'form':form})
+    else:
+        return HttpResponseForbidden("Interdit")
+
+@login_required
+def tournoi_detail(request,id):
+    tournoi = get_object_or_404(Tournoi,id_tournoi=id)
+    inscrits = Inscrit.objects.filter(tournoi=tournoi)
+    matchs = Match.objects.filter(tournoi=tournoi)
+    termine = 0
+    nb_matchs = matchs.count()
+    if tournoi.status == 'EC':
+        for m in matchs:
+            if m.status == 'FI':
+                termine += 1
+    return render(request,'game/tournoi_detail.html',context={'tournoi':tournoi,'inscrits':inscrits,'matchs':matchs,'termine':termine,'nb_matchs':nb_matchs})
+
+@login_required
+def update_tournoi(request,id):
+    if request.user.create_tournament :
+        tournoi = get_object_or_404(Tournoi,id_tournoi=id)
+        form = forms.TournoisForm(instance=tournoi) #Le préremplissage ne marche pas avec la date à cause du changement d'attrubut
+        if request.method == 'POST':
+            form = forms.TournoisForm(request.POST, instance=tournoi)
+            if form.is_valid():
+                form.save()
+                return redirect('tournoi_detail',tournoi.id_tournoi)
+        return render(request,'game/update_tournoi.html',context={'form':form,'id':id})
+    else:
+        return HttpResponseForbidden("Interdit")

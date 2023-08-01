@@ -7,6 +7,8 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.db.models import Q
 from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
+import datetime
 
 def task_link_view(t: Task):
     if t is None:
@@ -26,7 +28,7 @@ class Champion(models.Model):
     code = models.FileField(validators = [FileExtensionValidator(allowed_extensions=["zip","tgz","tar.gz"])])
     nom = models.CharField(max_length=128, blank=False,unique=True, validators=[RegexValidator("^[a-zA-Z-_0-9]*$", "Les seuls caractères valides sont les lettres, les chiffres, - et _.")])
     uploader = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
-    date = models.DateTimeField(auto_now_add=True)
+    date = models.DateTimeField(auto_now_add=True, editable = False)
     compilation_status = models.CharField(choices=Status.choices, max_length=2, editable=False, default=Status.EN_ATTENTE)
     compile_task = models.ForeignKey(Task, null=True, editable=False, on_delete=models.PROTECT)
     supprimer =  models.BooleanField(default=True)
@@ -51,6 +53,53 @@ class Champion(models.Model):
         return Match.objects.filter(Q(champion1=self)|Q(champion2=self)).count()
 
 
+
+class Tournoi(models.Model):
+
+    class Status(models.TextChoices):
+        EN_ATTENTE = 'EA'
+        EN_COURS = 'EC'
+        FINI = 'FI'
+        ERREUR = 'ER'
+        LANCEMENT_PROGRAMMÉ = 'LP'
+
+    def valide_date(date):
+        if date.timestamp() < datetime.datetime.now().timestamp():
+                raise ValidationError("Vous ne pouvez pas lancer le tournoi avant qu'il soit créé !")
+
+    id_tournoi = models.AutoField(primary_key=True, unique=True)
+    status = models.CharField(choices=Status.choices,max_length=2, default=Status.EN_ATTENTE,)
+    max_champions = models.IntegerField(default=3)
+    date_lancement = models.DateTimeField(validators=[valide_date])
+
+    def nb_champions(self):
+        return Inscrit.objects.filter(tournoi=self).count()
+
+    def nb_champions_user(self, user):
+        return Inscrit.objects.filter(tournoi=self, champion__uploader=user).count()
+
+    def __str__(self) -> str:
+        return f"Tournoi #{self.id_tournoi} {self.date_lancement:%d/%m/%y %H:%M}"
+
+class Inscrit(models.Model):
+    tournoi = models.ForeignKey(Tournoi,on_delete=models.CASCADE)
+    champion = models.ForeignKey(Champion,on_delete=models.CASCADE)
+    classement = models.IntegerField(null=True)
+    nb_points = models.IntegerField(null=True)
+    date = models.DateTimeField(auto_now_add=True, editable=False)
+    
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['tournoi', 'champion'], name='champion unique dans un tournoi')
+        ]
+
+    def __str__(self) -> str:
+        return f"Inscrit {self.champion} #{self.tournoi.id_tournoi}"
+
+
+
+
 class Match(models.Model):
     class Status(models.TextChoices):
         EN_ATTENTE = 'EA'
@@ -68,7 +117,7 @@ class Match(models.Model):
     champion1 = models.ForeignKey(Champion, on_delete=models.PROTECT, related_name='champion1')
     champion2 = models.ForeignKey(Champion, on_delete=models.PROTECT, related_name='champion2')
     gagnant = models.IntegerField(choices=Gagnant.choices, editable=False, default=Gagnant.NON_FINI)
-    status = models.CharField(choices=Status.choices,max_length=5, editable=False, default=Status.EN_ATTENTE,)
+    status = models.CharField(choices=Status.choices,max_length=2, editable=False, default=Status.EN_ATTENTE,)
     score1 = models.IntegerField(
         null=True,
         blank=True,
@@ -81,9 +130,9 @@ class Match(models.Model):
         editable=False,
         validators=[MinValueValidator(0), MaxValueValidator(21)]
     )
-    #dump = models.FileField(null=True,blank=True,validators=[FileExtensionValidator(allowed_extensions=["json"])])
-    date = models.DateTimeField(auto_now_add=True)
+    date = models.DateTimeField(auto_now_add=True, editable = False)
     match_task = models.ForeignKey(Task, null=True, editable=False, on_delete=models.PROTECT)
+    tournoi = models.ForeignKey(Tournoi, null=True,on_delete=models.CASCADE, blank=True)
 
     def save(self, *args, run=True, **kwargs) -> None:
         if not self.is_correct():
@@ -116,3 +165,5 @@ class Match(models.Model):
 
     def __str__(self) -> str:
         return f"Match #{self.id_match} {self.champion1} vs {self.champion2}"
+
+

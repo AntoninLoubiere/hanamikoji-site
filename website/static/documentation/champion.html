@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Coder un champion &#8212; Documentation Hanamikoji </title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/translations.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Recherche" href="search.html" />
+    <link rel="next" title="Utilisation en local" href="utilisation-local.html" />
+    <link rel="prev" title="Le jeu : Hanamikoji" href="jeu.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="coder-un-champion">
+<h1>Coder un champion<a class="headerlink" href="#coder-un-champion" title="Lien permanent vers cette rubrique">¶</a></h1>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Lien permanent vers cette rubrique">¶</a></h2>
+<p>Pour participer à la compétition vous devez coder un programme (appelé champion). Pour cela
+télécharger les <a class="reference external" href="/static/rules.zip">patrons de codes</a>. Choisissez votre langage favoris parmi :</p>
+<ul class="simple">
+<li><p>c</p></li>
+<li><p>c++</p></li>
+<li><p>ocaml</p></li>
+<li><p>python</p></li>
+</ul>
+<p>Pour</p>
+<ul class="simple">
+<li><p>java</p></li>
+<li><p>js</p></li>
+<li><p>php</p></li>
+<li><p>rust</p></li>
+</ul>
+<p>veuillez nous demander.</p>
+</section>
+<section id="anatomie-d-un-champion">
+<h2>Anatomie d’un champion<a class="headerlink" href="#anatomie-d-un-champion" title="Lien permanent vers cette rubrique">¶</a></h2>
+<p>Un champion doit implémenter les cinq <a class="reference external" href="api.html#fonctions-utilisateur">fonctions utilisateurs</a> :</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="n">init_jeu</span><span class="p">()</span>
+<span class="kt">void</span><span class="w"> </span><span class="n">jouer_tour</span><span class="p">()</span>
+<span class="kt">void</span><span class="w"> </span><span class="n">repondre_action_choix_trois</span><span class="p">()</span>
+<span class="kt">void</span><span class="w"> </span><span class="n">repondre_action_choix_paquets</span><span class="p">()</span>
+<span class="kt">void</span><span class="w"> </span><span class="n">fin_jeu</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Après l’initialisation du jeu, la fonction <code class="docutils literal notranslate"><span class="pre">init_jeu</span></code> est appelée, à partir de ce moment, vous
+avez accès à toutes les <a class="reference external" href="api.html#fonctions">fonctions de l’API</a>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Avertissement</p>
+<p>Appeler des fonctions de l’API avant que <code class="docutils literal notranslate"><span class="pre">init_jeu</span></code> ait été appelée peut planter.</p>
+</div>
+<p>À votre tour, la fonction <code class="docutils literal notranslate"><span class="pre">jouer_tour</span></code> sera appelée. Lorsque l’adversaire jouera une action qui
+nécessite une intervention de votre part, la fonction en question sera appelée. Une fois la partie
+terminée, la fonction <code class="docutils literal notranslate"><span class="pre">fin_jeu</span></code> sera appelée.</p>
+<div class="admonition warning">
+<p class="admonition-title">Avertissement</p>
+<p>Ne pas jouer d’action ou ne pas répondre à un choix entraîne la perte <strong>immédiate</strong> du match.</p>
+</div>
+<p>Les <a class="reference external" href="jeu.html#description-generale">Geisha</a> sont représentées par des entiers de 0
+à 6 représentant dans l’ordre les trois Geisha à deux cartes, les deux Geisha à trois cartes, la
+Geisha à quatre cartes et la Geisha à cinq cartes.</p>
+<p>Les cartes sont représentées par des entiers de 0 à 6 correspondant à la Geisha représentée par la
+carte.</p>
+</section>
+<section id="lancer-un-match">
+<h2>Lancer un match<a class="headerlink" href="#lancer-un-match" title="Lien permanent vers cette rubrique">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference external" href="utilisation-local.html#lancement-dun-match">Lancer un match en local</a></p></li>
+<li><p><a class="reference external" href="utilisation-serveur.html#lancer-un-match">Lancer un match avec le serveur</a></p></li>
+</ul>
+</div></blockquote>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Hanamikoji</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="jeu.html">Le jeu : Hanamikoji</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Coder un champion</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#anatomie-d-un-champion">Anatomie d’un champion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lancer-un-match">Lancer un match</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="utilisation-local.html">Utilisation en local</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utilisation-serveur.html">Utilisation avec le serveur</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="jeu.html" title="Chapitre précédent">Le jeu : Hanamikoji</a></li>
+      <li>Next: <a href="utilisation-local.html" title="Chapitre suivant">Utilisation en local</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Antonin LOUBIERE, Tristan PAGEZY & Alex ONCEANU.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/champion.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

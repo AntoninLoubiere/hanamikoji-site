@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Utilisation en local &#8212; Documentation Hanamikoji </title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/translations.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Recherche" href="search.html" />
+    <link rel="next" title="Utilisation avec le serveur" href="utilisation-serveur.html" />
+    <link rel="prev" title="Coder un champion" href="champion.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="utilisation-en-local">
+<h1>Utilisation en local<a class="headerlink" href="#utilisation-en-local" title="Lien permanent vers cette rubrique">¶</a></h1>
+<p>L’installation en local peut être rude, vous pouvez aussi lancer les matchs sur le serveur.</p>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Lien permanent vers cette rubrique">¶</a></h2>
+<p>Téléchargez
+<a class="reference external" href="https://gitlab.com/prologin/tech/tools/stechec2/">stechec2</a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">gitlab</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">prologin</span><span class="o">/</span><span class="n">tech</span><span class="o">/</span><span class="n">tools</span><span class="o">/</span><span class="n">stechec2</span><span class="o">.</span><span class="n">git</span>
+<span class="n">cd</span> <span class="n">stechec2</span>
+</pre></div>
+</div>
+<p>Téléchargez le code d’Hanamikoji</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">AntoninLoubiere</span><span class="o">/</span><span class="n">Hanamikoji</span><span class="o">.</span><span class="n">git</span> <span class="n">games</span><span class="o">/</span><span class="n">hanamikoji</span>
+</pre></div>
+</div>
+<p>Installez les paquets requis par stechec2: cf
+<a class="reference external" href="https://gitlab.com/prologin/tech/tools/stechec2/-/blob/main/README.rst#requirements">https://gitlab.com/prologin/tech/tools/stechec2/-/blob/main/README.rst#requirements</a></p>
+<p>Configurez le projet :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">waf</span><span class="o">.</span><span class="n">py</span> <span class="n">configure</span> <span class="o">--</span><span class="k">with</span><span class="o">-</span><span class="n">games</span><span class="o">=</span><span class="n">hanamikoji</span> <span class="o">--</span><span class="n">prefix</span><span class="o">=/</span><span class="n">usr</span>
+</pre></div>
+</div>
+<p>(En cas d’erreur, <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">commande</span> <span class="pre">inconnue</span></code>, remplacer ./waf.py par
+python3 waf.py)</p>
+<p>Construisez et installez :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">waf</span><span class="o">.</span><span class="n">py</span> <span class="n">build</span> <span class="n">install</span>
+</pre></div>
+</div>
+<p>(Un accès administrateur <code class="docutils literal notranslate"><span class="pre">sudo</span></code> sera peut être nécessaire).</p>
+</section>
+<section id="generation-du-patron-de-code">
+<h2>Génération du patron de code<a class="headerlink" href="#generation-du-patron-de-code" title="Lien permanent vers cette rubrique">¶</a></h2>
+<p>Pour générer les patrons de code pour les champions :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">stechec2</span><span class="o">-</span><span class="n">generator</span> <span class="n">player</span> <span class="n">hanamikoji</span> <span class="o">&lt;</span><span class="n">dossier</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>(remplacez <code class="docutils literal notranslate"><span class="pre">&lt;dossier&gt;</span></code> par <code class="docutils literal notranslate"><span class="pre">players</span></code> par exemple).</p>
+</section>
+<section id="lancement-dun-match">
+<h2>Lancement d’un match<a class="headerlink" href="#lancement-dun-match" title="Lien permanent vers cette rubrique">¶</a></h2>
+<p>Compilez le code (même pour python !), en exécutant dans le dossier
+correspondant <code class="docutils literal notranslate"><span class="pre">make</span></code>.</p>
+<p>Créez un fichier de configuration du type</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">rules</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/usr/lib/libhanamikoji.so</span>
+<span class="nt">map</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./map.txt</span>
+<span class="nt">verbose</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w">  </span><span class="c1"># Niveau d&#39;informations de débogage affichées dans la console</span>
+<span class="nt">clients</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./champion.so</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./champion.so</span><span class="w"> </span><span class="c1"># Chemins vers les exécutables des champions, ils peuvent être différents</span>
+<span class="nt">names</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Player 1</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Player 2</span>
+<span class="nt">dump</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dump.json</span><span class="w"> </span><span class="c1"># Rapport du match pour le replay.</span>
+</pre></div>
+</div>
+<p>Lancez le match avec</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">stechec2</span><span class="o">-</span><span class="n">run</span> <span class="n">config</span><span class="o">.</span><span class="n">json</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Hanamikoji</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="jeu.html">Le jeu : Hanamikoji</a></li>
+<li class="toctree-l1"><a class="reference internal" href="champion.html">Coder un champion</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Utilisation en local</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#generation-du-patron-de-code">Génération du patron de code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lancement-dun-match">Lancement d’un match</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="utilisation-serveur.html">Utilisation avec le serveur</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="champion.html" title="Chapitre précédent">Coder un champion</a></li>
+      <li>Next: <a href="utilisation-serveur.html" title="Chapitre suivant">Utilisation avec le serveur</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Antonin LOUBIERE, Tristan PAGEZY & Alex ONCEANU.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/utilisation-local.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
