@@ -356,6 +356,26 @@ caption {
     color: red;
 }
 
+.match a {
+    color: black;
+}
+
+.match-inexistant {
+    background: gray;
+}
+
+.match-won {
+    background: hsl(109, 76%, 67%)
+}
+
+.match-egalite {
+    background-color: hsl(40, 98%, 60%);
+}
+
+.match-lost {
+    background-color: hsl(0, 85%, 67%);
+}
+
 @media screen and (max-width: 700px) {
     /* :root {
         font-size: 0.75em;
@@ -365,4 +385,8 @@ caption {
         gap: 1rem;
         grid-template-columns: repeat(2, 1fr);
     }
+}
+
+.mw-max-content {
+    min-width: max-content;
 }

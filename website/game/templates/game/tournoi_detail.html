@@ -5,15 +5,88 @@
 <h1>Tournoi n°{{ tournoi.id_tournoi }}</h1>
 <div class="content-section">
     <span class="content-center">{{ tournoi.get_status_display }}</span>
+    {% if tournoi.status != 'EA' %}
     <span class="content-center">Lancement : {{ tournoi.date_lancement }}</span>
-    {% if tournoi.status == 'LP' %}
-    Choix des champions <br />
+    {% endif %}
+    {% if tournoi.status == 'LP' or tournoi.status == 'EA' %}
+    <table>
+        <caption>Champions sélectionnés</caption>
+        <tr>
+            <th>Champion</th>
+            <th>Date d'ajout</th>
+            <th>Supprimer</th>
+        </tr>
+        {% for cs in champions_select %}
+        <tr>
+            <td>{{ cs.champion.nom }}</td>
+            <td>{{ cs.date }}</td>
+            <td><a href="{% url 'delete_champion_tournoi' id=tournoi.id_tournoi nom=cs.champion.nom %}">Supprimer</a></td>
+        </tr>
+        {% endfor %}
+    </table>
+    {{ message }}<br />
+    Choix des champions : {{ champions_select.count }} sur {{ tournoi.max_champions }} <br />
+    {% if nb_select < tournoi.max_champions %} <form action="" method="post">
+        {% csrf_token %}
+        <select name="champion" class="ajout">
+            {% for cns in champions_non_select %}
+            <option value="{{ cns.id }}">{{ cns.nom }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" id="envoi">Choisir</button>
+    </form>
+    {% endif %}
     {% elif tournoi.status == 'EC' %}
     Nombres de matchs terminés : {{ termine }} sur {{ nb_matchs }}
     {% elif tournoi.status == 'FI' %}
-    Résultat du tournoi
+    <table>
+        <caption>Classement</caption>
+        <tr>
+            <th>Classement</th>
+            <th>Nom</th>
+            <th>Auteur</th>
+            <th class="mw-max-content">V / É / D</th>
+            <th>Nombre de points</th>
+        </tr>
+        {% for ins in inscrits %}
+        <tr>
+            <td>{{ ins.classement }}</td>
+            <td title="{{ins.champion}}">{{ ins.champion.nom }}</td>
+            <td id="sans_casse">{{ ins.champion.uploader }}</td>
+            <td class="mw-max-content">{{ ins.victoires }} / {{ ins.egalites }} / {{ ins.defaites }}</td>
+            <td>{{ ins.nb_points }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <table>
+        <caption>Matchs</caption>
+        <tr>
+            <th>Champions</th>
+            {% for i, _ in match_matrix %}
+                <th title="{{ i.champion }}">{{ i.champion.nom }}</th>
+            {% endfor %}
+        </tr>
+        {% for i, ms in match_matrix %}
+            <tr>
+                <th title="{{ i.champion }}">{{ i.classement }}. {{ i.champion.nom }}</th>
+                {% for m in ms %}
+                    {% if m %}
+                        <td class="match {% if m.gagnant == 1 %}match-won{% elif m.gagnant == 2 %}match-lost{% else %}match-egalite{% endif %}">
+                            <a href="{% url 'match_detail' m.id_match %}">{{ m.score1 }} à {{ m.score2 }}</a>
+                        </td>
+                    {% else %}
+                        <td class="match-inexistant"></td>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+
+
     {% endif %}
-    {% if tournoi.status == 'LP' and user.create_tournament %}
+    {% if tournoi.status == 'LP' and user.create_tournament or tournoi.status == 'EA' and user.create_tournament %}
+    {# J'ai pas trouvé mieux #}
     <a href="{% url 'update_tournoi' tournoi.id_tournoi %}" class="content-center">Lancer ou changer la date du
         tournoi</a>
     {% endif %}

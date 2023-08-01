@@ -8,10 +8,11 @@ import re
 import subprocess
 import shutil
 import tempfile
-from django_q.tasks import Task
+from django_q.tasks import Task, async_task
 
 from website.settings import ISOLATE_TIMEOUT, MATCH_RULES, MATCH_SERVER_TIMEOUT, SERVER_TIMEOUT, MEDIA_ROOT, STECHEC_CLIENT, STECHEC_SERVER, MAX_ISOLATE, BASE_DIR
-from .models import Champion, Match
+from .models import Champion, Inscrit, Match, Tournoi
+
 
 PATH_BUILD_DIR = Path('/var/www/hanamikoji/build_champion')
 PATH_BUILD_DIR.mkdir(exist_ok=True, parents=True)
@@ -64,11 +65,12 @@ def compile_champion(champion: Champion):
     # On détecte maintenant la langue
 
     lang = None
-    if (lang_file := out_dir / '_lang').exists():
+    lang_file = out_dir / '_lang'
+    if lang_file.exists():
         with open(lang_file, 'r') as fir:
-            content = fir.read(50)
-            if (c := content.strip()) in LANGS:
-                lang = c
+            content = fir.read(50).strip()
+            if content in LANGS:
+                lang = content
 
     if lang is None:
         for f in out_dir.iterdir():
@@ -248,3 +250,73 @@ def on_end_match(task: Task):
     m.status = Match.Status.FINI if task.success else Match.Status.ERREUR
     m.match_task = task
     m.save(run=False)
+
+def on_end_tournoi(t: Tournoi):
+    print(f"Fin du tournoi {t}")
+    matchs = Match.objects.filter(tournoi=t)
+    inscrits = list(Inscrit.objects.filter(tournoi=t))
+
+    for i in inscrits:
+        i.nb_points = 0
+        i.defaites = 0
+        i.victoires = 0
+        i.egalites = 0
+
+    reverse_inscrits = {i.champion.pk: i for i in inscrits}
+    for m in matchs:
+        i1 = reverse_inscrits[m.champion1.pk]
+        i2 = reverse_inscrits[m.champion2.pk]
+
+        i1.nb_points += m.score1
+        i2.nb_points += m.score2
+
+        if m.gagnant == Match.Gagnant.CHAMPION_1:
+            i1.victoires += 1
+            i2.defaites += 1
+        elif m.gagnant == Match.Gagnant.CHAMPION_2:
+            i1.defaites += 1
+            i2.victoires += 1
+        else:
+            i1.egalites += 1
+            i2.egalites += 1
+
+    classement = sorted(inscrits, key=lambda i: (i.victoires_score(), i.nb_points), reverse=True)
+    last_classement = 1
+    for (idx, i) in enumerate(classement):
+        if idx == 0 or i.victoires_score() != classement[idx - 1].victoires_score() or i.nb_points != classement[idx - 1].nb_points:
+            last_classement = idx + 1
+        i.classement = last_classement
+
+    Inscrit.objects.bulk_update(inscrits, ['classement', 'nb_points', 'victoires', 'defaites', 'egalites'])
+    t.status = Tournoi.Status.FINI
+    t.save()
+
+def launch_tournoi(tournoi_id: str):
+    tournoi = Tournoi.objects.get(id_tournoi=int(tournoi_id))
+    inscrits = Inscrit.objects.filter(tournoi=tournoi)
+    nb = inscrits.count()
+    matchs = []
+    for i in range(nb):
+        for j in range(i + 1, nb):
+            ins1 = inscrits[i]
+            ins2 = inscrits[j]
+            matchs.append(Match(champion1=ins1.champion, champion2=ins2.champion, tournoi=tournoi))
+            matchs.append(Match(champion1=ins2.champion, champion2=ins1.champion, tournoi=tournoi))
+
+
+    tournoi.status = Tournoi.Status.EN_COURS
+    tournoi.nb_matchs_done = 0
+    tournoi.nb_matchs = len(matchs)
+    tournoi.save()
+
+    champions_update = []
+    for i in inscrits:
+        if i.champion.supprimer:
+            i.champion.supprimer = False
+            champions_update.append(i.champion)
+    Champion.objects.bulk_update(champions_update, ['supprimer'])
+
+
+    Match.objects.bulk_create(matchs)
+    for m in matchs:
+        async_task('game.tasks.run_match', m, hook='game.tasks.on_end_match', group=f"tournoi-{tournoi.id_tournoi}")
