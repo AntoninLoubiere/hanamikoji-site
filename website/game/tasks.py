@@ -64,11 +64,12 @@ def compile_champion(champion: Champion):
     # On détecte maintenant la langue
 
     lang = None
-    if (lang_file := out_dir / '_lang').exists():
+    lang_file = out_dir / '_lang'
+    if lang_file.exists():
         with open(lang_file, 'r') as fir:
-            content = fir.read(50)
-            if (c := content.strip()) in LANGS:
-                lang = c
+            content = fir.read(50).strip()
+            if content in LANGS:
+                lang = content
 
     if lang is None:
         for f in out_dir.iterdir():
