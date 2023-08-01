@@ -47,8 +47,12 @@
     {% for tournoi in tournois %}
     <tr>
         <td><a href="{% url 'tournoi_detail' tournoi.id_tournoi %}">{{ tournoi.id_tournoi }}</a></td>
-        <td>{{ tournoi.date_lancement }}</td>
+        <td>{% if tournoi.date_lancement == None %}Non programmé{% else %}{{ tournoi.date_lancement }}{% endif %}</td>
+        {% if tournoi.status == 'EC'%}
+        <td>{{ tournoi.get_status_display }} ou Fini</td>
+        {% else %}
         <td>{{ tournoi.get_status_display }}</td>
+        {% endif %}
         <td>{{ tournoi.nb_champions }}</td>
     </tr>
     {% endfor %}
