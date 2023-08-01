@@ -250,7 +250,7 @@ def tournoi_detail(request,id):
     message = ''
     if request.method == 'POST':
         nb_inscrits = Inscrit.objects.filter(tournoi=tournoi,champion__uploader=request.user).count()
-        if nb_inscrits < tournoi.max_champions :
+        if nb_inscrits < tournoi.max_champions and tournoi.status == 'EA' or tournoi.status == 'LP':
             try:
                 i = Inscrit()
                 i.champion = Champion.objects.get(id=int(request.POST.get('champion')))
