@@ -247,14 +247,27 @@ def add_tournoi(request):
 @login_required
 def tournoi_detail(request,id):
     tournoi = get_object_or_404(Tournoi,id_tournoi=id)
+    message = ''
+    if request.method == 'POST':
+        nb_inscrits = Inscrit.objects.filter(tournoi=tournoi,champion__uploader=request.user).count()
+        if nb_inscrits < tournoi.max_champions :
+            try:
+                i = Inscrit()
+                i.champion = Champion.objects.get(id=int(request.POST.get('champion')))
+                i.tournoi = tournoi
+                i.save()
+                message = "Le champion a bien été selectionné"
+            except:
+                message = "Il y a eu une erreur lors de l'enregistrement du champion "
+        else:
+            message = "C'est très étrange, le nombre max de champion a pourtant été atteind"
+
+
     inscrits = Inscrit.objects.filter(tournoi=tournoi).order_by("classement")
     matchs = Match.objects.filter(tournoi=tournoi).order_by("champion1","champion2")
-    # champions_select = Champion.objects.filter(nom__in=inscrits.champion.name, uploader=request.user)
-    # champions_non_select = Champion.objects.filter(Q(uploader=request.user) | ~Q(nom__in=inscrits.champion.name))
-    form = forms.ChoiceChampions(user=request.user, id=id)
-    
-    
-    termine = 0
+    champions_select = inscrits.filter(champion__uploader=request.user)
+    champions_selected_ids = champions_select.values_list('champion', flat=True).all()
+    champions_non_select = Champion.objects.exclude(id__in=champions_selected_ids).filter(uploader=request.user).order_by("-date")
 
     termine = 0
     match_matrix = None
@@ -280,8 +293,7 @@ def tournoi_detail(request,id):
 
 
     return render(request,'game/tournoi_detail.html',context={
-        'tournoi':tournoi,'inscrits':inscrits, 'matchs':matchs,'termine':termine,'nb_matchs':nb_matchs,
-        'form':form,'match_matrix': match_matrix})
+        'tournoi':tournoi,'inscrits':inscrits, 'matchs':matchs,'termine':termine,'nb_matchs':nb_matchs,'match_matrix': match_matrix, 'champions_select': champions_select, 'champions_non_select': champions_non_select, 'nb_select': champions_select.count(), 'message': message})
 
 @login_required
 def update_tournoi(request,id):
@@ -301,3 +313,9 @@ def update_tournoi(request,id):
         return render(request,'game/update_tournoi.html',context={'form':form,'id':id})
     else:
         return HttpResponseForbidden("Interdit")
+
+@login_required
+def delete_champion_tournoi(request,id,nom):
+    inscrit = Inscrit.objects.get(tournoi=Tournoi.objects.get(id_tournoi=id),champion=Champion.objects.get(nom=nom))
+    inscrit.delete()
+    return redirect('tournoi_detail', id)

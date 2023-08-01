@@ -9,12 +9,33 @@
     <span class="content-center">Lancement : {{ tournoi.date_lancement }}</span>
     {% endif %}
     {% if tournoi.status == 'LP' or tournoi.status == 'EA' %}
-    Choix des champions <br />
-    <form method="post" class="form">
-        {{ form.as_p }}
+    <table>
+        <caption>Champions sélectionnés</caption>
+        <tr>
+            <th>Champion</th>
+            <th>Date d'ajout</th>
+            <th>Supprimer</th>
+        </tr>
+        {% for cs in champions_select %}
+        <tr>
+            <td>{{ cs.champion.nom }}</td>
+            <td>{{ cs.date }}</td>
+            <td><a href="{% url 'delete_champion_tournoi' id=tournoi.id_tournoi nom=cs.champion.nom %}">Supprimer</a></td>
+        </tr>
+        {% endfor %}
+    </table>
+    {{ message }}<br />
+    Choix des champions : {{ champions_select.count }} sur {{ tournoi.max_champions }} <br />
+    {% if nb_select < tournoi.max_champions %} <form action="" method="post">
         {% csrf_token %}
-        <button type="submit" id="envoi">Envoyer</button>
+        <select name="champion" class="ajout">
+            {% for cns in champions_non_select %}
+            <option value="{{ cns.id }}">{{ cns.nom }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" id="envoi">Choisir</button>
     </form>
+    {% endif %}
     {% elif tournoi.status == 'EC' %}
     Nombres de matchs terminés : {{ termine }} sur {{ nb_matchs }}
     {% elif tournoi.status == 'FI' %}

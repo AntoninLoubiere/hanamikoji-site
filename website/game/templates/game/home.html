@@ -28,7 +28,7 @@
         {% if champion.supprimer %}
         <td><a href="{% url 'delete_champion' champion.nom %}" class="supp">Supprimer</a></td>
         {% else %}
-        <td>Impossible à supprimer</td>
+        <td>Impossible</td>
         {% endif %}
     </tr>
     {% endfor %}
