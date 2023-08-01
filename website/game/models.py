@@ -107,9 +107,15 @@ class Tournoi(models.Model):
 class Inscrit(models.Model):
     tournoi = models.ForeignKey(Tournoi,on_delete=models.CASCADE)
     champion = models.ForeignKey(Champion,on_delete=models.CASCADE)
-    classement = models.IntegerField(null=True)
-    nb_points = models.IntegerField(null=True)
+    classement = models.IntegerField(null=True, blank=True)
+    nb_points = models.IntegerField(null=True, blank=True)
+    victoires = models.IntegerField(null=True, blank=True)
+    egalites = models.IntegerField(null=True, blank=True)
+    defaites = models.IntegerField(null=True, blank=True)
     date = models.DateTimeField(auto_now_add=True, editable=False)
+
+    def victoires_score(self):
+        return 3 * self.victoires + self.egalites
     
 
     class Meta:

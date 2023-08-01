@@ -24,6 +24,7 @@
             <th>Classement</th>
             <th>Nom</th>
             <th>Auteur</th>
+            <th class="mw-max-content">V / É / D</th>
             <th>Nombre de points</th>
         </tr>
         {% for ins in inscrits %}
@@ -31,6 +32,7 @@
             <td>{{ ins.classement }}</td>
             <td title="{{ins.champion}}">{{ ins.champion.nom }}</td>
             <td id="sans_casse">{{ ins.champion.uploader }}</td>
+            <td class="mw-max-content">{{ ins.victoires }} / {{ ins.egalites }} / {{ ins.defaites }}</td>
             <td>{{ ins.nb_points }}</td>
         </tr>
         {% endfor %}

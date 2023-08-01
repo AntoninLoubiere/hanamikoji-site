@@ -386,3 +386,7 @@ caption {
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
+.mw-max-content {
+    min-width: max-content;
+}

@@ -255,9 +255,11 @@ def on_end_tournoi(t: Tournoi):
 
     for i in inscrits:
         i.nb_points = 0
+        i.defaites = 0
+        i.victoires = 0
+        i.egalites = 0
 
     reverse_inscrits = {i.champion.pk: i for i in inscrits}
-    victoires = {i.pk: 0 for i in inscrits}
     for m in matchs:
         i1 = reverse_inscrits[m.champion1.pk]
         i2 = reverse_inscrits[m.champion2.pk]
@@ -266,21 +268,23 @@ def on_end_tournoi(t: Tournoi):
         i2.nb_points += m.score2
 
         if m.gagnant == Match.Gagnant.CHAMPION_1:
-            victoires[i1.pk] += 3
+            i1.victoires += 1
+            i2.defaites += 1
         elif m.gagnant == Match.Gagnant.CHAMPION_2:
-            victoires[i2.pk] += 3
+            i1.defaites += 1
+            i2.victoires += 1
         else:
-            victoires[i1.pk] += 1
-            victoires[i2.pk] += 1
+            i1.egalites += 1
+            i2.egalites += 1
 
-    classement = sorted(inscrits, key=lambda i: (victoires[i.pk], i.nb_points), reverse=True)
+    classement = sorted(inscrits, key=lambda i: (i.victoires_score(), i.nb_points), reverse=True)
     last_classement = 1
     for (idx, i) in enumerate(classement):
-        if idx == 0 or victoires[i.pk] != victoires[classement[idx - 1].pk] or i.nb_points != classement[idx - 1].nb_points:
+        if idx == 0 or i.victoires_score() != classement[idx - 1].victoires_score() or i.nb_points != classement[idx - 1].nb_points:
             last_classement = idx + 1
         i.classement = last_classement
 
-    Inscrit.objects.bulk_update(inscrits, ['classement', 'nb_points'])
+    Inscrit.objects.bulk_update(inscrits, ['classement', 'nb_points', 'victoires', 'defaites', 'egalites'])
     t.status = Tournoi.Status.FINI
     t.save()
 
