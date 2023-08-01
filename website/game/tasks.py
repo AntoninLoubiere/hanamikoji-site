@@ -248,9 +248,41 @@ def on_end_match(task: Task):
     m.match_task = task
     m.save(run=False)
 
-def on_end_match_tournoi(task: Task):
-    on_end_match(task)
-    print("END TOURNOI")
+def on_end_tournoi(t: Tournoi):
+    print(f"Fin du tournoi {t}")
+    matchs = Match.objects.filter(tournoi=t)
+    inscrits = list(Inscrit.objects.filter(tournoi=t))
+
+    for i in inscrits:
+        i.nb_points = 0
+
+    reverse_inscrits = {i.champion.pk: i for i in inscrits}
+    victoires = {i.pk: 0 for i in inscrits}
+    for m in matchs:
+        i1 = reverse_inscrits[m.champion1.pk]
+        i2 = reverse_inscrits[m.champion2.pk]
+
+        i1.nb_points += m.score1
+        i2.nb_points += m.score2
+
+        if m.gagnant == Match.Gagnant.CHAMPION_1:
+            victoires[i1.pk] += 3
+        elif m.gagnant == Match.Gagnant.CHAMPION_2:
+            victoires[i2.pk] += 3
+        else:
+            victoires[i1.pk] += 1
+            victoires[i2.pk] += 1
+
+    classement = sorted(inscrits, key=lambda i: (victoires[i.pk], i.nb_points), reverse=True)
+    last_classement = 1
+    for (idx, i) in enumerate(classement):
+        if idx == 0 or victoires[i.pk] != victoires[classement[idx - 1].pk] or i.nb_points != classement[idx - 1].nb_points:
+            last_classement = idx + 1
+        i.classement = last_classement
+
+    Inscrit.objects.bulk_update(inscrits, ['classement', 'nb_points'])
+    t.status = Tournoi.Status.FINI
+    t.save()
 
 def launch_tournoi(tournoi_id: str):
     tournoi = Tournoi.objects.get(id_tournoi=int(tournoi_id))
@@ -264,13 +296,20 @@ def launch_tournoi(tournoi_id: str):
             matchs.append(Match(champion1=ins1.champion, champion2=ins2.champion, tournoi=tournoi))
             matchs.append(Match(champion1=ins2.champion, champion2=ins1.champion, tournoi=tournoi))
 
+
     tournoi.status = Tournoi.Status.EN_COURS
+    tournoi.nb_matchs_done = 0
+    tournoi.nb_matchs = len(matchs)
     tournoi.save()
+
+    champions_update = []
+    for i in inscrits:
+        if i.champion.supprimer:
+            i.champion.supprimer = False
+            champions_update.append(i.champion)
+    Champion.objects.bulk_update(champions_update, ['supprimer'])
 
 
     Match.objects.bulk_create(matchs)
     for m in matchs:
-        async_task('game.tasks.run_match', m, hook='game.tasks.on_end_match_tournoi', group=f"tournoi-{tournoi.id_tournoi}")
-
-def end_launch_tournoi(task: Task):
-    print("ON END LAUNCH")
+        async_task('game.tasks.run_match', m, hook='game.tasks.on_end_match', group=f"tournoi-{tournoi.id_tournoi}")

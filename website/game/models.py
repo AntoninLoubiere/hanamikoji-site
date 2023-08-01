@@ -87,6 +87,7 @@ class Tournoi(models.Model):
                     name=f"launch-tournoi-{self.id_tournoi}",
                     next_run=self.date_lancement,
                 )
+                super().save(*args, **kwargs)
 
         elif self.status == self.Status.EN_ATTENTE:
             if self.schedule is not None:

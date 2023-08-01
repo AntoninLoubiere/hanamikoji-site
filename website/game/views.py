@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
-from game.tasks import MATCH_OUT_DIR
+from game.tasks import MATCH_OUT_DIR, on_end_tournoi
 
 from . import forms
 from game.models import Champion, Match, Tournoi, Inscrit
@@ -253,12 +253,18 @@ def tournoi_detail(request,id):
     # champions_non_select = Champion.objects.filter(Q(uploader=request.user) | ~Q(nom__in=inscrits.champion.name))
     form = forms.ChoiceChampions(user=request.user, id=id)
     
+    
+    termine = 0
+
     termine = 0
     match_matrix = None
     nb_matchs = matchs.count()
     if tournoi.status == Tournoi.Status.EN_COURS:
-        termine = Match.objects.filter(tournoi=tournoi, status=Match.Status.FINI).count()
-    elif tournoi.status == Tournoi.Status.FINI:
+        termine = Match.objects.filter(Q(tournoi=tournoi) & (Q(status=Match.Status.FINI) | Q(status=Match.Status.ERREUR))).count()
+        if termine >= nb_matchs:
+            on_end_tournoi(tournoi)
+
+    if tournoi.status == Tournoi.Status.FINI:
         nb_ins = inscrits.count()
 
         match_matrix = []

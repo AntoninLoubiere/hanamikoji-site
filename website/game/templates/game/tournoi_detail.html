@@ -46,12 +46,12 @@
         </tr>
         {% for i, ms in match_matrix %}
             <tr>
-                <th title="{{ i.champion }}">{{ i.champion.nom }}</th>
+                <th title="{{ i.champion }}">{{ i.classement }}. {{ i.champion.nom }}</th>
                 {% for m in ms %}
-                {% if m %}
-                    <td class="match {% if m.gagnant == 1 %} match-won {% elif m.gagnant == 2 %} match-lost {% else %} match-egalite {% endif %}">
-                        <a href="{% url 'match_detail' m.id_match %}">{{ m.score1 }} à {{ m.score2 }}</a>
-                    </td>
+                    {% if m %}
+                        <td class="match {% if m.gagnant == 1 %}match-won{% elif m.gagnant == 2 %}match-lost{% else %}match-egalite{% endif %}">
+                            <a href="{% url 'match_detail' m.id_match %}">{{ m.score1 }} à {{ m.score2 }}</a>
+                        </td>
                     {% else %}
                         <td class="match-inexistant"></td>
                     {% endif %}
