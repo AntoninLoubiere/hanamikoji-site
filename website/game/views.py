@@ -294,7 +294,10 @@ def tournoi_detail(request,id):
 
 
     return render(request,'game/tournoi_detail.html',context={
-        'tournoi':tournoi,'inscrits':inscrits, 'matchs':matchs,'termine':termine,'nb_matchs':nb_matchs,'match_matrix': match_matrix, 'champions_select': champions_select, 'champions_non_select': champions_non_select, 'nb_select': champions_select.count(), 'message': message})
+        'tournoi':tournoi,'inscrits':inscrits, 'matchs':matchs,'termine':termine,'nb_matchs':nb_matchs,
+        'match_matrix': match_matrix, 'champions_select': champions_select,
+        'champions_non_select': champions_non_select, 'nb_select': champions_select.count(),
+        'message': message, 'timer': tournoi.date_lancement.isoformat()})
 
 @login_required
 def update_tournoi(request,id):
