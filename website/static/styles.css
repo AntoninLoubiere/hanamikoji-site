@@ -304,7 +304,8 @@ caption {
 }
 
 #timer {
-    margin: 1rem 0;
+    margin: 1rem auto;
+    width: max-content;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 2rem;
@@ -389,4 +390,30 @@ caption {
 
 .mw-max-content {
     min-width: max-content;
+}
+
+.select-champ {
+    font-size: 2em;
+    background-color: white;
+    border: solid red 5px;
+    color: red;
+    border-radius: .8rem;
+    padding: .5rem 1rem;
+    box-shadow: 10px 10px 3px #000000;
+    text-decoration: none;
+    font-variant: small-caps;
+    font-weight: bold;
+    font-family: serif;
+}
+
+.select-champ-form {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.text-center {
+    margin: .3rem .3rem;
+    text-align: center;
+    font-size: larger;
 }

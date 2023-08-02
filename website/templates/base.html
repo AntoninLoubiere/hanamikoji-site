@@ -21,8 +21,8 @@
         <a href="{% url 'tournois' %}">Tournois</a>
         <a href="{% url 'password_change' %}">Changer de mot de passe</a>
         <a href="{% url 'logout' %}">Se déconnecter</a>
-        {% if user.is_superuser %}
-        <a href="/admin/" target="_blank">Administration</a>
+        {% if user.is_staff %}
+            <a href="/admin/" target="_blank">Administration</a>
         {% endif %}
     </nav>
     {% endif %}

@@ -1,39 +1,59 @@
 {% extends 'base_game.html' %}
 {% block title %}Tournoi n°{{ tournoi.id_tournoi }}{% endblock title %}
-
+{% load static %}
 {% block content %}
 <h1>Tournoi n°{{ tournoi.id_tournoi }}</h1>
 <div class="content-section">
     <span class="content-center">{{ tournoi.get_status_display }}</span>
-    {% if tournoi.status != 'EA' %}
-    <span class="content-center">Lancement : {{ tournoi.date_lancement }}</span>
+    {% if tournoi.status == 'LP' %}
+        <span class="content-center">Le {{ tournoi.date_lancement|date:"l d F Y à H:i" }}</span>
+    {% elif tournoi.status != 'EA' %}
+        <span class="content-center">Lancé le {{ tournoi.date_lancement|date:"l d F Y à H:i" }}</span>
     {% endif %}
     {% if tournoi.status == 'LP' or tournoi.status == 'EA' %}
+    <div id="timer" data-time="{{ timer }}">
+        <div id="timer-days" class="timer-nbs">
+            <div class="digit digit-2" id="timer-days-2"><span class="from">0</span><span class="to"></span></div><div class="digit" id="timer-days-1"><span class="from">0</span><span class="to"></span></div>
+            <div class="timer-caption">jours</div>
+        </div>
+        <div id="timer-days" class="timer-nbs">
+            <div class="digit digit-2" id="timer-hours-2"><span class="from">0</span><span class="to"></span></div><div class="digit" id="timer-hours-1"><span class="from">0</span><span class="to"></span></div>
+            <div class="timer-caption">heures</div>
+        </div>
+        <div id="timer-days" class="timer-nbs">
+            <div class="digit digit-2" id="timer-minutes-2"><span class="from">0</span><span class="to"></span></div><div class="digit" id="timer-minutes-1"><span class="from">0</span><span class="to"></span></div>
+            <div class="timer-caption">minutes</div>
+        </div>
+        <div id="timer-days" class="timer-nbs">
+            <div class="digit digit-2" id="timer-seconds-2"><span class="from">0</span><span class="to"></span></div><div class="digit" id="timer-seconds-1"><span class="from">0</span><span class="to"></span></div>
+            <div class="timer-caption">secondes</div>
+        </div>
+    </div>
+    <script src="{% static 'game/timer.js' %}"></script>
     <table>
-        <caption>Champions sélectionnés</caption>
+        <caption>{{ champions_select.count }}/{{ tournoi.max_champions }} champions sélectionnés</caption>
         <tr>
             <th>Champion</th>
             <th>Date d'ajout</th>
-            <th>Supprimer</th>
+            <th>Enlever</th>
         </tr>
         {% for cs in champions_select %}
         <tr>
             <td>{{ cs.champion.nom }}</td>
-            <td>{{ cs.date }}</td>
-            <td><a href="{% url 'delete_champion_tournoi' id=tournoi.id_tournoi nom=cs.champion.nom %}">Supprimer</a></td>
+            <td>{{ cs.date|date:"l d F Y, H:i" }}</td>
+            <td><a href="{% url 'delete_champion_tournoi' id=tournoi.id_tournoi nom=cs.champion.nom %}">Enlever</a></td>
         </tr>
         {% endfor %}
     </table>
-    {{ message }}<br />
-    Choix des champions : {{ champions_select.count }} sur {{ tournoi.max_champions }} <br />
-    {% if nb_select < tournoi.max_champions %} <form action="" method="post">
+    <div class="text-center">{{ message }}</div>
+    {% if nb_select < tournoi.max_champions %} <form action="" method="post" class="select-champ-form">
         {% csrf_token %}
-        <select name="champion" class="ajout">
+        <select name="champion" class="select-champ" onchange="this.form.submit()">
+            <option disabled selected>Sélectionnez un champion</option>
             {% for cns in champions_non_select %}
-            <option value="{{ cns.id }}">{{ cns.nom }}</option>
+                <option value="{{ cns.id }}">{{ cns.nom }}</option>
             {% endfor %}
         </select>
-        <button type="submit" id="envoi">Choisir</button>
     </form>
     {% endif %}
     {% elif tournoi.status == 'EC' %}
@@ -86,8 +106,7 @@
 
     {% endif %}
     {% if tournoi.status == 'LP' and user.create_tournament or tournoi.status == 'EA' and user.create_tournament %}
-    {# J'ai pas trouvé mieux #}
-    <a href="{% url 'update_tournoi' tournoi.id_tournoi %}" class="content-center">Lancer ou changer la date du
+    <a href="{% url 'update_tournoi' tournoi.id_tournoi %}" class="content-center">Changer la date du
         tournoi</a>
     {% endif %}
 </div>

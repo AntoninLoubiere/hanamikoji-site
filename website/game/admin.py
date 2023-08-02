@@ -35,5 +35,6 @@ class TournoiAdmin(admin.ModelAdmin):
 
 @admin.register(Inscrit)
 class InscritAdmin(admin.ModelAdmin):
-    list_display = ('champion', 'tournoi', 'classement', 'nb_points')
+    readonly_fields = ('classement', 'nb_points', 'victoires', 'egalites', 'defaites')
+    list_display = ('champion', 'tournoi', 'classement', 'nb_points', 'victoires', 'egalites', 'defaites')
     list_filter = ('tournoi', 'champion', 'champion__uploader')
