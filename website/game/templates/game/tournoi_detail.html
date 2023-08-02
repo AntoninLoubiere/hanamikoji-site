@@ -106,7 +106,7 @@
 
     {% endif %}
     {% if tournoi.status == 'LP' and user.create_tournament or tournoi.status == 'EA' and user.create_tournament %}
-    <a href="{% url 'update_tournoi' tournoi.id_tournoi %}" class="content-center">Lancer ou changer la date du
+    <a href="{% url 'update_tournoi' tournoi.id_tournoi %}" class="content-center">Changer la date du
         tournoi</a>
     {% endif %}
 </div>

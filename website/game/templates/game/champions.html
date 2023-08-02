@@ -27,7 +27,7 @@
     {% for champion in champions %}
     <tr>
         <td title="{{champion}}">{{ champion.nom }}</td>
-        <td>{{ champion.date }}</td>
+        <td>{{ champion.date|date:"l d F Y, H:i" }}</td>
         <td id="sans_casse">{{ champion.uploader }}</td>
         <td>{{ champion.get_compilation_status_display }}</td>
         <td>{{ champion.nb_matchs }}</td>
