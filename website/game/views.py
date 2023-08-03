@@ -165,6 +165,7 @@ def add_match(request: HttpRequest):
             m = Match()
             m.champion1 = Champion.objects.get(id=int(request.POST.get('champion1')))
             m.champion2 = Champion.objects.get(id=int(request.POST.get('champion2')))
+            m.lanceur = request.user
             if m.is_correct():
                 m.champion1.supprimer = False
                 m.champion2.supprimer = False
@@ -175,7 +176,8 @@ def add_match(request: HttpRequest):
             else:
                 message = "Match invalide (vérifier que tous les champions ont bien terminé leur compilation)"
 
-        except (ValueError, Champion.DoesNotExist):
+        except (ValueError, Champion.DoesNotExist) as e:
+            print(e)
             message = "Champion inexistants."
 
     return render(request,'game/add_match.html',context={'message':message, 'list_champions': list_champions})
