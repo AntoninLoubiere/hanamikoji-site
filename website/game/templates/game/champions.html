@@ -26,7 +26,11 @@
     </tr>
     {% for champion in champions %}
     <tr>
-        <td title="{{champion}}">{{ champion.nom }}</td>
+        {% if champion.uploader == request.user or request.user.is_superuser %}
+            <td><a href="{% url 'champion_detail' champion.nom %}" title="{{ champion }}">{{ champion.nom }}</a></td>
+        {% else %}
+            <td title="{{champion}}">{{ champion.nom }}</td>
+        {% endif %}
         <td>{{ champion.date|date:"l d F Y, H:i" }}</td>
         <td id="sans_casse">{{ champion.uploader }}</td>
         <td>{{ champion.get_compilation_status_display }}</td>

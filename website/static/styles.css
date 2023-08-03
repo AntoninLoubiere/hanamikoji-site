@@ -417,3 +417,35 @@ caption {
     text-align: center;
     font-size: larger;
 }
+
+.grid-key {
+    display: grid;
+    margin: .5rem auto;
+    grid-template-columns: max-content max-content;
+    width: max-content;
+    gap: 0 1rem;
+    font-size: 2rem;
+}
+
+.content-text-center {
+    text-align: center;
+    margin: .5rem 0;
+    font-size:  2rem;
+}
+
+.command-output {
+    font-size: 1rem;
+    font-family: monospace;
+    white-space: pre-line;
+    margin: 1rem auto;
+    padding: .5rem .8rem;
+
+    border: black solid 2px;
+    border-radius: .7rem;
+
+    background-color: white;
+}
+
+.max-90 {
+    max-width: 90%;
+}

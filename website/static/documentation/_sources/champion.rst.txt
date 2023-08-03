@@ -56,6 +56,10 @@ Geisha à quatre cartes et la Geisha à cinq cartes.
 Les cartes sont représentées par des entiers de 0 à 6 correspondant à la Geisha représentée par la
 carte.
 
+.. note::
+  À chaque fois que votre programme est appelé, il doit terminer en moins de une seconde (+ 500 ms de
+  marge)
+
 Lancer un match
 ===============
 

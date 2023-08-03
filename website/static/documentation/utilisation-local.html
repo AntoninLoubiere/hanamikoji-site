@@ -86,6 +86,14 @@ correspondant <code class="docutils literal notranslate"><span class="pre">make<
 <span class="nt">dump</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dump.json</span><span class="w"> </span><span class="c1"># Rapport du match pour le replay.</span>
 </pre></div>
 </div>
+<p>Créez un fichier <code class="docutils literal notranslate"><span class="pre">map.txt</span></code> représentant la distribution des cartes. Il doit être composé de trois
+lignes, représentant la distribution des cartes pour chaque manche.</p>
+<p>Sur chaque ligne les cartes sont représentées par des entiers de 0 à 6 séparés par des espaces, et
+représentent dans l’ordre, les 6 cartes distribuées au premier joueur au début de la manche, les 6
+suivantes sont les 6 cartes de début de manche du second joueur. Ensuite les cartes représentent les
+cartes piochées à chaque tour, la dernière carte n’est donc pas utilisé.</p>
+<p>Vous pouvez utiliser <a class="reference external" href="_static/random_map.py">ce script python</a> pour générer une distribution de
+cartes aléatoire.</p>
 <p>Lancez le match avec</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">stechec2</span><span class="o">-</span><span class="n">run</span> <span class="n">config</span><span class="o">.</span><span class="n">json</span>
 </pre></div>

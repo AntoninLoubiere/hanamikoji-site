@@ -148,7 +148,6 @@ def tournois(request):
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
-    #print(Tournoi.objects.filter(date_lancement__gt=timezone.now()))
     prochain_tournoi = Tournoi.objects.filter(date_lancement__gt=timezone.now()).order_by("date_lancement").first()
     dateiso = prochain_tournoi.date_lancement.isoformat() if prochain_tournoi else ''
     nb_champs_user = prochain_tournoi.nb_champions_user(request.user) if prochain_tournoi else 0
@@ -165,6 +164,7 @@ def add_match(request: HttpRequest):
             m = Match()
             m.champion1 = Champion.objects.get(id=int(request.POST.get('champion1')))
             m.champion2 = Champion.objects.get(id=int(request.POST.get('champion2')))
+            m.lanceur = request.user
             if m.is_correct():
                 m.champion1.supprimer = False
                 m.champion2.supprimer = False
@@ -204,7 +204,6 @@ def redirection_out(request,id,nb):
         response = HttpResponse()
         response["Content-Type"] = "text/plain"
         response["Content-Disposition"] = f"attachment; filename=match_{id}_champion{nb}.out.txt"
-        print(id, f"/media/match/{id}/champion{nb}.out.txt")
         response["X-Accel-Redirect"] = f"/media/match/{id}/champion{nb}.out.txt"
         return response
     return HttpResponseForbidden("Interdit")
@@ -251,24 +250,27 @@ def tournoi_detail(request,id):
     message = ''
     if request.method == 'POST':
         nb_inscrits = Inscrit.objects.filter(tournoi=tournoi,champion__uploader=request.user).count()
-        if nb_inscrits < tournoi.max_champions and tournoi.status == 'EA' or tournoi.status == 'LP':
+        if nb_inscrits < tournoi.max_champions and (tournoi.status == 'EA' or tournoi.status == 'LP'):
             try:
                 i = Inscrit()
                 i.champion = Champion.objects.get(id=int(request.POST.get('champion')))
-                i.tournoi = tournoi
-                i.save()
-                message = "Le champion a bien été selectionné"
+                if i.champion.compilation_status == Champion.Status.FINI:
+                    i.tournoi = tournoi
+                    i.save()
+                    message = "Le champion a bien été sélectionné"
+                else:
+                    message = "Ce champion n'est pas encore compilé"
             except:
                 message = "Il y a eu une erreur lors de l'enregistrement du champion "
         else:
-            message = "C'est très étrange, le nombre max de champion a pourtant été atteind"
+            message = "C'est très étrange, le nombre max de champions a pourtant été atteint"
 
 
     inscrits = Inscrit.objects.filter(tournoi=tournoi).order_by("classement")
     matchs = Match.objects.filter(tournoi=tournoi).order_by("champion1","champion2")
     champions_select = inscrits.filter(champion__uploader=request.user)
     champions_selected_ids = champions_select.values_list('champion', flat=True).all()
-    champions_non_select = Champion.objects.exclude(id__in=champions_selected_ids).filter(uploader=request.user).order_by("-date")
+    champions_non_select = Champion.objects.filter(uploader=request.user, compilation_status=Champion.Status.FINI).exclude(id__in=champions_selected_ids).order_by("-date")
 
     termine = 0
     match_matrix = None
@@ -289,8 +291,6 @@ def tournoi_detail(request,id):
 
         for m in matchs:
             match_matrix[user_to_classement[m.champion1.pk]][1][user_to_classement[m.champion2.pk]] = m
-
-        print(match_matrix)
 
 
     return render(request,'game/tournoi_detail.html',context={
@@ -323,3 +323,12 @@ def delete_champion_tournoi(request,id,nom):
     inscrit = Inscrit.objects.get(tournoi=Tournoi.objects.get(id_tournoi=id),champion=Champion.objects.get(nom=nom))
     inscrit.delete()
     return redirect('tournoi_detail', id)
+
+
+@login_required
+def champion_detail(request, name):
+    champion = get_object_or_404(Champion,nom=name)
+    if champion.uploader != request.user and not request.user.is_superuser:
+        return HttpResponseForbidden('Interdit')
+
+    return render(request, 'game/champion_detail.html', context={'champion': champion})

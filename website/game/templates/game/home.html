@@ -21,7 +21,7 @@
     </tr>
     {% for champion in champions %}
     <tr>
-        <td>{{ champion.nom }}</td>
+        <td><a href="{% url 'champion_detail' champion.nom %}" title="{{ champion }}">{{ champion.nom }}</a></td>
         <td>{{ champion.date|date:"l d F Y, H:i" }}</td>
         <td><a href="{% url 'redirection_code' champion.nom %}">{{ champion.code }}</a></td>
         <td>{{ champion.get_compilation_status_display }}</td>

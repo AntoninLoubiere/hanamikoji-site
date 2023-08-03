@@ -10,7 +10,7 @@
     {% elif tournoi.status != 'EA' %}
         <span class="content-center">Lancé le {{ tournoi.date_lancement|date:"l d F Y à H:i" }}</span>
     {% endif %}
-    {% if tournoi.status == 'LP' or tournoi.status == 'EA' %}
+    {% if tournoi.status == 'LP' %}
     <div id="timer" data-time="{{ timer }}">
         <div id="timer-days" class="timer-nbs">
             <div class="digit digit-2" id="timer-days-2"><span class="from">0</span><span class="to"></span></div><div class="digit" id="timer-days-1"><span class="from">0</span><span class="to"></span></div>
@@ -106,6 +106,21 @@
 
     {% endif %}
     {% if tournoi.status == 'LP' and user.create_tournament or tournoi.status == 'EA' and user.create_tournament %}
+    <table>
+        <caption>Inscrits</caption>
+        <tr>
+            <th>Champion</th>
+            <th>Auteur</th>
+            <th>Date d'ajout</th>
+        </tr>
+        {% for inscrit in inscrits %}
+        <tr>
+            <td>{{ inscrit.champion.nom }}</td>
+            <td id="sans_casse">{{ inscrit.champion.uploader }}</td>
+            <td>{{ inscrit.date|date:"l d F Y, H:i" }}</td>
+        </tr>
+        {% endfor %}
+    </table>
     <a href="{% url 'update_tournoi' tournoi.id_tournoi %}" class="content-center">Changer la date du
         tournoi</a>
     {% endif %}
