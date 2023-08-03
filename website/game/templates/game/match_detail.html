@@ -26,7 +26,7 @@
         </div>
         <div class="champion-column {% if match.gagnant == 2 %}winner{% endif %}">
             <span class="champion-name">{{match.champion2.nom}}</span>
-            <span>{{ match.champion1.uploader }}</span>
+            <span>{{ match.champion2.uploader }}</span>
             {% if match.status == 'FI' %}<span class="score">{{match.score2}}</span>{% endif %}
         </div>
         
