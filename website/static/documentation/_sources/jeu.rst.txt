@@ -14,7 +14,7 @@ Pour exécuter votre code, en local il faudra télécharger stechec (cf
 
 .. note::
   Des règles plus détaillées sont disponibles sur le site `regledujeu.fr
-  <https://www.regledujeu.fr/hanamikoji/>`__
+  <https://www.regledujeu.fr/hanamikoji/>`__. Vous pouvez jouer vous même au jeu sur `boardgamearena.com <https://fr.boardgamearena.com/gamepanel?game=hanamikoji>`_.
 
 Le jeu, Hanamikoji
 ~~~~~~~~~~~~~~~~~~
