@@ -12,6 +12,10 @@ Pour exécuter votre code, en local il faudra télécharger stechec (cf
 `Utilisation Locale <utilisation-local.html>`__) sinon vous pouvez utiliser le site (cf
 `Utilisation Serveur <utilisation-serveur.html>`__).
 
+.. note::
+  Des règles plus détaillées sont disponibles sur le site `regledujeu.fr
+  <https://www.regledujeu.fr/hanamikoji/>`__
+
 Le jeu, Hanamikoji
 ~~~~~~~~~~~~~~~~~~
 

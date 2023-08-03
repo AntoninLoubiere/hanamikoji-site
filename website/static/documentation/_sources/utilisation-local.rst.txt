@@ -73,6 +73,17 @@ Créez un fichier de configuration du type
      - Player 2
    dump: dump.json # Rapport du match pour le replay.
 
+Créez un fichier ``map.txt`` représentant la distribution des cartes. Il doit être composé de trois
+lignes, représentant la distribution des cartes pour chaque manche.
+
+Sur chaque ligne les cartes sont représentées par des entiers de 0 à 6 séparés par des espaces, et
+représentent dans l'ordre, les 6 cartes distribuées au premier joueur au début de la manche, les 6
+suivantes sont les 6 cartes de début de manche du second joueur. Ensuite les cartes représentent les
+cartes piochées à chaque tour, la dernière carte n'est donc pas utilisé.
+
+Vous pouvez utiliser `ce script python <_static/random_map.py>`_ pour générer une distribution de
+cartes aléatoire.
+
 Lancez le match avec
 
 ::

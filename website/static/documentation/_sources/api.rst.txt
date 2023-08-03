@@ -16,6 +16,10 @@ Geisha à quatre cartes et la Geisha à cinq cartes.
 Les cartes sont représentées par des entiers de 0 à 6 correspondant à la Geisha représentée par la
 carte.
 
+.. note::
+  L'api est décrite dans le langage C, mais les nom des fonctions sont identiques dans les autres
+  langages.
+
 
 Constantes
 ==========
@@ -24,7 +28,7 @@ Constantes
 
   :Valeur: 7
   :Description:
-    Les 7 geisha (2, 2, 2, 3, 3, 4, 5)
+    Les 7 Geisha (2, 2, 2, 3, 3, 4, 5)
 .. c:var:: int NB_CARTES_TOTAL
 
   :Valeur: 21
@@ -44,7 +48,7 @@ Constantes
 
   :Valeur: 4
   :Description:
-    Le nombre total d'action que chaque joueur devra faire
+    Le nombre total d'actions que chaque joueur devra faire
 .. c:var:: int NB_MANCHES_MAX
 
   :Valeur: 3
@@ -54,7 +58,7 @@ Constantes
 
   :Valeur: "2|2|2|3|3|4|5"
   :Description:
-    La valeur (et le nombre de cartes) de chaque geisha séparée par des |
+    La valeur (et le nombre de cartes) de chaque Geisha séparée par des |
 
 Énumérations
 ============
@@ -67,7 +71,7 @@ Constantes
       :VALIDER:
         Valide une unique carte
       :DEFAUSSER:
-        Defausse deux cartes
+        Défausse deux cartes
       :CHOIX_TROIS:
         Donne le choix entre trois cartes
       :CHOIX_PAQUETS:
@@ -88,11 +92,11 @@ Constantes
       :PAQUET_INVALIDE:
         ce paquet n'existe pas
       :GEISHA_INVALIDES:
-        cette geisha n'existe pas (doit être un entier entre 0 et NB_GEISHA)
+        cette Geisha n'existe pas (doit être un entier entre 0 et NB_GEISHA - 1)
       :JOUEUR_INVALIDE:
         ce joueur n'existe pas
       :CHOIX_INVALIDE:
-        vous ne pouvez pas repondre à ce choix
+        vous ne pouvez pas répondre à ce choix
       :ACTION_INVALIDE:
         vous ne pouvez pas jouer cette action maintenant
 .. c:type:: joueur
@@ -150,14 +154,14 @@ Fonctions
 
 .. c:function:: int manche()
 
-    Renvoie le numéro de la manche (indexé à 0)
+    Renvoie le numéro de la manche (entre 0 et 2)
 
 
 
 
 .. c:function:: int tour()
 
-    Renvoie le numéro de la manche (indexé à 0)
+    Renvoie le numéro du tour (entre 0 et 7)
 
 
 
@@ -171,20 +175,20 @@ Fonctions
 
 .. c:function:: int nb_carte_validee(joueur j, int g)
 
-    Renvoie le nombre de carte validée par le joueur pour la geisha
+    Renvoie le nombre de cartes validées par le joueur pour la Geisha
 
 
 
     :param j: Le joueur
-    :param g: La geisha
+    :param g: La Geisha
 
 .. c:function:: joueur possession_geisha(int g)
 
-    Renvoie qui possède la geisha
+    Renvoie qui possède la Geisha
 
 
 
-    :param g: La geisha
+    :param g: La Geisha
 
 .. c:function:: bool est_jouee_action(joueur j, action a)
 
@@ -197,7 +201,7 @@ Fonctions
 
 .. c:function:: int nb_cartes(joueur j)
 
-    Renvoie le nombre de carte que le joueur a
+    Renvoie le nombre de cartes que le joueur a
 
 
 
@@ -212,7 +216,7 @@ Fonctions
 
 .. c:function:: int carte_pioche()
 
-    Renvoie la carte que vous avez pioché au début du tour
+    Renvoie la carte que vous avez piochée au début du tour
 
 
 
@@ -324,7 +328,7 @@ Fonctions utilisateur
 
 .. c:function:: void repondre_action_choix_paquets()
 
-    Fonction appelée lors du choix entre deux paquet lors de l'action de l'adversaire (cf tour_precedent)
+    Fonction appelée lors du choix entre deux paquets lors de l'action de l'adversaire (cf tour_precedent)
 
 
 .. c:function:: void fin_jeu()

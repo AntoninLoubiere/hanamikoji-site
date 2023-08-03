@@ -40,6 +40,11 @@
 Geisha à quatre cartes et la Geisha à cinq cartes.</p>
 <p>Les cartes sont représentées par des entiers de 0 à 6 correspondant à la Geisha représentée par la
 carte.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>L’api est décrite dans le langage C, mais les nom des fonctions sont identiques dans les autres
+langages.</p>
+</div>
 </section>
 <section id="constantes">
 <h2>Constantes<a class="headerlink" href="#constantes" title="Lien permanent vers cette rubrique">¶</a></h2>
@@ -51,7 +56,7 @@ carte.</p>
 <dd class="field-odd"><p>7</p>
 </dd>
 <dt class="field-even">Description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Les 7 geisha (2, 2, 2, 3, 3, 4, 5)</p>
+<dd class="field-even"><p>Les 7 Geisha (2, 2, 2, 3, 3, 4, 5)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -103,7 +108,7 @@ carte.</p>
 <dd class="field-odd"><p>4</p>
 </dd>
 <dt class="field-even">Description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Le nombre total d’action que chaque joueur devra faire</p>
+<dd class="field-even"><p>Le nombre total d’actions que chaque joueur devra faire</p>
 </dd>
 </dl>
 </dd></dl>
@@ -129,7 +134,7 @@ carte.</p>
 <dd class="field-odd"><p>« 2|2|2|3|3|4|5 »</p>
 </dd>
 <dt class="field-even">Description<span class="colon">:</span></dt>
-<dd class="field-even"><p>La valeur (et le nombre de cartes) de chaque geisha séparée par des |</p>
+<dd class="field-even"><p>La valeur (et le nombre de cartes) de chaque Geisha séparée par des |</p>
 </dd>
 </dl>
 </dd></dl>
@@ -150,7 +155,7 @@ carte.</p>
 <dd class="field-odd"><p>Valide une unique carte</p>
 </dd>
 <dt class="field-even">DEFAUSSER<span class="colon">:</span></dt>
-<dd class="field-even"><p>Defausse deux cartes</p>
+<dd class="field-even"><p>Défausse deux cartes</p>
 </dd>
 <dt class="field-odd">CHOIX_TROIS<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Donne le choix entre trois cartes</p>
@@ -188,13 +193,13 @@ carte.</p>
 <dd class="field-even"><p>ce paquet n’existe pas</p>
 </dd>
 <dt class="field-odd">GEISHA_INVALIDES<span class="colon">:</span></dt>
-<dd class="field-odd"><p>cette geisha n’existe pas (doit être un entier entre 0 et NB_GEISHA)</p>
+<dd class="field-odd"><p>cette Geisha n’existe pas (doit être un entier entre 0 et NB_GEISHA - 1)</p>
 </dd>
 <dt class="field-even">JOUEUR_INVALIDE<span class="colon">:</span></dt>
 <dd class="field-even"><p>ce joueur n’existe pas</p>
 </dd>
 <dt class="field-odd">CHOIX_INVALIDE<span class="colon">:</span></dt>
-<dd class="field-odd"><p>vous ne pouvez pas repondre à ce choix</p>
+<dd class="field-odd"><p>vous ne pouvez pas répondre à ce choix</p>
 </dd>
 <dt class="field-even">ACTION_INVALIDE<span class="colon">:</span></dt>
 <dd class="field-even"><p>vous ne pouvez pas jouer cette action maintenant</p>
@@ -286,13 +291,13 @@ carte.</p>
 <dl class="c function">
 <dt class="sig sig-object c" id="c.manche">
 <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">manche</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.manche" title="Lien permanent vers cette définition">¶</a><br /></dt>
-<dd><p>Renvoie le numéro de la manche (indexé à 0)</p>
+<dd><p>Renvoie le numéro de la manche (entre 0 et 2)</p>
 </dd></dl>
 
 <dl class="c function">
 <dt class="sig sig-object c" id="c.tour">
 <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">tour</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.tour" title="Lien permanent vers cette définition">¶</a><br /></dt>
-<dd><p>Renvoie le numéro de la manche (indexé à 0)</p>
+<dd><p>Renvoie le numéro du tour (entre 0 et 7)</p>
 </dd></dl>
 
 <dl class="c function">
@@ -304,12 +309,12 @@ carte.</p>
 <dl class="c function">
 <dt class="sig sig-object c" id="c.nb_carte_validee">
 <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">nb_carte_validee</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.joueur" title="joueur"><span class="n"><span class="pre">joueur</span></span></a><span class="w"> </span><span class="n"><span class="pre">j</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">g</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.nb_carte_validee" title="Lien permanent vers cette définition">¶</a><br /></dt>
-<dd><p>Renvoie le nombre de carte validée par le joueur pour la geisha</p>
+<dd><p>Renvoie le nombre de cartes validées par le joueur pour la Geisha</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>j</strong> – Le joueur</p></li>
-<li><p><strong>g</strong> – La geisha</p></li>
+<li><p><strong>g</strong> – La Geisha</p></li>
 </ul>
 </dd>
 </dl>
@@ -318,11 +323,11 @@ carte.</p>
 <dl class="c function">
 <dt class="sig sig-object c" id="c.possession_geisha">
 <a class="reference internal" href="#c.joueur" title="joueur"><span class="n"><span class="pre">joueur</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">possession_geisha</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">g</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.possession_geisha" title="Lien permanent vers cette définition">¶</a><br /></dt>
-<dd><p>Renvoie qui possède la geisha</p>
+<dd><p>Renvoie qui possède la Geisha</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>g</strong> – La geisha</p></li>
+<li><p><strong>g</strong> – La Geisha</p></li>
 </ul>
 </dd>
 </dl>
@@ -345,7 +350,7 @@ carte.</p>
 <dl class="c function">
 <dt class="sig sig-object c" id="c.nb_cartes">
 <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">nb_cartes</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.joueur" title="joueur"><span class="n"><span class="pre">joueur</span></span></a><span class="w"> </span><span class="n"><span class="pre">j</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.nb_cartes" title="Lien permanent vers cette définition">¶</a><br /></dt>
-<dd><p>Renvoie le nombre de carte que le joueur a</p>
+<dd><p>Renvoie le nombre de cartes que le joueur a</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -364,7 +369,7 @@ carte.</p>
 <dl class="c function">
 <dt class="sig sig-object c" id="c.carte_pioche">
 <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">carte_pioche</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.carte_pioche" title="Lien permanent vers cette définition">¶</a><br /></dt>
-<dd><p>Renvoie la carte que vous avez pioché au début du tour</p>
+<dd><p>Renvoie la carte que vous avez piochée au début du tour</p>
 </dd></dl>
 
 <dl class="c function">
@@ -527,7 +532,7 @@ carte.</p>
 <dl class="c function">
 <dt class="sig sig-object c" id="c.repondre_action_choix_paquets">
 <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">repondre_action_choix_paquets</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.repondre_action_choix_paquets" title="Lien permanent vers cette définition">¶</a><br /></dt>
-<dd><p>Fonction appelée lors du choix entre deux paquet lors de l’action de l’adversaire (cf tour_precedent)</p>
+<dd><p>Fonction appelée lors du choix entre deux paquets lors de l’action de l’adversaire (cf tour_precedent)</p>
 </dd></dl>
 
 <dl class="c function">
