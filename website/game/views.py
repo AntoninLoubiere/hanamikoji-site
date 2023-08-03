@@ -51,22 +51,9 @@ def champion_upload(request):
 
 @login_required
 def match_detail(request,id):
-    matchs =  list(Match.objects.all().order_by("id_match"))
     match_select = get_object_or_404(Match, id_match=id)
-    suiv = None
-    prec = None
-    ind = -1
-    for m in matchs:
-        ind += 1
-        if m.id_match == match_select.id_match:
-            break
-    if ind != len(matchs):
-        if ind < len(matchs)-1:
-            suiv = matchs[ind+1]
-        if ind > 0:
-            prec = matchs[ind-1]
-    else:
-        HttpResponseBadRequest("Erreur")
+    suiv = Match.objects.filter(id_match__gt=id).order_by('id_match').first()
+    prec = Match.objects.filter(id_match__lt=id).order_by('-id_match').first()
     map = ""
     if match_select.status == Match.Status.FINI:
         map = (MATCH_OUT_DIR / str(match_select.id_match) / 'map.txt').read_text()
