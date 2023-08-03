@@ -54,7 +54,7 @@ def compile_champion(champion: Champion):
 
     # On vérifie déjà si c'est une archive
     if champion.code.name.endswith('.zip'):
-        subprocess.run(['unzip', '-o', champion.code.path, '-d', out_dir])
+        subprocess.run(['unzip', '-j', '-o', champion.code.path, '-d', out_dir])
     elif champion.code.name.endswith('.tar.gz') or champion.code.name.endswith('.tgz'):
         subprocess.run(['tar', '-xf', champion.code.path, '-C', out_dir])
     else:
