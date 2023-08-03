@@ -145,8 +145,8 @@ class Match(models.Model):
         EGALITE = 0
 
     id_match = models.AutoField(primary_key=True, unique=True)
-    champion1 = models.ForeignKey(Champion, on_delete=models.PROTECT, related_name='champion1')
-    champion2 = models.ForeignKey(Champion, on_delete=models.PROTECT, related_name='champion2')
+    champion1 = models.ForeignKey(Champion, on_delete=models.CASCADE, related_name='champion1')
+    champion2 = models.ForeignKey(Champion, on_delete=models.CASCADE, related_name='champion2')
     gagnant = models.IntegerField(choices=Gagnant.choices, editable=False, default=Gagnant.NON_FINI)
     status = models.CharField(choices=Status.choices,max_length=2, editable=False, default=Status.EN_ATTENTE,)
     score1 = models.IntegerField(

@@ -166,10 +166,11 @@ def add_match(request: HttpRequest):
             m.champion2 = Champion.objects.get(id=int(request.POST.get('champion2')))
             m.lanceur = request.user
             if m.is_correct():
-                m.champion1.supprimer = False
-                m.champion2.supprimer = False
-                m.champion1.save(compile=False)
-                m.champion2.save(compile=False)
+                if m.champion1.uploader != m.champion2.uploader:
+                    m.champion1.supprimer = False
+                    m.champion2.supprimer = False
+                    m.champion1.save(compile=False)
+                    m.champion2.save(compile=False)
                 m.save()
                 return redirect('match_detail', m.id_match)
             else:
@@ -256,6 +257,8 @@ def tournoi_detail(request,id):
                 i.champion = Champion.objects.get(id=int(request.POST.get('champion')))
                 if i.champion.compilation_status == Champion.Status.FINI:
                     i.tournoi = tournoi
+                    i.champion.supprimer = False
+                    i.champion.save(compile=False)
                     i.save()
                     message = "Le champion a bien été sélectionné"
                 else:
@@ -320,9 +323,24 @@ def update_tournoi(request,id):
 
 @login_required
 def delete_champion_tournoi(request,id,nom):
-    inscrit = Inscrit.objects.get(tournoi=Tournoi.objects.get(id_tournoi=id),champion=Champion.objects.get(nom=nom))
-    inscrit.delete()
-    return redirect('tournoi_detail', id)
+    champion = get_object_or_404(Champion,nom=nom)
+    inscrit = get_object_or_404(Inscrit,tournoi=Tournoi.objects.get(id_tournoi=id),champion=champion)
+    if champion.uploader == request.user:
+        supp = True
+        matchs = Match.objects.filter(
+            Q(champion1__in=champion) |
+            Q(champion2__in=champion)
+        )
+        for m in matchs:
+            if m.champion1.uploader != m.champion2.uploader:
+                supp = False
+                break
+        if supp:
+            champion.supprimer = True
+            champion.save(compile=False)
+        inscrit.delete()
+        return redirect('tournoi_detail', id)
+    return HttpResponseForbidden('Interdit')
 
 
 @login_required
