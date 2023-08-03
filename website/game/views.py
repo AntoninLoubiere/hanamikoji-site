@@ -11,7 +11,6 @@ from  django.db.models import Q
 from authentication.models import User
 
 from django.core.paginator import Paginator
-import datetime
 
 from django.db.models import Count
 
@@ -53,17 +52,14 @@ def champion_upload(request):
 @login_required
 def match_detail(request,id):
     match_select = get_object_or_404(Match, id_match=id)
-    suiv = True
-    try : 
-        match_suiv = Match.objects.get(id_match=id+1)
-    except Match.DoesNotExist :
-        suiv = False
+    suiv = Match.objects.filter(id_match__gt=id).order_by('id_match').first()
+    prec = Match.objects.filter(id_match__lt=id).order_by('-id_match').first()
     map = ""
     if match_select.status == Match.Status.FINI:
         map = (MATCH_OUT_DIR / str(match_select.id_match) / 'map.txt').read_text()
 
 
-    return render(request, 'game/match_detail.html',context={'match':match_select, 'map': map, 'suivant':suiv})
+    return render(request, 'game/match_detail.html',context={'match':match_select, 'map': map, 'suivant':suiv,'precedent':prec})
 
 
 @login_required
@@ -101,8 +97,8 @@ def matchs(request: HttpRequest):
 def champions(request):
     message=''
     champions = None
-    users = User.objects.all()
-
+    users_ids = Champion.objects.all().values_list('uploader', flat=True).all()
+    users = User.objects.filter(id__in = users_ids)
     filter_id = -1
     if request.method == 'POST':
         filter_id = request.POST.get('filter', 'all')
@@ -166,10 +162,11 @@ def add_match(request: HttpRequest):
             m.champion2 = Champion.objects.get(id=int(request.POST.get('champion2')))
             m.lanceur = request.user
             if m.is_correct():
-                m.champion1.supprimer = False
-                m.champion2.supprimer = False
-                m.champion1.save(compile=False)
-                m.champion2.save(compile=False)
+                if m.champion1.uploader != m.champion2.uploader:
+                    m.champion1.supprimer = False
+                    m.champion2.supprimer = False
+                    m.champion1.save(compile=False)
+                    m.champion2.save(compile=False)
                 m.save()
                 return redirect('match_detail', m.id_match)
             else:
@@ -183,13 +180,14 @@ def add_match(request: HttpRequest):
 @login_required
 def delete_champion(request,name):
     champion = Champion.objects.get(nom=name) 
-
-    if request.method == 'POST':
-        champion.delete()
-        return redirect('home')
-    return render(request,
-                    'game/delete_champion.html',
-                    {'champion': champion})
+    if request.user == champion.uploader and champion.supprimer :
+        if request.method == 'POST':
+            champion.delete()
+            return redirect('home')
+        return render(request,
+                        'game/delete_champion.html',
+                        {'champion': champion})
+    return HttpResponseForbidden("Interdit")
 
 @login_required
 def redirection_out(request,id,nb):
@@ -256,6 +254,8 @@ def tournoi_detail(request,id):
                 i.champion = Champion.objects.get(id=int(request.POST.get('champion')))
                 if i.champion.compilation_status == Champion.Status.FINI:
                     i.tournoi = tournoi
+                    i.champion.supprimer = False
+                    i.champion.save(compile=False)
                     i.save()
                     message = "Le champion a bien été sélectionné"
                 else:
@@ -320,9 +320,24 @@ def update_tournoi(request,id):
 
 @login_required
 def delete_champion_tournoi(request,id,nom):
-    inscrit = Inscrit.objects.get(tournoi=Tournoi.objects.get(id_tournoi=id),champion=Champion.objects.get(nom=nom))
-    inscrit.delete()
-    return redirect('tournoi_detail', id)
+    champion = get_object_or_404(Champion,nom=nom)
+    inscrit = get_object_or_404(Inscrit,tournoi=Tournoi.objects.get(id_tournoi=id),champion=champion)
+    if champion.uploader == request.user:
+        supp = True
+        matchs = Match.objects.filter(
+            Q(champion1__in=champion) |
+            Q(champion2__in=champion)
+        )
+        for m in matchs:
+            if m.champion1.uploader != m.champion2.uploader:
+                supp = False
+                break
+        if supp:
+            champion.supprimer = True
+            champion.save(compile=False)
+        inscrit.delete()
+        return redirect('tournoi_detail', id)
+    return HttpResponseForbidden('Interdit')
 
 
 @login_required
