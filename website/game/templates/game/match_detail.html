@@ -3,14 +3,14 @@
 
 {% block content %}
 <div class="nav-matchs">
-    {% if match.id_match != 1 %}
-    <a href="{% url 'match_detail' match.id_match|add:-1 %}">Précédent</a>
+    {% if precedent != None %}
+    <a href="{% url 'match_detail' precedent.id_match %}">Précédent</a>
     {% else %}
     Début
     {% endif %}
     <h1>Match N°{{ match.id_match }}</h1>
-    {% if suivant %}
-    <a href="{% url 'match_detail' match.id_match|add:1 %}">Suivant</a>
+    {% if suivant != None %}
+    <a href="{% url 'match_detail' suivant.id_match %}">Suivant</a>
     {% else %}
     Fin
     {% endif %}

@@ -11,7 +11,6 @@ from  django.db.models import Q
 from authentication.models import User
 
 from django.core.paginator import Paginator
-import datetime
 
 from django.db.models import Count
 
@@ -52,18 +51,28 @@ def champion_upload(request):
 
 @login_required
 def match_detail(request,id):
+    matchs =  list(Match.objects.all().order_by("id_match"))
     match_select = get_object_or_404(Match, id_match=id)
-    suiv = True
-    try : 
-        match_suiv = Match.objects.get(id_match=id+1)
-    except Match.DoesNotExist :
-        suiv = False
+    suiv = None
+    prec = None
+    ind = -1
+    for m in matchs:
+        ind += 1
+        if m.id_match == match_select.id_match:
+            break
+    if ind != len(matchs):
+        if ind < len(matchs)-1:
+            suiv = matchs[ind+1]
+        if ind > 0:
+            prec = matchs[ind-1]
+    else:
+        HttpResponseBadRequest("Erreur")
     map = ""
     if match_select.status == Match.Status.FINI:
         map = (MATCH_OUT_DIR / str(match_select.id_match) / 'map.txt').read_text()
 
 
-    return render(request, 'game/match_detail.html',context={'match':match_select, 'map': map, 'suivant':suiv})
+    return render(request, 'game/match_detail.html',context={'match':match_select, 'map': map, 'suivant':suiv,'precedent':prec})
 
 
 @login_required
@@ -101,8 +110,8 @@ def matchs(request: HttpRequest):
 def champions(request):
     message=''
     champions = None
-    users = User.objects.all()
-
+    users_ids = Champion.objects.all().values_list('uploader', flat=True).all()
+    users = User.objects.filter(id__in = users_ids)
     filter_id = -1
     if request.method == 'POST':
         filter_id = request.POST.get('filter', 'all')
