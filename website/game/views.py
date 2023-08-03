@@ -184,13 +184,14 @@ def add_match(request: HttpRequest):
 @login_required
 def delete_champion(request,name):
     champion = Champion.objects.get(nom=name) 
-
-    if request.method == 'POST':
-        champion.delete()
-        return redirect('home')
-    return render(request,
-                    'game/delete_champion.html',
-                    {'champion': champion})
+    if request.user == champion.uploader and champion.supprimer :
+        if request.method == 'POST':
+            champion.delete()
+            return redirect('home')
+        return render(request,
+                        'game/delete_champion.html',
+                        {'champion': champion})
+    return HttpResponseForbidden("Interdit")
 
 @login_required
 def redirection_out(request,id,nb):
