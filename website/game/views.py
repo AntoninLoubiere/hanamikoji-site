@@ -323,3 +323,12 @@ def delete_champion_tournoi(request,id,nom):
     inscrit = Inscrit.objects.get(tournoi=Tournoi.objects.get(id_tournoi=id),champion=Champion.objects.get(nom=nom))
     inscrit.delete()
     return redirect('tournoi_detail', id)
+
+
+@login_required
+def champion_detail(request, name):
+    champion = get_object_or_404(Champion,nom=name)
+    if champion.uploader != request.user and not request.user.is_superuser:
+        return HttpResponseForbidden('Interdit')
+
+    return render(request, 'game/champion_detail.html', context={'champion': champion})
