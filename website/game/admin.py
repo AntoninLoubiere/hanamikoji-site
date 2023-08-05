@@ -13,8 +13,14 @@ class ChampionAdmin(admin.ModelAdmin):
 @admin.register(Match)
 class MatchAdmin(admin.ModelAdmin):
     readonly_fields = ('status', 'date', 'score1', 'score2', 'gagnant', 'task_link', 'map_link', 'champion_1_out', 'champion_2_out')
-    list_display = ('__str__', 'status', 'score1', 'score2', 'gagnant', 'tournoi')
+    list_display = ('__str__', 'status', 'score1', 'score2', 'gagnant', 'tournoi', 'lanceur')
     list_filter = ('status', 'tournoi', 'gagnant', 'champion1', 'champion2')
+    actions = ('relancer',)
+
+    def relancer(modeladmin, _, queryset):
+        queryset.update(status=Match.Status.EN_ATTENTE)
+        for m in queryset:
+            m.launch_match()
 
 
 @admin.register(Tournoi)

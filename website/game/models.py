@@ -173,7 +173,10 @@ class Match(models.Model):
 
         super().save(*args, **kwargs)
         if run:
-            async_task('game.tasks.run_match', self, hook='game.tasks.on_end_match', group="match")
+            self.launch_match()
+
+    def launch_match(self):
+        async_task('game.tasks.run_match', self, hook='game.tasks.on_end_match', group="match")
 
     @admin.display(description="Match task")
     def task_link(self):
