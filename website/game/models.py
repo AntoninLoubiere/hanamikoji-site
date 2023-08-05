@@ -20,6 +20,10 @@ def task_link_view(t: Task):
 def format_link(link, content):
     return format_html(f'<a href="{link}">{content}</a>')
 
+def even(v):
+    if v % 2 == 1:
+        raise ValidationError("Un entier pair est attendu !")
+
 
 class Champion(models.Model):
     class Status(models.TextChoices):
@@ -72,6 +76,7 @@ class Tournoi(models.Model):
     id_tournoi = models.AutoField(primary_key=True, unique=True)
     status = models.CharField(choices=Status.choices,max_length=2, default=Status.EN_ATTENTE,)
     max_champions = models.IntegerField(default=3)
+    nb_matchs = models.IntegerField(default=10, validators=[even])
     date_lancement = models.DateTimeField(validators=[valide_date], null=True, blank=True)
     schedule = models.ForeignKey(Schedule, blank=True, null=True, default=None, on_delete=models.SET_NULL)
 
