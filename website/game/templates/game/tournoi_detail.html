@@ -32,6 +32,7 @@
     <script src="{% static 'game/timer.js' %}"></script>
     {% endif %}
     {% if tournoi.status == 'LP' or tournoi.status == 'EA' %}
+    <div class="content-text-center">Nombre de matchs par rencontre {{ tournoi.nb_matchs }} ({{ nb_matchs }} matchs au total)</div>
     <table>
         <caption>{{ champions_select.count }}/{{ tournoi.max_champions }} champions sélectionnés</caption>
         <tr>
