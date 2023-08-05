@@ -203,7 +203,7 @@ def redirection_out(request,id,nb):
     if champion.uploader_id == request.user.id or request.user.is_superuser:
         response = HttpResponse()
         response["Content-Type"] = "text/plain"
-        response["Content-Disposition"] = f"attachment; filename=match_{id}_champion{nb}.out.txt"
+        response["Content-Disposition"] = f"inline; filename=match_{id}_champion{nb}.out.txt"
         response["X-Accel-Redirect"] = f"/media/match/{id}/champion{nb}.out.txt"
         return response
     return HttpResponseForbidden("Interdit")
