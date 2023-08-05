@@ -17,7 +17,7 @@ static PyObject* champ_module;
 typedef enum action
 {
     VALIDER, ///< Valide une unique carte
-    DEFAUSSER, ///< Defausse deux cartes
+    DEFAUSSER, ///< Défausse deux cartes
     CHOIX_TROIS, ///< Donne le choix entre trois cartes
     CHOIX_PAQUETS, ///< Donne le choix entre deux paquets de deux cartes
     PREMIER_JOUEUR, ///< Aucune action n'a été jouée (utilisé dans tour_precedent)
@@ -30,9 +30,9 @@ typedef enum error
     ACTION_DEJA_JOUEE, ///< l'action a déjà été jouée
     CARTES_INVALIDES, ///< vous ne pouvez pas jouer ces cartes
     PAQUET_INVALIDE, ///< ce paquet n'existe pas
-    GEISHA_INVALIDES, ///< cette geisha n'existe pas (doit être un entier entre 0 et NB_GEISHA)
+    GEISHA_INVALIDES, ///< cette Geisha n'existe pas (doit être un entier entre 0 et NB_GEISHA - 1)
     JOUEUR_INVALIDE, ///< ce joueur n'existe pas
-    CHOIX_INVALIDE, ///< vous ne pouvez pas repondre à ce choix
+    CHOIX_INVALIDE, ///< vous ne pouvez pas répondre à ce choix
     ACTION_INVALIDE, ///< vous ne pouvez pas jouer cette action maintenant
 } error;
 
@@ -62,32 +62,33 @@ joueur api_id_joueur();
 /// Renvoie l'identifiant de l'adversaire
 joueur api_id_adversaire();
 
-/// Renvoie le numéro de la manche
+/// Renvoie le numéro de la manche (entre 0 et 2)
 int api_manche();
 
-/// Renvoie le numéro de la manche
+/// Renvoie le numéro du tour (entre 0 et 7)
 int api_tour();
 
 /// Renvoie l'action jouée par l'adversaire
 action_jouee api_tour_precedent();
 
-/// Renvoie le nombre de carte validée par le joueur pour la geisha
-int api_nb_carte_validee(joueur j, int g);
+/// Renvoie le nombre de cartes validées par le joueur pour la Geisha (la carte
+/// validée secrètement n'est pas prise en compte)
+int api_nb_cartes_validees(joueur j, int g);
 
-/// Renvoie qui possède la geisha
+/// Renvoie qui possède la Geisha
 joueur api_possession_geisha(int g);
 
 /// Renvoie si l'action a déjà été jouée par le joueur
 bool api_est_jouee_action(joueur j, action a);
 
-/// Renvoie le nombre de carte que le joueur a
+/// Renvoie le nombre de cartes que le joueur a
 int api_nb_cartes(joueur j);
 
 /// Renvoie les cartes que vous avez
 std::vector<int> api_cartes_en_main();
 
-/// Renvoie la carte que vous avez pioché au début du tour
-int api_carte_pioche();
+/// Renvoie la carte que vous avez piochée au début du tour
+int api_carte_piochee();
 
 /// Jouer l'action valider une carte
 error api_action_valider(int c);
@@ -401,7 +402,7 @@ static PyObject* p_id_adversaire(PyObject* /* self */, PyObject* args)
 }
 
 // Python native wrapper for function manche.
-// Renvoie le numéro de la manche
+// Renvoie le numéro de la manche (entre 0 et 2)
 static PyObject* p_manche(PyObject* /* self */, PyObject* args)
 {
     if (!PyArg_ParseTuple(args, ""))
@@ -417,7 +418,7 @@ static PyObject* p_manche(PyObject* /* self */, PyObject* args)
 }
 
 // Python native wrapper for function tour.
-// Renvoie le numéro de la manche
+// Renvoie le numéro du tour (entre 0 et 7)
 static PyObject* p_tour(PyObject* /* self */, PyObject* args)
 {
     if (!PyArg_ParseTuple(args, ""))
@@ -448,9 +449,10 @@ static PyObject* p_tour_precedent(PyObject* /* self */, PyObject* args)
     }
 }
 
-// Python native wrapper for function nb_carte_validee.
-// Renvoie le nombre de carte validée par le joueur pour la geisha
-static PyObject* p_nb_carte_validee(PyObject* /* self */, PyObject* args)
+// Python native wrapper for function nb_cartes_validees.
+// Renvoie le nombre de cartes validées par le joueur pour la Geisha (la carte
+// validée secrètement n'est pas prise en compte)
+static PyObject* p_nb_cartes_validees(PyObject* /* self */, PyObject* args)
 {
     PyObject* arg_j;
     PyObject* arg_g;
@@ -460,14 +462,14 @@ static PyObject* p_nb_carte_validee(PyObject* /* self */, PyObject* args)
     }
 
     try {
-        return cxx_to_python<PyObject*, int>(api_nb_carte_validee(python_to_cxx<PyObject*, joueur>(arg_j), python_to_cxx<PyObject*, int>(arg_g)));
+        return cxx_to_python<PyObject*, int>(api_nb_cartes_validees(python_to_cxx<PyObject*, joueur>(arg_j), python_to_cxx<PyObject*, int>(arg_g)));
     } catch (...) {
         return nullptr;
     }
 }
 
 // Python native wrapper for function possession_geisha.
-// Renvoie qui possède la geisha
+// Renvoie qui possède la Geisha
 static PyObject* p_possession_geisha(PyObject* /* self */, PyObject* args)
 {
     PyObject* arg_g;
@@ -502,7 +504,7 @@ static PyObject* p_est_jouee_action(PyObject* /* self */, PyObject* args)
 }
 
 // Python native wrapper for function nb_cartes.
-// Renvoie le nombre de carte que le joueur a
+// Renvoie le nombre de cartes que le joueur a
 static PyObject* p_nb_cartes(PyObject* /* self */, PyObject* args)
 {
     PyObject* arg_j;
@@ -534,9 +536,9 @@ static PyObject* p_cartes_en_main(PyObject* /* self */, PyObject* args)
     }
 }
 
-// Python native wrapper for function carte_pioche.
-// Renvoie la carte que vous avez pioché au début du tour
-static PyObject* p_carte_pioche(PyObject* /* self */, PyObject* args)
+// Python native wrapper for function carte_piochee.
+// Renvoie la carte que vous avez piochée au début du tour
+static PyObject* p_carte_piochee(PyObject* /* self */, PyObject* args)
 {
     if (!PyArg_ParseTuple(args, ""))
     {
@@ -544,7 +546,7 @@ static PyObject* p_carte_pioche(PyObject* /* self */, PyObject* args)
     }
 
     try {
-        return cxx_to_python<PyObject*, int>(api_carte_pioche());
+        return cxx_to_python<PyObject*, int>(api_carte_piochee());
     } catch (...) {
         return nullptr;
     }
@@ -737,12 +739,12 @@ static PyMethodDef api_callback[] = {
     {"manche", p_manche, METH_VARARGS, "manche"},
     {"tour", p_tour, METH_VARARGS, "tour"},
     {"tour_precedent", p_tour_precedent, METH_VARARGS, "tour_precedent"},
-    {"nb_carte_validee", p_nb_carte_validee, METH_VARARGS, "nb_carte_validee"},
+    {"nb_cartes_validees", p_nb_cartes_validees, METH_VARARGS, "nb_cartes_validees"},
     {"possession_geisha", p_possession_geisha, METH_VARARGS, "possession_geisha"},
     {"est_jouee_action", p_est_jouee_action, METH_VARARGS, "est_jouee_action"},
     {"nb_cartes", p_nb_cartes, METH_VARARGS, "nb_cartes"},
     {"cartes_en_main", p_cartes_en_main, METH_VARARGS, "cartes_en_main"},
-    {"carte_pioche", p_carte_pioche, METH_VARARGS, "carte_pioche"},
+    {"carte_piochee", p_carte_piochee, METH_VARARGS, "carte_piochee"},
     {"action_valider", p_action_valider, METH_VARARGS, "action_valider"},
     {"action_defausser", p_action_defausser, METH_VARARGS, "action_defausser"},
     {"action_choix_trois", p_action_choix_trois, METH_VARARGS, "action_choix_trois"},

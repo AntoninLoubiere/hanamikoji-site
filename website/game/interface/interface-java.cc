@@ -19,7 +19,7 @@ struct Champion
 typedef enum action
 {
     VALIDER, ///< Valide une unique carte
-    DEFAUSSER, ///< Defausse deux cartes
+    DEFAUSSER, ///< Défausse deux cartes
     CHOIX_TROIS, ///< Donne le choix entre trois cartes
     CHOIX_PAQUETS, ///< Donne le choix entre deux paquets de deux cartes
     PREMIER_JOUEUR, ///< Aucune action n'a été jouée (utilisé dans tour_precedent)
@@ -37,9 +37,9 @@ typedef enum error
     ACTION_DEJA_JOUEE, ///< l'action a déjà été jouée
     CARTES_INVALIDES, ///< vous ne pouvez pas jouer ces cartes
     PAQUET_INVALIDE, ///< ce paquet n'existe pas
-    GEISHA_INVALIDES, ///< cette geisha n'existe pas (doit être un entier entre 0 et NB_GEISHA)
+    GEISHA_INVALIDES, ///< cette Geisha n'existe pas (doit être un entier entre 0 et NB_GEISHA - 1)
     JOUEUR_INVALIDE, ///< ce joueur n'existe pas
-    CHOIX_INVALIDE, ///< vous ne pouvez pas repondre à ce choix
+    CHOIX_INVALIDE, ///< vous ne pouvez pas répondre à ce choix
     ACTION_INVALIDE, ///< vous ne pouvez pas jouer cette action maintenant
 } error;
 
@@ -98,12 +98,12 @@ extern "C" joueur api_id_adversaire();
 extern "C" int api_manche();
 extern "C" int api_tour();
 extern "C" action_jouee api_tour_precedent();
-extern "C" int api_nb_carte_validee(joueur j, int g);
+extern "C" int api_nb_cartes_validees(joueur j, int g);
 extern "C" joueur api_possession_geisha(int g);
 extern "C" bool api_est_jouee_action(joueur j, action a);
 extern "C" int api_nb_cartes(joueur j);
 extern "C" std::vector<int> api_cartes_en_main();
-extern "C" int api_carte_pioche();
+extern "C" int api_carte_piochee();
 extern "C" error api_action_valider(int c);
 extern "C" error api_action_defausser(int c1, int c2);
 extern "C" error api_action_choix_trois(int c1, int c2, int c3);
@@ -393,9 +393,9 @@ jobject tour_precedent(JNIEnv*, jobject)
     return cxx_to_java<action_jouee, jobject>(api_tour_precedent());
 }
 
-jint nb_carte_validee(JNIEnv*, jobject, jobject j, jint g)
+jint nb_cartes_validees(JNIEnv*, jobject, jobject j, jint g)
 {
-    return cxx_to_java<int, jint>(api_nb_carte_validee(java_to_cxx<jobject, joueur>(j), java_to_cxx<jint, int>(g)));
+    return cxx_to_java<int, jint>(api_nb_cartes_validees(java_to_cxx<jobject, joueur>(j), java_to_cxx<jint, int>(g)));
 }
 
 jobject possession_geisha(JNIEnv*, jobject, jint g)
@@ -418,9 +418,9 @@ jarray cartes_en_main(JNIEnv*, jobject)
     return cxx_to_java_array<int, jint>(api_cartes_en_main());
 }
 
-jint carte_pioche(JNIEnv*, jobject)
+jint carte_piochee(JNIEnv*, jobject)
 {
-    return cxx_to_java<int, jint>(api_carte_pioche());
+    return cxx_to_java<int, jint>(api_carte_piochee());
 }
 
 jobject action_valider(JNIEnv*, jobject, jint c)
@@ -577,12 +577,12 @@ static void _register_native_methods(JNIEnv* env)
         {(char*)"manche", (char*)"()I", (void*)&manche},
         {(char*)"tour", (char*)"()I", (void*)&tour},
         {(char*)"tour_precedent", (char*)"()LActionJouee;", (void*)&tour_precedent},
-        {(char*)"nb_carte_validee", (char*)"(LJoueur;I)I", (void*)&nb_carte_validee},
+        {(char*)"nb_cartes_validees", (char*)"(LJoueur;I)I", (void*)&nb_cartes_validees},
         {(char*)"possession_geisha", (char*)"(I)LJoueur;", (void*)&possession_geisha},
         {(char*)"est_jouee_action", (char*)"(LJoueur;LAction;)Z", (void*)&est_jouee_action},
         {(char*)"nb_cartes", (char*)"(LJoueur;)I", (void*)&nb_cartes},
         {(char*)"cartes_en_main", (char*)"()[I", (void*)&cartes_en_main},
-        {(char*)"carte_pioche", (char*)"()I", (void*)&carte_pioche},
+        {(char*)"carte_piochee", (char*)"()I", (void*)&carte_piochee},
         {(char*)"action_valider", (char*)"(I)LError;", (void*)&action_valider},
         {(char*)"action_defausser", (char*)"(II)LError;", (void*)&action_defausser},
         {(char*)"action_choix_trois", (char*)"(III)LError;", (void*)&action_choix_trois},
