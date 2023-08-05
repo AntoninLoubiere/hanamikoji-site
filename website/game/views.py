@@ -267,10 +267,12 @@ def tournoi_detail(request,id):
 
 
     inscrits = Inscrit.objects.filter(tournoi=tournoi).order_by("classement")
-    matchs = Match.objects.filter(tournoi=tournoi).order_by("champion1","champion2")
+    matchs = Match.objects.filter(tournoi=tournoi).order_by("id_match")
     champions_select = inscrits.filter(champion__uploader=request.user)
-    champions_selected_ids = champions_select.values_list('champion', flat=True).all()
-    champions_non_select = Champion.objects.filter(uploader=request.user, compilation_status=Champion.Status.FINI).exclude(id__in=champions_selected_ids).order_by("-date")
+    champions_non_select = []
+    if tournoi.status == Tournoi.Status.LANCEMENT_PROGRAMMÉ or tournoi.status == Tournoi.Status.EN_ATTENTE:
+        champions_selected_ids = champions_select.values_list('champion', flat=True).all()
+        champions_non_select = Champion.objects.filter(uploader=request.user, compilation_status=Champion.Status.FINI).exclude(id__in=champions_selected_ids).order_by("-date")
 
     termine = 0
     match_matrix = None
@@ -287,17 +289,17 @@ def tournoi_detail(request,id):
         user_to_classement = {}
         for i in inscrits:
             user_to_classement[i.champion.pk] = len(match_matrix)
-            match_matrix.append((i, [None] * nb_ins))
+            match_matrix.append((i, [[] for _ in range(nb_ins)]))
 
         for m in matchs:
-            match_matrix[user_to_classement[m.champion1.pk]][1][user_to_classement[m.champion2.pk]] = m
+            match_matrix[user_to_classement[m.champion1.pk]][1][user_to_classement[m.champion2.pk]].append(m)
 
 
     return render(request,'game/tournoi_detail.html',context={
         'tournoi':tournoi,'inscrits':inscrits, 'matchs':matchs,'termine':termine,'nb_matchs':nb_matchs,
         'match_matrix': match_matrix, 'champions_select': champions_select,
         'champions_non_select': champions_non_select, 'nb_select': champions_select.count(),
-        'message': message, 'timer': tournoi.date_lancement.isoformat()})
+        'message': message, 'timer': tournoi.date_lancement.isoformat() if tournoi.status == Tournoi.Status.LANCEMENT_PROGRAMMÉ else ''})
 
 @login_required
 def update_tournoi(request,id):

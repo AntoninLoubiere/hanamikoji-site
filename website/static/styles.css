@@ -142,12 +142,12 @@ table {
     margin: auto;
         margin-top: 1.5rem;
     border-collapse: collapse;
-    width: 75%;
+    width: 75vw;
 }
 
 th,
 td {
-    padding: 15px;
+    padding: 1rem;
 }
 table tbody tr:nth-child(odd) {
     background: #eb6969cc;
@@ -156,7 +156,7 @@ table tbody tr:nth-child(odd) {
 }
 
 caption {
-    margin-bottom: 15px;
+    margin-bottom: 1rem;
     font-size: 2.5em;
     text-decoration: underline;
 }
@@ -357,23 +357,28 @@ caption {
     color: red;
 }
 
-.match a {
+.matchs-td {
+    padding: 0;
+}
+
+.matchs-td a {
     color: black;
+    display: block;
 }
 
 .match-inexistant {
     background: gray;
 }
 
-.match-won {
+.match-gagnant-1 {
     background: hsl(109, 76%, 67%)
 }
 
-.match-egalite {
+.match-gagnant-0 {
     background-color: hsl(40, 98%, 60%);
 }
 
-.match-lost {
+.match-gagnant-2 {
     background-color: hsl(0, 85%, 67%);
 }
 

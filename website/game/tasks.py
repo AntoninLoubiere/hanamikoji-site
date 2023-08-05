@@ -296,12 +296,13 @@ def launch_tournoi(tournoi_id: str):
     inscrits = Inscrit.objects.filter(tournoi=tournoi)
     nb = inscrits.count()
     matchs = []
-    for i in range(nb):
-        for j in range(i + 1, nb):
-            ins1 = inscrits[i]
-            ins2 = inscrits[j]
-            matchs.append(Match(champion1=ins1.champion, champion2=ins2.champion, tournoi=tournoi))
-            matchs.append(Match(champion1=ins2.champion, champion2=ins1.champion, tournoi=tournoi))
+    for _ in range(tournoi.nb_matchs // 2):
+        for i in range(nb):
+            for j in range(i + 1, nb):
+                ins1 = inscrits[i]
+                ins2 = inscrits[j]
+                matchs.append(Match(champion1=ins1.champion, champion2=ins2.champion, tournoi=tournoi))
+                matchs.append(Match(champion1=ins2.champion, champion2=ins1.champion, tournoi=tournoi))
 
 
     tournoi.status = Tournoi.Status.EN_COURS
