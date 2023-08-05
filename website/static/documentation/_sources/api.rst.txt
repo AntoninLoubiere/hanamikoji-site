@@ -29,7 +29,7 @@ Constantes
   :Valeur: 7
   :Description:
     Les 7 Geisha (2, 2, 2, 3, 3, 4, 5)
-.. c:var:: int NB_CARTES_TOTAL
+.. c:var:: int NB_CARTES_TOTALES
 
   :Valeur: 21
   :Description:
@@ -173,9 +173,9 @@ Fonctions
 
 
 
-.. c:function:: int nb_carte_validee(joueur j, int g)
+.. c:function:: int nb_cartes_validees(joueur j, int g)
 
-    Renvoie le nombre de cartes validées par le joueur pour la Geisha
+    Renvoie le nombre de cartes validées par le joueur pour la Geisha (la carte validée secrètement n'est pas prise en compte)
 
 
 
@@ -214,7 +214,7 @@ Fonctions
 
 
 
-.. c:function:: int carte_pioche()
+.. c:function:: int carte_piochee()
 
     Renvoie la carte que vous avez piochée au début du tour
 
