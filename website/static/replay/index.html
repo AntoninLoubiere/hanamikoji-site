@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hanamikoji : replay</title>
+</head>
+<body style="background-image: url('./assets/bg.jpg')">
+
+    <img id="geisha_2_violet" src="./assets/geishas/geisha_2_violet.jpg" style="position:absolute; top:50%; transform: translate(300px, -45%); scale: 120%;">
+    <img id="geisha_2_rouge" src="./assets/geishas/geisha_2_rouge.jpg" style="position:absolute; top:50%; transform: translate(450px, -45%); scale: 120%;">
+    <img id="geisha_2_jaune" src="./assets/geishas/geisha_2_jaune.jpg" style="position:absolute; top:50%; transform: translate(600px, -45%); scale: 120%;">
+    <img id="geisha_3_bleu" src="./assets/geishas/geisha_3_bleu.jpg" style="position:absolute; top:50%; transform: translate(750px, -45%); scale: 120%;">
+    <img id="geisha_3_orange" src="./assets/geishas/geisha_3_orange.jpg" style="position:absolute; top:50%; transform: translate(900px, -45%); scale: 120%;">
+    <img id="geisha_4_vert" src="./assets/geishas/geisha_4_vert.jpg" style="position:absolute; top:50%; transform: translate(1050px, -45%); scale: 120%;">
+    <img id="geisha_5_rose" src="./assets/geishas/geisha_5_rose.jpg" style="position:absolute; top:50%; transform: translate(1200px, -45%); scale: 120%;">
+
+    <!-- translateY(+- 100%) selon son état -->
+    <img id="marker1" src="./assets/marker.png" style="position:absolute; top:55%; transition:transform 1s; transform: translate(670px,  -210%); scale:54%">
+    <img id="marker2" src="./assets/marker.png" style="position:absolute; top:55%; transition:transform 1s; transform: translate(1005px, -210%); scale:54%">
+    <img id="marker3" src="./assets/marker.png" style="position:absolute; top:55%; transition:transform 1s; transform: translate(1340px, -210%); scale:54%">
+    <img id="marker4" src="./assets/marker.png" style="position:absolute; top:55%; transition:transform 1s; transform: translate(1675px, -210%); scale:54%">
+    <img id="marker5" src="./assets/marker.png" style="position:absolute; top:55%; transition:transform 1s; transform: translate(2010px, -210%); scale:54%">
+    <img id="marker6" src="./assets/marker.png" style="position:absolute; top:55%; transition:transform 1s; transform: translate(2345px, -210%); scale:54%">
+    <img id="marker7" src="./assets/marker.png" style="position:absolute; top:55%; transition:transform 1s; transform: translate(2680px, -210%); scale:54%">
+    
+    <img id="pioche" src="./assets/cartes/dos_carte.jpg" style="position:absolute; top:50%; transform:translate(80px, -80%); scale:65%">
+
+    <img id="B1" src="./assets/actions/B1.jpg" style="position:absolute; transition:transform 1s, scale 1s; transform:translate(2000px, 0px); top:8%; scale:80%">
+    <img id="B2" src="./assets/actions/B2.jpg" style="position:absolute; transition:transform 1s, scale 1s; transform:translate(2135px, 0px); top:8%; scale:80%">
+    <img id="B3" src="./assets/actions/B3.jpg" style="position:absolute; transition:transform 1s, scale 1s; transform:translate(2000px, 0px); top:18%; scale:80%">
+    <img id="B4" src="./assets/actions/B4.jpg" style="position:absolute; transition:transform 1s, scale 1s; transform:translate(2135px, 0px); top:18%; scale:80%">
+
+    <img id="A1" src="./assets/actions/A1.jpg" style="position:absolute; top:73%; transition:transform 1s, scale 1s; transform:translateX(2000px); scale:80%">
+    <img id="A2" src="./assets/actions/A2.jpg" style="position:absolute; top:73%; transition:transform 1s, scale 1s; transform:translateX(2135px); scale:80%">
+    <img id="A3" src="./assets/actions/A3.jpg" style="position:absolute; top:83%; transition:transform 1s, scale 1s; transform:translateX(2000px); scale:80%">
+    <img id="A4" src="./assets/actions/A4.jpg" style="position:absolute; top:83%; transition:transform 1s, scale 1s; transform:translateX(2135px); scale:80%">
+    
+    <button id="pause" onclick="toggle_pause()" style="position:absolute; width:64px; height:64px; transform:translate(20px, 20px); background-image:url('./assets/pause.png'); background-size:cover; background-color: white; border-radius: 70%; border:none;"></button>
+    <div id="j1" style="top:90.4%; position:absolute; transform: translateX(120px); color:rgb(200, 200, 200)"></div>
+    <div id="j2" style="top:-1%; position:absolute; transform: translateX(120px); color:rgb(200, 200, 200)"></div>
+
+    <script src="main.js"></script>
+
+</body>
+</html>
