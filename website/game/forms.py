@@ -11,7 +11,7 @@ class ChampionsForm(forms.ModelForm):
 class TournoisForm(forms.ModelForm):
     class Meta:
         model = models.Tournoi
-        fields = ['max_champions','date_lancement']
+        fields = ['max_champions','date_lancement', 'nb_matchs']
         widgets = {'date_lancement': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
 }
 
