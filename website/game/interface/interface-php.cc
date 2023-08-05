@@ -15,7 +15,7 @@
 typedef enum action
 {
     VALIDER, ///< Valide une unique carte
-    DEFAUSSER, ///< Defausse deux cartes
+    DEFAUSSER, ///< Défausse deux cartes
     CHOIX_TROIS, ///< Donne le choix entre trois cartes
     CHOIX_PAQUETS, ///< Donne le choix entre deux paquets de deux cartes
     PREMIER_JOUEUR, ///< Aucune action n'a été jouée (utilisé dans tour_precedent)
@@ -28,9 +28,9 @@ typedef enum error
     ACTION_DEJA_JOUEE, ///< l'action a déjà été jouée
     CARTES_INVALIDES, ///< vous ne pouvez pas jouer ces cartes
     PAQUET_INVALIDE, ///< ce paquet n'existe pas
-    GEISHA_INVALIDES, ///< cette geisha n'existe pas (doit être un entier entre 0 et NB_GEISHA)
+    GEISHA_INVALIDES, ///< cette Geisha n'existe pas (doit être un entier entre 0 et NB_GEISHA - 1)
     JOUEUR_INVALIDE, ///< ce joueur n'existe pas
-    CHOIX_INVALIDE, ///< vous ne pouvez pas repondre à ce choix
+    CHOIX_INVALIDE, ///< vous ne pouvez pas répondre à ce choix
     ACTION_INVALIDE, ///< vous ne pouvez pas jouer cette action maintenant
 } error;
 
@@ -60,32 +60,33 @@ joueur api_id_joueur();
 /// Renvoie l'identifiant de l'adversaire
 joueur api_id_adversaire();
 
-/// Renvoie le numéro de la manche
+/// Renvoie le numéro de la manche (entre 0 et 2)
 int api_manche();
 
-/// Renvoie le numéro de la manche
+/// Renvoie le numéro du tour (entre 0 et 7)
 int api_tour();
 
 /// Renvoie l'action jouée par l'adversaire
 action_jouee api_tour_precedent();
 
-/// Renvoie le nombre de carte validée par le joueur pour la geisha
-int api_nb_carte_validee(joueur j, int g);
+/// Renvoie le nombre de cartes validées par le joueur pour la Geisha (la carte
+/// validée secrètement n'est pas prise en compte)
+int api_nb_cartes_validees(joueur j, int g);
 
-/// Renvoie qui possède la geisha
+/// Renvoie qui possède la Geisha
 joueur api_possession_geisha(int g);
 
 /// Renvoie si l'action a déjà été jouée par le joueur
 bool api_est_jouee_action(joueur j, action a);
 
-/// Renvoie le nombre de carte que le joueur a
+/// Renvoie le nombre de cartes que le joueur a
 int api_nb_cartes(joueur j);
 
 /// Renvoie les cartes que vous avez
 std::vector<int> api_cartes_en_main();
 
-/// Renvoie la carte que vous avez pioché au début du tour
-int api_carte_pioche();
+/// Renvoie la carte que vous avez piochée au début du tour
+int api_carte_piochee();
 
 /// Jouer l'action valider une carte
 error api_action_valider(int c);
@@ -408,7 +409,7 @@ PHP_FUNCTION(php_api_id_adversaire)
 ZEND_BEGIN_ARG_INFO_EX(php_arginfo_id_adversaire, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-// Renvoie le numéro de la manche
+// Renvoie le numéro de la manche (entre 0 et 2)
 PHP_FUNCTION(php_api_manche)
 {
     (void) execute_data;
@@ -423,7 +424,7 @@ PHP_FUNCTION(php_api_manche)
 ZEND_BEGIN_ARG_INFO_EX(php_arginfo_manche, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-// Renvoie le numéro de la manche
+// Renvoie le numéro du tour (entre 0 et 7)
 PHP_FUNCTION(php_api_tour)
 {
     (void) execute_data;
@@ -453,8 +454,9 @@ PHP_FUNCTION(php_api_tour_precedent)
 ZEND_BEGIN_ARG_INFO_EX(php_arginfo_tour_precedent, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-// Renvoie le nombre de carte validée par le joueur pour la geisha
-PHP_FUNCTION(php_api_nb_carte_validee)
+// Renvoie le nombre de cartes validées par le joueur pour la Geisha (la carte
+// validée secrètement n'est pas prise en compte)
+PHP_FUNCTION(php_api_nb_cartes_validees)
 {
     (void) execute_data;
     zval* arg_j;
@@ -466,19 +468,19 @@ PHP_FUNCTION(php_api_nb_carte_validee)
     }
 
     try {
-        zval ret = cxx_to_php<zval, int>(api_nb_carte_validee(php_to_cxx<zval*, joueur>(arg_j), php_to_cxx<zval*, int>(arg_g)));
+        zval ret = cxx_to_php<zval, int>(api_nb_cartes_validees(php_to_cxx<zval*, joueur>(arg_j), php_to_cxx<zval*, int>(arg_g)));
         RETURN_ZVAL(&ret, 0, 0);
     } catch (...) {
         RETURN_NULL();
     }
 }
 
-ZEND_BEGIN_ARG_INFO_EX(php_arginfo_nb_carte_validee, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(php_arginfo_nb_cartes_validees, 0, 0, 2)
     ZEND_ARG_INFO(0, j)
     ZEND_ARG_INFO(0, g)
 ZEND_END_ARG_INFO()
 
-// Renvoie qui possède la geisha
+// Renvoie qui possède la Geisha
 PHP_FUNCTION(php_api_possession_geisha)
 {
     (void) execute_data;
@@ -526,7 +528,7 @@ ZEND_BEGIN_ARG_INFO_EX(php_arginfo_est_jouee_action, 0, 0, 2)
     ZEND_ARG_INFO(0, a)
 ZEND_END_ARG_INFO()
 
-// Renvoie le nombre de carte que le joueur a
+// Renvoie le nombre de cartes que le joueur a
 PHP_FUNCTION(php_api_nb_cartes)
 {
     (void) execute_data;
@@ -564,19 +566,19 @@ PHP_FUNCTION(php_api_cartes_en_main)
 ZEND_BEGIN_ARG_INFO_EX(php_arginfo_cartes_en_main, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-// Renvoie la carte que vous avez pioché au début du tour
-PHP_FUNCTION(php_api_carte_pioche)
+// Renvoie la carte que vous avez piochée au début du tour
+PHP_FUNCTION(php_api_carte_piochee)
 {
     (void) execute_data;
     try {
-        zval ret = cxx_to_php<zval, int>(api_carte_pioche());
+        zval ret = cxx_to_php<zval, int>(api_carte_piochee());
         RETURN_ZVAL(&ret, 0, 0);
     } catch (...) {
         RETURN_NULL();
     }
 }
 
-ZEND_BEGIN_ARG_INFO_EX(php_arginfo_carte_pioche, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(php_arginfo_carte_piochee, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 // Jouer l'action valider une carte
@@ -828,12 +830,12 @@ static zend_function_entry api_callback[] = {
     PHP_FALIAS(manche, php_api_manche, php_arginfo_manche)
     PHP_FALIAS(tour, php_api_tour, php_arginfo_tour)
     PHP_FALIAS(tour_precedent, php_api_tour_precedent, php_arginfo_tour_precedent)
-    PHP_FALIAS(nb_carte_validee, php_api_nb_carte_validee, php_arginfo_nb_carte_validee)
+    PHP_FALIAS(nb_cartes_validees, php_api_nb_cartes_validees, php_arginfo_nb_cartes_validees)
     PHP_FALIAS(possession_geisha, php_api_possession_geisha, php_arginfo_possession_geisha)
     PHP_FALIAS(est_jouee_action, php_api_est_jouee_action, php_arginfo_est_jouee_action)
     PHP_FALIAS(nb_cartes, php_api_nb_cartes, php_arginfo_nb_cartes)
     PHP_FALIAS(cartes_en_main, php_api_cartes_en_main, php_arginfo_cartes_en_main)
-    PHP_FALIAS(carte_pioche, php_api_carte_pioche, php_arginfo_carte_pioche)
+    PHP_FALIAS(carte_piochee, php_api_carte_piochee, php_arginfo_carte_piochee)
     PHP_FALIAS(action_valider, php_api_action_valider, php_arginfo_action_valider)
     PHP_FALIAS(action_defausser, php_api_action_defausser, php_arginfo_action_defausser)
     PHP_FALIAS(action_choix_trois, php_api_action_choix_trois, php_arginfo_action_choix_trois)

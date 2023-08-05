@@ -19,7 +19,7 @@
 typedef enum action
 {
     VALIDER, ///< Valide une unique carte
-    DEFAUSSER, ///< Defausse deux cartes
+    DEFAUSSER, ///< Défausse deux cartes
     CHOIX_TROIS, ///< Donne le choix entre trois cartes
     CHOIX_PAQUETS, ///< Donne le choix entre deux paquets de deux cartes
     PREMIER_JOUEUR, ///< Aucune action n'a été jouée (utilisé dans tour_precedent)
@@ -32,9 +32,9 @@ typedef enum error
     ACTION_DEJA_JOUEE, ///< l'action a déjà été jouée
     CARTES_INVALIDES, ///< vous ne pouvez pas jouer ces cartes
     PAQUET_INVALIDE, ///< ce paquet n'existe pas
-    GEISHA_INVALIDES, ///< cette geisha n'existe pas (doit être un entier entre 0 et NB_GEISHA)
+    GEISHA_INVALIDES, ///< cette Geisha n'existe pas (doit être un entier entre 0 et NB_GEISHA - 1)
     JOUEUR_INVALIDE, ///< ce joueur n'existe pas
-    CHOIX_INVALIDE, ///< vous ne pouvez pas repondre à ce choix
+    CHOIX_INVALIDE, ///< vous ne pouvez pas répondre à ce choix
     ACTION_INVALIDE, ///< vous ne pouvez pas jouer cette action maintenant
 } error;
 
@@ -64,32 +64,33 @@ joueur api_id_joueur();
 /// Renvoie l'identifiant de l'adversaire
 joueur api_id_adversaire();
 
-/// Renvoie le numéro de la manche
+/// Renvoie le numéro de la manche (entre 0 et 2)
 int api_manche();
 
-/// Renvoie le numéro de la manche
+/// Renvoie le numéro du tour (entre 0 et 7)
 int api_tour();
 
 /// Renvoie l'action jouée par l'adversaire
 action_jouee api_tour_precedent();
 
-/// Renvoie le nombre de carte validée par le joueur pour la geisha
-int api_nb_carte_validee(joueur j, int g);
+/// Renvoie le nombre de cartes validées par le joueur pour la Geisha (la carte
+/// validée secrètement n'est pas prise en compte)
+int api_nb_cartes_validees(joueur j, int g);
 
-/// Renvoie qui possède la geisha
+/// Renvoie qui possède la Geisha
 joueur api_possession_geisha(int g);
 
 /// Renvoie si l'action a déjà été jouée par le joueur
 bool api_est_jouee_action(joueur j, action a);
 
-/// Renvoie le nombre de carte que le joueur a
+/// Renvoie le nombre de cartes que le joueur a
 int api_nb_cartes(joueur j);
 
 /// Renvoie les cartes que vous avez
 std::vector<int> api_cartes_en_main();
 
-/// Renvoie la carte que vous avez pioché au début du tour
-int api_carte_pioche();
+/// Renvoie la carte que vous avez piochée au début du tour
+int api_carte_piochee();
 
 /// Jouer l'action valider une carte
 error api_action_valider(int c);
@@ -351,14 +352,14 @@ extern "C" CAMLprim value ml_id_adversaire(value unit)
     CAMLreturn((cxx_to_caml<value, joueur>(api_id_adversaire())));
 }
 
-// Renvoie le numéro de la manche
+// Renvoie le numéro de la manche (entre 0 et 2)
 extern "C" CAMLprim value ml_manche(value unit)
 {
     CAMLparam1(unit);
     CAMLreturn((cxx_to_caml<value, int>(api_manche())));
 }
 
-// Renvoie le numéro de la manche
+// Renvoie le numéro du tour (entre 0 et 7)
 extern "C" CAMLprim value ml_tour(value unit)
 {
     CAMLparam1(unit);
@@ -372,14 +373,15 @@ extern "C" CAMLprim value ml_tour_precedent(value unit)
     CAMLreturn((cxx_to_caml<value, action_jouee>(api_tour_precedent())));
 }
 
-// Renvoie le nombre de carte validée par le joueur pour la geisha
-extern "C" CAMLprim value ml_nb_carte_validee(value j, value g)
+// Renvoie le nombre de cartes validées par le joueur pour la Geisha (la carte
+// validée secrètement n'est pas prise en compte)
+extern "C" CAMLprim value ml_nb_cartes_validees(value j, value g)
 {
     CAMLparam2(j, g);
-    CAMLreturn((cxx_to_caml<value, int>(api_nb_carte_validee(caml_to_cxx<value, joueur>(j), caml_to_cxx<value, int>(g)))));
+    CAMLreturn((cxx_to_caml<value, int>(api_nb_cartes_validees(caml_to_cxx<value, joueur>(j), caml_to_cxx<value, int>(g)))));
 }
 
-// Renvoie qui possède la geisha
+// Renvoie qui possède la Geisha
 extern "C" CAMLprim value ml_possession_geisha(value g)
 {
     CAMLparam1(g);
@@ -393,7 +395,7 @@ extern "C" CAMLprim value ml_est_jouee_action(value j, value a)
     CAMLreturn((cxx_to_caml<value, bool>(api_est_jouee_action(caml_to_cxx<value, joueur>(j), caml_to_cxx<value, action>(a)))));
 }
 
-// Renvoie le nombre de carte que le joueur a
+// Renvoie le nombre de cartes que le joueur a
 extern "C" CAMLprim value ml_nb_cartes(value j)
 {
     CAMLparam1(j);
@@ -407,11 +409,11 @@ extern "C" CAMLprim value ml_cartes_en_main(value unit)
     CAMLreturn((cxx_to_caml_array(api_cartes_en_main())));
 }
 
-// Renvoie la carte que vous avez pioché au début du tour
-extern "C" CAMLprim value ml_carte_pioche(value unit)
+// Renvoie la carte que vous avez piochée au début du tour
+extern "C" CAMLprim value ml_carte_piochee(value unit)
 {
     CAMLparam1(unit);
-    CAMLreturn((cxx_to_caml<value, int>(api_carte_pioche())));
+    CAMLreturn((cxx_to_caml<value, int>(api_carte_piochee())));
 }
 
 // Jouer l'action valider une carte
@@ -538,7 +540,7 @@ extern "C" void repondre_action_choix_trois()
     CAMLreturn0;
 }
 
-// Fonction appelée lors du choix entre deux paquet lors de l'action de
+// Fonction appelée lors du choix entre deux paquets lors de l'action de
 // l'adversaire (cf tour_precedent)
 extern "C" void repondre_action_choix_paquets()
 {

@@ -18,7 +18,7 @@
 typedef enum action
 {
     VALIDER, ///< Valide une unique carte
-    DEFAUSSER, ///< Defausse deux cartes
+    DEFAUSSER, ///< Défausse deux cartes
     CHOIX_TROIS, ///< Donne le choix entre trois cartes
     CHOIX_PAQUETS, ///< Donne le choix entre deux paquets de deux cartes
     PREMIER_JOUEUR, ///< Aucune action n'a été jouée (utilisé dans tour_precedent)
@@ -31,9 +31,9 @@ typedef enum error
     ACTION_DEJA_JOUEE, ///< l'action a déjà été jouée
     CARTES_INVALIDES, ///< vous ne pouvez pas jouer ces cartes
     PAQUET_INVALIDE, ///< ce paquet n'existe pas
-    GEISHA_INVALIDES, ///< cette geisha n'existe pas (doit être un entier entre 0 et NB_GEISHA)
+    GEISHA_INVALIDES, ///< cette Geisha n'existe pas (doit être un entier entre 0 et NB_GEISHA - 1)
     JOUEUR_INVALIDE, ///< ce joueur n'existe pas
-    CHOIX_INVALIDE, ///< vous ne pouvez pas repondre à ce choix
+    CHOIX_INVALIDE, ///< vous ne pouvez pas répondre à ce choix
     ACTION_INVALIDE, ///< vous ne pouvez pas jouer cette action maintenant
 } error;
 
@@ -62,32 +62,33 @@ joueur api_id_joueur();
 /// Renvoie l'identifiant de l'adversaire
 joueur api_id_adversaire();
 
-/// Renvoie le numéro de la manche
+/// Renvoie le numéro de la manche (entre 0 et 2)
 int api_manche();
 
-/// Renvoie le numéro de la manche
+/// Renvoie le numéro du tour (entre 0 et 7)
 int api_tour();
 
 /// Renvoie l'action jouée par l'adversaire
 action_jouee api_tour_precedent();
 
-/// Renvoie le nombre de carte validée par le joueur pour la geisha
-int api_nb_carte_validee(joueur j, int g);
+/// Renvoie le nombre de cartes validées par le joueur pour la Geisha (la carte
+/// validée secrètement n'est pas prise en compte)
+int api_nb_cartes_validees(joueur j, int g);
 
-/// Renvoie qui possède la geisha
+/// Renvoie qui possède la Geisha
 joueur api_possession_geisha(int g);
 
 /// Renvoie si l'action a déjà été jouée par le joueur
 bool api_est_jouee_action(joueur j, action a);
 
-/// Renvoie le nombre de carte que le joueur a
+/// Renvoie le nombre de cartes que le joueur a
 int api_nb_cartes(joueur j);
 
 /// Renvoie les cartes que vous avez
 std::vector<int> api_cartes_en_main();
 
-/// Renvoie la carte que vous avez pioché au début du tour
-int api_carte_pioche();
+/// Renvoie la carte que vous avez piochée au début du tour
+int api_carte_piochee();
 
 /// Jouer l'action valider une carte
 error api_action_valider(int c);
@@ -409,9 +410,9 @@ bool js_tour_precedent(JSContext* cx, unsigned argc, JS::Value* vp) {
     return true;
 }
 
-bool js_nb_carte_validee(JSContext* cx, unsigned argc, JS::Value* vp) {
+bool js_nb_cartes_validees(JSContext* cx, unsigned argc, JS::Value* vp) {
     if (argc != 2) {
-        JS_ReportErrorASCII(cx, "`nbCarteValidee` "
+        JS_ReportErrorASCII(cx, "`nbCartesValidees` "
                             "expected 2 arguments, "
                             "got %d", argc);
         return false;
@@ -420,14 +421,14 @@ bool js_nb_carte_validee(JSContext* cx, unsigned argc, JS::Value* vp) {
 
     joueur j;
     if (!js_to_cxx(cx, args[0], j)) {
-        JS_ReportErrorASCII(cx, "`nbCarteValidee` "
+        JS_ReportErrorASCII(cx, "`nbCartesValidees` "
                             "got bad 0th argument, "
                             "expected type `Joueur`");
         return false;
     }
     int g;
     if (!js_to_cxx(cx, args[1], g)) {
-        JS_ReportErrorASCII(cx, "`nbCarteValidee` "
+        JS_ReportErrorASCII(cx, "`nbCartesValidees` "
                             "got bad 1th argument, "
                             "expected type `number`");
         return false;
@@ -435,7 +436,7 @@ bool js_nb_carte_validee(JSContext* cx, unsigned argc, JS::Value* vp) {
 
     cxx_to_js(
         cx,
-        api_nb_carte_validee(j, g),
+        api_nb_cartes_validees(j, g),
         args.rval());
     return true;
 }
@@ -536,9 +537,9 @@ bool js_cartes_en_main(JSContext* cx, unsigned argc, JS::Value* vp) {
     return true;
 }
 
-bool js_carte_pioche(JSContext* cx, unsigned argc, JS::Value* vp) {
+bool js_carte_piochee(JSContext* cx, unsigned argc, JS::Value* vp) {
     if (argc != 0) {
-        JS_ReportErrorASCII(cx, "`cartePioche` "
+        JS_ReportErrorASCII(cx, "`cartePiochee` "
                             "expected 0 arguments, "
                             "got %d", argc);
         return false;
@@ -548,7 +549,7 @@ bool js_carte_pioche(JSContext* cx, unsigned argc, JS::Value* vp) {
 
     cxx_to_js(
         cx,
-        api_carte_pioche(),
+        api_carte_piochee(),
         args.rval());
     return true;
 }
@@ -839,8 +840,8 @@ static JSFunctionSpec api_functions[] = {
           js_tour, 0, 0),
     JS_FN("tourPrecedent", 
           js_tour_precedent, 0, 0),
-    JS_FN("nbCarteValidee", 
-          js_nb_carte_validee, 2, 0),
+    JS_FN("nbCartesValidees", 
+          js_nb_cartes_validees, 2, 0),
     JS_FN("possessionGeisha", 
           js_possession_geisha, 1, 0),
     JS_FN("estJoueeAction", 
@@ -849,8 +850,8 @@ static JSFunctionSpec api_functions[] = {
           js_nb_cartes, 1, 0),
     JS_FN("cartesEnMain", 
           js_cartes_en_main, 0, 0),
-    JS_FN("cartePioche", 
-          js_carte_pioche, 0, 0),
+    JS_FN("cartePiochee", 
+          js_carte_piochee, 0, 0),
     JS_FN("actionValider", 
           js_action_valider, 1, 0),
     JS_FN("actionDefausser", 
@@ -942,10 +943,10 @@ void define_const_nb_geisha(JSContext* cx,
     JS_SetProperty(cx, global, "NB_GEISHA", val);
 }
 
-void define_const_nb_cartes_total(JSContext* cx,
+void define_const_nb_cartes_totales(JSContext* cx,
                                                 JS::HandleObject global) {
     JS::RootedValue val(cx, JS::Int32Value(21));
-    JS_SetProperty(cx, global, "NB_CARTES_TOTAL", val);
+    JS_SetProperty(cx, global, "NB_CARTES_TOTALES", val);
 }
 
 void define_const_nb_cartes_debut(JSContext* cx,
@@ -1052,7 +1053,7 @@ static void init_js() {
     define_enum_error(cx, global);
     define_enum_joueur(cx, global);
     define_const_nb_geisha(cx, global);
-    define_const_nb_cartes_total(cx, global);
+    define_const_nb_cartes_totales(cx, global);
     define_const_nb_cartes_debut(cx, global);
     define_const_nb_cartes_ecartees(cx, global);
     define_const_nb_actions(cx, global);
