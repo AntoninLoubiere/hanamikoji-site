@@ -131,11 +131,11 @@ extern "C" action_jouee tour_precedent(void)
     return cxx_to_c<action_jouee, __internal__cxx__action_jouee>(api_tour_precedent());
 }
 
-extern "C" int api_nb_carte_validee(joueur j, int g);
+extern "C" int api_nb_cartes_validees(joueur j, int g);
 
-extern "C" int nb_carte_validee(joueur j, int g)
+extern "C" int nb_cartes_validees(joueur j, int g)
 {
-    return cxx_to_c<int, int>(api_nb_carte_validee(c_to_cxx<joueur, joueur>(j), c_to_cxx<int, int>(g)));
+    return cxx_to_c<int, int>(api_nb_cartes_validees(c_to_cxx<joueur, joueur>(j), c_to_cxx<int, int>(g)));
 }
 
 extern "C" joueur api_possession_geisha(int g);
@@ -166,11 +166,11 @@ extern "C" int_array cartes_en_main(void)
     return cxx_to_c_array<int, int_array, int>(api_cartes_en_main());
 }
 
-extern "C" int api_carte_pioche();
+extern "C" int api_carte_piochee();
 
-extern "C" int carte_pioche(void)
+extern "C" int carte_piochee(void)
 {
-    return cxx_to_c<int, int>(api_carte_pioche());
+    return cxx_to_c<int, int>(api_carte_piochee());
 }
 
 extern "C" error api_action_valider(int c);

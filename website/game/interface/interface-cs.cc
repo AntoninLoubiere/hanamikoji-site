@@ -44,7 +44,7 @@ class CSharpInterface
 typedef enum action
 {
     VALIDER, ///< Valide une unique carte
-    DEFAUSSER, ///< Defausse deux cartes
+    DEFAUSSER, ///< Défausse deux cartes
     CHOIX_TROIS, ///< Donne le choix entre trois cartes
     CHOIX_PAQUETS, ///< Donne le choix entre deux paquets de deux cartes
     PREMIER_JOUEUR, ///< Aucune action n'a été jouée (utilisé dans tour_precedent)
@@ -57,9 +57,9 @@ typedef enum error
     ACTION_DEJA_JOUEE, ///< l'action a déjà été jouée
     CARTES_INVALIDES, ///< vous ne pouvez pas jouer ces cartes
     PAQUET_INVALIDE, ///< ce paquet n'existe pas
-    GEISHA_INVALIDES, ///< cette geisha n'existe pas (doit être un entier entre 0 et NB_GEISHA)
+    GEISHA_INVALIDES, ///< cette Geisha n'existe pas (doit être un entier entre 0 et NB_GEISHA - 1)
     JOUEUR_INVALIDE, ///< ce joueur n'existe pas
-    CHOIX_INVALIDE, ///< vous ne pouvez pas repondre à ce choix
+    CHOIX_INVALIDE, ///< vous ne pouvez pas répondre à ce choix
     ACTION_INVALIDE, ///< vous ne pouvez pas jouer cette action maintenant
 } error;
 
@@ -89,32 +89,33 @@ joueur api_id_joueur();
 /// Renvoie l'identifiant de l'adversaire
 joueur api_id_adversaire();
 
-/// Renvoie le numéro de la manche
+/// Renvoie le numéro de la manche (entre 0 et 2)
 int api_manche();
 
-/// Renvoie le numéro de la manche
+/// Renvoie le numéro du tour (entre 0 et 7)
 int api_tour();
 
 /// Renvoie l'action jouée par l'adversaire
 action_jouee api_tour_precedent();
 
-/// Renvoie le nombre de carte validée par le joueur pour la geisha
-int api_nb_carte_validee(joueur j, int g);
+/// Renvoie le nombre de cartes validées par le joueur pour la Geisha (la carte
+/// validée secrètement n'est pas prise en compte)
+int api_nb_cartes_validees(joueur j, int g);
 
-/// Renvoie qui possède la geisha
+/// Renvoie qui possède la Geisha
 joueur api_possession_geisha(int g);
 
 /// Renvoie si l'action a déjà été jouée par le joueur
 bool api_est_jouee_action(joueur j, action a);
 
-/// Renvoie le nombre de carte que le joueur a
+/// Renvoie le nombre de cartes que le joueur a
 int api_nb_cartes(joueur j);
 
 /// Renvoie les cartes que vous avez
 std::vector<int> api_cartes_en_main();
 
-/// Renvoie la carte que vous avez pioché au début du tour
-int api_carte_pioche();
+/// Renvoie la carte que vous avez piochée au début du tour
+int api_carte_piochee();
 
 /// Jouer l'action valider une carte
 error api_action_valider(int c);
@@ -417,14 +418,14 @@ gint32 cs_id_adversaire()
 }
 
 // C# native wrapper for function manche.
-// Renvoie le numéro de la manche
+// Renvoie le numéro de la manche (entre 0 et 2)
 gint32 cs_manche()
 {
     return cxx2lang<gint32, int>(api_manche());
 }
 
 // C# native wrapper for function tour.
-// Renvoie le numéro de la manche
+// Renvoie le numéro du tour (entre 0 et 7)
 gint32 cs_tour()
 {
     return cxx2lang<gint32, int>(api_tour());
@@ -437,15 +438,16 @@ MonoObject* cs_tour_precedent()
     return cxx2lang<MonoObject*, action_jouee>(api_tour_precedent());
 }
 
-// C# native wrapper for function nb_carte_validee.
-// Renvoie le nombre de carte validée par le joueur pour la geisha
-gint32 cs_nb_carte_validee(gint32 j, gint32 g)
+// C# native wrapper for function nb_cartes_validees.
+// Renvoie le nombre de cartes validées par le joueur pour la Geisha (la carte
+// validée secrètement n'est pas prise en compte)
+gint32 cs_nb_cartes_validees(gint32 j, gint32 g)
 {
-    return cxx2lang<gint32, int>(api_nb_carte_validee(lang2cxx<gint32, joueur>(j), lang2cxx<gint32, int>(g)));
+    return cxx2lang<gint32, int>(api_nb_cartes_validees(lang2cxx<gint32, joueur>(j), lang2cxx<gint32, int>(g)));
 }
 
 // C# native wrapper for function possession_geisha.
-// Renvoie qui possède la geisha
+// Renvoie qui possède la Geisha
 gint32 cs_possession_geisha(gint32 g)
 {
     return cxx2lang<gint32, joueur>(api_possession_geisha(lang2cxx<gint32, int>(g)));
@@ -459,7 +461,7 @@ gint32 cs_est_jouee_action(gint32 j, gint32 a)
 }
 
 // C# native wrapper for function nb_cartes.
-// Renvoie le nombre de carte que le joueur a
+// Renvoie le nombre de cartes que le joueur a
 gint32 cs_nb_cartes(gint32 j)
 {
     return cxx2lang<gint32, int>(api_nb_cartes(lang2cxx<gint32, joueur>(j)));
@@ -472,11 +474,11 @@ MonoArray* cs_cartes_en_main()
     return cxx2lang_array<gint32, int>(api_cartes_en_main());
 }
 
-// C# native wrapper for function carte_pioche.
-// Renvoie la carte que vous avez pioché au début du tour
-gint32 cs_carte_pioche()
+// C# native wrapper for function carte_piochee.
+// Renvoie la carte que vous avez piochée au début du tour
+gint32 cs_carte_piochee()
 {
-    return cxx2lang<gint32, int>(api_carte_pioche());
+    return cxx2lang<gint32, int>(api_carte_piochee());
 }
 
 // C# native wrapper for function action_valider.
@@ -590,12 +592,12 @@ CSharpInterface::CSharpInterface()
     mono_add_internal_call("Champion.Api::Manche", (const void*)cs_manche);
     mono_add_internal_call("Champion.Api::Tour", (const void*)cs_tour);
     mono_add_internal_call("Champion.Api::TourPrecedent", (const void*)cs_tour_precedent);
-    mono_add_internal_call("Champion.Api::NbCarteValidee", (const void*)cs_nb_carte_validee);
+    mono_add_internal_call("Champion.Api::NbCartesValidees", (const void*)cs_nb_cartes_validees);
     mono_add_internal_call("Champion.Api::PossessionGeisha", (const void*)cs_possession_geisha);
     mono_add_internal_call("Champion.Api::EstJoueeAction", (const void*)cs_est_jouee_action);
     mono_add_internal_call("Champion.Api::NbCartes", (const void*)cs_nb_cartes);
     mono_add_internal_call("Champion.Api::CartesEnMain", (const void*)cs_cartes_en_main);
-    mono_add_internal_call("Champion.Api::CartePioche", (const void*)cs_carte_pioche);
+    mono_add_internal_call("Champion.Api::CartePiochee", (const void*)cs_carte_piochee);
     mono_add_internal_call("Champion.Api::ActionValider", (const void*)cs_action_valider);
     mono_add_internal_call("Champion.Api::ActionDefausser", (const void*)cs_action_defausser);
     mono_add_internal_call("Champion.Api::ActionChoixTrois", (const void*)cs_action_choix_trois);

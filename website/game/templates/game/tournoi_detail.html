@@ -1,0 +1,125 @@
+{% extends 'base_game.html' %}
+{% block title %}Tournoi n°{{ tournoi.id_tournoi }}{% endblock title %}
+{% load static %}
+{% block content %}
+<h1>Tournoi n°{{ tournoi.id_tournoi }}</h1>
+<div class="content-section">
+    <span class="content-center">{{ tournoi.get_status_display }}</span>
+    {% if tournoi.status == 'LP' %}
+        <span class="content-center">Le {{ tournoi.date_lancement|date:"l d F Y à H:i" }}</span>
+    {% elif tournoi.status != 'EA' %}
+        <span class="content-center">Lancé le {{ tournoi.date_lancement|date:"l d F Y à H:i" }}</span>
+    {% endif %}
+    {% if tournoi.status == 'LP' %}
+    <div id="timer" data-time="{{ timer }}">
+        <div id="timer-days" class="timer-nbs">
+            <div class="digit digit-2" id="timer-days-2"><span class="from">0</span><span class="to"></span></div><div class="digit" id="timer-days-1"><span class="from">0</span><span class="to"></span></div>
+            <div class="timer-caption">jours</div>
+        </div>
+        <div id="timer-days" class="timer-nbs">
+            <div class="digit digit-2" id="timer-hours-2"><span class="from">0</span><span class="to"></span></div><div class="digit" id="timer-hours-1"><span class="from">0</span><span class="to"></span></div>
+            <div class="timer-caption">heures</div>
+        </div>
+        <div id="timer-days" class="timer-nbs">
+            <div class="digit digit-2" id="timer-minutes-2"><span class="from">0</span><span class="to"></span></div><div class="digit" id="timer-minutes-1"><span class="from">0</span><span class="to"></span></div>
+            <div class="timer-caption">minutes</div>
+        </div>
+        <div id="timer-days" class="timer-nbs">
+            <div class="digit digit-2" id="timer-seconds-2"><span class="from">0</span><span class="to"></span></div><div class="digit" id="timer-seconds-1"><span class="from">0</span><span class="to"></span></div>
+            <div class="timer-caption">secondes</div>
+        </div>
+    </div>
+    <script src="{% static 'game/timer.js' %}"></script>
+    {% endif %}
+    {% if tournoi.status == 'LP' or tournoi.status == 'EA' %}
+    <div class="content-text-center">Nombre de matchs par rencontre {{ tournoi.nb_matchs }} ({{ nb_matchs }} matchs au total)</div>
+    <table>
+        <caption>{{ champions_select.count }}/{{ tournoi.max_champions }} champions sélectionnés</caption>
+        <tr>
+            <th>Champion</th>
+            <th>Date d'ajout</th>
+            <th>Enlever</th>
+        </tr>
+        {% for cs in champions_select %}
+        <tr>
+            <td>{{ cs.champion.nom }}</td>
+            <td>{{ cs.date|date:"l d F Y, H:i" }}</td>
+            <td><a href="{% url 'delete_champion_tournoi' id=tournoi.id_tournoi nom=cs.champion.nom %}">Enlever</a></td>
+        </tr>
+        {% endfor %}
+    </table>
+    <div class="text-center">{{ message }}</div>
+    {% if nb_select < tournoi.max_champions %} <form action="" method="post" class="select-champ-form">
+        {% csrf_token %}
+        <select name="champion" class="select-champ" onchange="this.form.submit()">
+            <option disabled selected>Sélectionnez un champion</option>
+            {% for cns in champions_non_select %}
+                <option value="{{ cns.id }}">{{ cns.nom }}</option>
+            {% endfor %}
+        </select>
+    </form>
+    {% endif %}
+    {% elif tournoi.status == 'EC' %}
+    Nombres de matchs terminés : {{ termine }} sur {{ nb_matchs }}
+    {% elif tournoi.status == 'FI' %}
+    <table>
+        <caption>Classement</caption>
+        <tr>
+            <th>Classement</th>
+            <th>Nom</th>
+            <th>Auteur</th>
+            <th class="mw-max-content">V / É / D</th>
+            <th>Nombre de points</th>
+        </tr>
+        {% for ins in inscrits %}
+        <tr>
+            <td>{{ ins.classement }}</td>
+            <td title="{{ins.champion}}">{{ ins.champion.nom }}</td>
+            <td id="sans_casse">{{ ins.champion.uploader }}</td>
+            <td class="mw-max-content">{{ ins.victoires }} / {{ ins.egalites }} / {{ ins.defaites }}</td>
+            <td>{{ ins.nb_points }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <table>
+        <caption>Matchs</caption>
+        <tr>
+            <th>Champions</th>
+            {% for i, _ in match_matrix %}
+                <th title="{{ i.champion }}">{{ i.champion.nom }}</th>
+            {% endfor %}
+        </tr>
+        {% for i, match_line in match_matrix %}
+            <tr>
+                <th title="{{ i.champion }}">{{ i.classement }}. {{ i.champion.nom }}</th>
+                {% for matchs in match_line %}
+                    <td class="matchs-td {% if not matchs %}match-inexistant{% endif %}">{% for m in matchs%}<a href="{% url 'match_detail' m.id_match %}" class="match-gagnant-{{m.gagnant}}">{{ m.score1 }} à {{ m.score2 }}</a>{% endfor %}</td>
+                    {% endfor %}
+                </tr>
+        {% endfor %}
+    </table>
+
+
+    {% endif %}
+    {% if tournoi.status == 'LP' and user.create_tournament or tournoi.status == 'EA' and user.create_tournament %}
+    <table>
+        <caption>Inscrits</caption>
+        <tr>
+            <th>Champion</th>
+            <th>Auteur</th>
+            <th>Date d'ajout</th>
+        </tr>
+        {% for inscrit in inscrits %}
+        <tr>
+            <td>{{ inscrit.champion.nom }}</td>
+            <td id="sans_casse">{{ inscrit.champion.uploader }}</td>
+            <td>{{ inscrit.date|date:"l d F Y, H:i" }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <a href="{% url 'update_tournoi' tournoi.id_tournoi %}" class="content-center">Changer la date du
+        tournoi</a>
+    {% endif %}
+</div>
+{% endblock content %}

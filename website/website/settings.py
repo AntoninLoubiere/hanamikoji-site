@@ -82,6 +82,12 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+        # "timeout": 120,
+        # "ENGINE": "django.db.backends.postgresql",
+        # "OPTIONS": {
+        #     "service": "hanamikoji",
+        #     "passfile": ".pg_hanamikoji_pass",
+        # },
     }
 }
 
@@ -110,11 +116,13 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'fr-fr'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Paris'
 
 USE_I18N = True
 
 USE_TZ = True
+DATETIME_FORMAT = "l d F Y, H:i"
+DATE_FORMAT = "l d F y"
 
 
 # Static files (CSS, JavaScript, Images)
@@ -140,7 +148,7 @@ LOGIN_REDIRECT_URL = 'home'
 
 LOGOUT_REDIRECT_URL = 'login'
 
-MEDIA_URL = '/codes/'
+MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'codes/'
 
 Q_CLUSTER = {

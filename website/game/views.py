@@ -1,12 +1,31 @@
-from django.http import HttpRequest, HttpResponseBadRequest, HttpResponseForbidden
+from datetime import datetime
+from django.utils import timezone
+from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
-from game.tasks import MATCH_OUT_DIR
+from game.tasks import MATCH_OUT_DIR, on_end_tournoi
 
 from . import forms
-from game.models import Champion, Match
+from game.models import Champion, Match, Tournoi, Inscrit
 from  django.db.models import Q
 from authentication.models import User
+
+from django.core.paginator import Paginator
+
+from django.db.models import Count
+import datetime
+
+MIMES_TYPES = {
+    '.tar': 'application/x-tar',
+    '.gz': 'application/gzip',
+    '.tgz': 'application/gzip',
+    '.zip': 'application/zip',
+    '.cc': 'text/x-c++src',
+    '.cpp': 'text/x-c++src',
+    '.ml': 'text/x-ocaml',
+    '.c': 'text/x-csrc',
+    '.py': 'text/x-python',
+}
 
 @login_required
 def home(request):
@@ -26,9 +45,7 @@ def champion_upload(request):
         form = forms.ChampionsForm(request.POST, request.FILES)
         if form.is_valid():
             champion = form.save(commit=False)
-            # set the uploader to the user before saving the model
             champion.uploader = request.user
-            # now we can save
             champion.save()
             return redirect('home')
     return render(request, 'game/champion_upload.html', context={'form': form})
@@ -36,21 +53,23 @@ def champion_upload(request):
 @login_required
 def match_detail(request,id):
     match_select = get_object_or_404(Match, id_match=id)
-
+    suiv = Match.objects.filter(id_match__gt=id).order_by('id_match').first()
+    prec = Match.objects.filter(id_match__lt=id).order_by('-id_match').first()
     map = ""
     if match_select.status == Match.Status.FINI:
         map = (MATCH_OUT_DIR / str(match_select.id_match) / 'map.txt').read_text()
 
 
-    return render(request, 'game/match_detail.html',context={'match':match_select, 'map': map})
+    return render(request, 'game/match_detail.html',context={'match':match_select, 'map': map, 'suivant':suiv,'precedent':prec})
 
 
 @login_required
 def matchs(request: HttpRequest):
     message=''
     list_champions = get_champions_per_user(request.user)
+    tournois = Tournoi.objects.filter(date_lancement__lte = datetime.datetime.now())
+    
     matchs = None
-
     filt_type = "all"
     filt_id = -1
     if request.method == 'POST':
@@ -71,14 +90,17 @@ def matchs(request: HttpRequest):
 
     if matchs is None:
         matchs =  Match.objects.all().order_by("-date")
-    return render(request,'game/matchs.html',context={'matchs':matchs,'message':message, 'list_champions': list_champions, 'filter_type': filt_type, 'filter_id': filt_id})
+    paginator = Paginator(matchs,15)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    return render(request,'game/matchs.html',context={'matchs':page_obj,'message':message, 'list_champions': list_champions, 'filter_type': filt_type, 'filter_id': filt_id, 'tournois': tournois})
 
 @login_required
 def champions(request):
     message=''
     champions = None
-    users = User.objects.all()
-
+    users_ids = Champion.objects.all().values_list('uploader', flat=True).all()
+    users = User.objects.filter(id__in = users_ids)
     filter_id = -1
     if request.method == 'POST':
         filter_id = request.POST.get('filter', 'all')
@@ -91,7 +113,10 @@ def champions(request):
 
     if champions is None:
         champions =  Champion.objects.all().order_by("-date")
-    return render(request,'game/champions.html',context={'champions':champions, 'users': users, 'message':message, 'filter_id': filter_id})
+    paginator = Paginator(champions,15)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    return render(request,'game/champions.html',context={'champions':page_obj, 'users': users, 'message':message, 'filter_id': filter_id})
 
 def get_champions_per_user(current_user=None, filter_champions=False):
     champs = Champion.objects.filter(compilation_status=Champion.Status.FINI) if filter_champions else Champion.objects.all()
@@ -114,6 +139,18 @@ def get_champions_per_user(current_user=None, filter_champions=False):
 
     return r
 
+@login_required
+def tournois(request):
+    tournois = Tournoi.objects.all().annotate(null_date=Count('date_lancement')).order_by("-null_date","date_lancement")
+    paginator = Paginator(tournois,10)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    prochain_tournoi = Tournoi.objects.filter(date_lancement__gt=timezone.now()).order_by("date_lancement").first()
+    dateiso = prochain_tournoi.date_lancement.isoformat() if prochain_tournoi else ''
+    nb_champs_user = prochain_tournoi.nb_champions_user(request.user) if prochain_tournoi else 0
+    return render(request,'game/tournois.html',context={'tournois': page_obj, 'prochain_tournoi': prochain_tournoi, 'timer': dateiso, 'nb_champs_user': nb_champs_user})
+
 
 @login_required
 def add_match(request: HttpRequest):
@@ -125,11 +162,13 @@ def add_match(request: HttpRequest):
             m = Match()
             m.champion1 = Champion.objects.get(id=int(request.POST.get('champion1')))
             m.champion2 = Champion.objects.get(id=int(request.POST.get('champion2')))
+            m.lanceur = request.user
             if m.is_correct():
-                m.champion1.supprimer = False
-                m.champion2.supprimer = False
-                m.champion1.save()
-                m.champion2.save()
+                if m.champion1.uploader != m.champion2.uploader:
+                    m.champion1.supprimer = False
+                    m.champion2.supprimer = False
+                    m.champion1.save(compile=False)
+                    m.champion2.save(compile=False)
                 m.save()
                 return redirect('match_detail', m.id_match)
             else:
@@ -143,30 +182,175 @@ def add_match(request: HttpRequest):
 @login_required
 def delete_champion(request,name):
     champion = Champion.objects.get(nom=name) 
-
-    if request.method == 'POST':
-        champion.delete()
-        return redirect('home')
-    return render(request,
-                    'game/delete_champion.html',
-                    {'champion': champion})
+    if request.user == champion.uploader and champion.supprimer :
+        if request.method == 'POST':
+            champion.delete()
+            return redirect('home')
+        return render(request,
+                        'game/delete_champion.html',
+                        {'champion': champion})
+    return HttpResponseForbidden("Interdit")
 
 @login_required
 def redirection_out(request,id,nb):
-    match_s = get_object_or_404(Match,id_match=id)
+    match_s = get_object_or_404(Match, id_match=id)
     if nb == 1:
         champion = match_s.champion1
     elif nb == 2:
         champion = match_s.champion2
     else :
         return HttpResponseBadRequest("Champion inexistant")
-    if champion.uploader_id == request.user.id :
-        return redirect(f'/codes/match/{id}/champion{nb}.out.txt')
+    if champion.uploader_id == request.user.id or request.user.is_superuser:
+        response = HttpResponse()
+        response["Content-Type"] = "text/plain"
+        response["Content-Disposition"] = f"attachment; filename=match_{id}_champion{nb}.out.txt"
+        response["X-Accel-Redirect"] = f"/media/match/{id}/champion{nb}.out.txt"
+        return response
     return HttpResponseForbidden("Interdit")
 
 @login_required
-def redirection_code(request,name):
+def redirection_code(request, name):
     champion = get_object_or_404(Champion,nom=name)
-    if champion.uploader_id == request.user.id :
-        return redirect(champion.code.url)
+    if champion.uploader_id == request.user.id or request.user.is_superuser:
+        response = HttpResponse()
+
+        for ext, mime in MIMES_TYPES.items():
+            if champion.code.name.endswith(ext):
+                response["Content-Type"] = mime
+                break
+        else:
+            response["Content-Type"] = "application/octet-stream"
+        response["Content-Disposition"] = "attachment; filename=" + champion.code.name
+        response["X-Accel-Redirect"] = champion.code.url
+        return response
     return HttpResponseForbidden("Interdit")
+
+
+@login_required
+def add_tournoi(request):
+    if request.user.create_tournament :
+        form = forms.TournoisForm()
+        if request.method == 'POST':
+            form = forms.TournoisForm(request.POST)
+            if form.is_valid():
+                tournoi = form.save(commit=False)
+                if tournoi.date_lancement == None:
+                    tournoi.status = 'EA'
+                else:
+                    tournoi.status = 'LP'
+                tournoi.save()
+                return redirect('tournoi_detail',tournoi.id_tournoi)
+        return render(request,'game/add_tournoi.html',context={'form':form})
+    else:
+        return HttpResponseForbidden("Interdit")
+
+@login_required
+def tournoi_detail(request,id):
+    tournoi = get_object_or_404(Tournoi,id_tournoi=id)
+    message = ''
+    if request.method == 'POST':
+        nb_inscrits = Inscrit.objects.filter(tournoi=tournoi,champion__uploader=request.user).count()
+        if nb_inscrits < tournoi.max_champions and (tournoi.status == 'EA' or tournoi.status == 'LP'):
+            try:
+                i = Inscrit()
+                i.champion = Champion.objects.get(id=int(request.POST.get('champion')))
+                if i.champion.compilation_status == Champion.Status.FINI:
+                    i.tournoi = tournoi
+                    i.champion.supprimer = False
+                    i.champion.save(compile=False)
+                    i.save()
+                    message = "Le champion a bien été sélectionné"
+                else:
+                    message = "Ce champion n'est pas encore compilé"
+            except:
+                message = "Il y a eu une erreur lors de l'enregistrement du champion "
+        else:
+            message = "C'est très étrange, le nombre max de champions a pourtant été atteint"
+
+
+    inscrits = Inscrit.objects.filter(tournoi=tournoi).order_by("classement")
+    matchs = Match.objects.filter(tournoi=tournoi).order_by("id_match")
+    champions_select = inscrits.filter(champion__uploader=request.user)
+    champions_non_select = []
+    if tournoi.status == Tournoi.Status.LANCEMENT_PROGRAMMÉ or tournoi.status == Tournoi.Status.EN_ATTENTE:
+        champions_selected_ids = champions_select.values_list('champion', flat=True).all()
+        champions_non_select = Champion.objects.filter(uploader=request.user, compilation_status=Champion.Status.FINI).exclude(id__in=champions_selected_ids).order_by("-date")
+
+    termine = 0
+    match_matrix = None
+    nb_matchs = matchs.count()
+    if tournoi.status == Tournoi.Status.EN_COURS:
+        termine = Match.objects.filter(Q(tournoi=tournoi) & (Q(status=Match.Status.FINI) | Q(status=Match.Status.ERREUR))).count()
+        if termine >= nb_matchs:
+            on_end_tournoi(tournoi)
+
+    if tournoi.status == Tournoi.Status.FINI:
+        nb_ins = inscrits.count()
+
+        match_matrix = []
+        user_to_classement = {}
+        for i in inscrits:
+            user_to_classement[i.champion.pk] = len(match_matrix)
+            match_matrix.append((i, [[] for _ in range(nb_ins)]))
+
+        for m in matchs:
+            match_matrix[user_to_classement[m.champion1.pk]][1][user_to_classement[m.champion2.pk]].append(m)
+    elif tournoi.status != Tournoi.Status.EN_COURS:
+        nb_ins = inscrits.count()
+        nb_matchs = nb_ins * (nb_ins - 1) * tournoi.nb_matchs // 2
+
+
+    return render(request,'game/tournoi_detail.html',context={
+        'tournoi':tournoi,'inscrits':inscrits, 'matchs':matchs,'termine':termine,'nb_matchs':nb_matchs,
+        'match_matrix': match_matrix, 'champions_select': champions_select,
+        'champions_non_select': champions_non_select, 'nb_select': champions_select.count(),
+        'message': message, 'timer': tournoi.date_lancement.isoformat() if tournoi.status == Tournoi.Status.LANCEMENT_PROGRAMMÉ else ''})
+
+@login_required
+def update_tournoi(request,id):
+    if request.user.create_tournament :
+        tournoi = get_object_or_404(Tournoi,id_tournoi=id)
+        form = forms.TournoisForm(instance=tournoi) #Le préremplissage ne marche pas avec la date à cause du changement d'attrubut
+        if request.method == 'POST':
+            form = forms.TournoisForm(request.POST, instance=tournoi)
+            if form.is_valid():
+                tournoi = form.save(commit=False)
+                if tournoi.date_lancement == None:
+                    tournoi.status = 'EA'
+                else:
+                    tournoi.status = 'LP'
+                tournoi.save()
+                return redirect('tournoi_detail',tournoi.id_tournoi)
+        return render(request,'game/update_tournoi.html',context={'form':form,'id':id})
+    else:
+        return HttpResponseForbidden("Interdit")
+
+@login_required
+def delete_champion_tournoi(request,id,nom):
+    champion = get_object_or_404(Champion,nom=nom)
+    inscrit = get_object_or_404(Inscrit,tournoi=Tournoi.objects.get(id_tournoi=id),champion=champion)
+    if champion.uploader == request.user:
+        supp = True
+        matchs = Match.objects.filter(
+            Q(champion1__in=champion) |
+            Q(champion2__in=champion)
+        )
+        for m in matchs:
+            if m.champion1.uploader != m.champion2.uploader:
+                supp = False
+                break
+        if supp:
+            champion.supprimer = True
+            champion.save(compile=False)
+        inscrit.delete()
+        return redirect('tournoi_detail', id)
+    return HttpResponseForbidden('Interdit')
+
+
+@login_required
+def champion_detail(request, name):
+    champion = get_object_or_404(Champion,nom=name)
+    if champion.uploader != request.user and not request.user.is_superuser:
+        return HttpResponseForbidden('Interdit')
+
+    return render(request, 'game/champion_detail.html', context={'champion': champion})

@@ -21,14 +21,14 @@
     </tr>
     {% for champion in champions %}
     <tr>
-        <td>{{ champion.nom }}</td>
-        <td>{{ champion.date }}</td>
+        <td><a href="{% url 'champion_detail' champion.nom %}" title="{{ champion }}">{{ champion.nom }}</a></td>
+        <td>{{ champion.date|date:"l d F Y, H:i" }}</td>
         <td><a href="{% url 'redirection_code' champion.nom %}">{{ champion.code }}</a></td>
         <td>{{ champion.get_compilation_status_display }}</td>
         {% if champion.supprimer %}
         <td><a href="{% url 'delete_champion' champion.nom %}" class="supp">Supprimer</a></td>
         {% else %}
-        <td>Impossible à supprimer</td>
+        <td>Impossible</td>
         {% endif %}
     </tr>
     {% endfor %}

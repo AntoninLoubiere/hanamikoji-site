@@ -1,0 +1,28 @@
+{% extends 'base_game.html' %}
+{% block title %}Champion {{ champion.nom }}{% endblock title %}
+
+{% block content %}
+<h1>Champion {{ champion.nom }}</h1>
+<div class="content-section max-90">
+    <div class="content-center">Détails</div>
+    <div class="grid-key">
+        <span>Statut de la compilation: </span>
+        <span>{{ champion.get_compilation_status_display }}</span>
+        <span>Date de création: </span>
+        <span>{{ champion.date|date:"d F Y, H:i" }}</span>
+        <span>Code: </span>
+        <a href="{% url 'redirection_code' champion.nom %}">{{ champion.code }}</a>
+    </div>
+    <div class="content-text-center">
+        {% if champion.supprimer %}
+        <a href="{% url 'delete_champion' champion.nom %}" class="supp">Supprimer {{ champion.nom }}</a>
+        {% else %}
+            Impossible de supprimer {{ champion.nom }}
+        {% endif %}
+    </div>
+    {% if champion.compile_task %}
+        <div class="content-center">Sortie de la compilation :</div>
+        <div class="command-output">{{ champion.compile_task.result }}</div>
+    {% endif%}
+</div>
+{% endblock %}

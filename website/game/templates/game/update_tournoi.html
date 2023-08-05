@@ -1,0 +1,11 @@
+{% extends 'base_game.html' %}
+{% block title %}Modifier tournoi{% endblock title %}
+{% block content %}
+<a href="{% url 'tournoi_detail' id %}">Retour</a>
+<h1>Modifier un tournoi</h1>
+<form method="post" class="form">
+    {{ form.as_p }}
+    {% csrf_token %}
+    <button type="submit" id="envoi">Modifier</button>
+</form>
+{% endblock content %}

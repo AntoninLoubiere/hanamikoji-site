@@ -19,6 +19,12 @@ h1 {
     margin-bottom: .5rem;
 }
 
+.h2 {
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 2rem;
+}
+
 form {
     margin: 0;
 }
@@ -53,7 +59,16 @@ footer {
     position: fixed;
     bottom: 3px;
     right: 3px;
-    padding: 5px
+    padding: 5px;
+    transition: .5s all;
+    opacity: 1;
+    transition-delay: 2s;
+}
+
+footer:hover {
+    opacity: 0.2;
+    transition-delay: 0s;
+    transform: translateY(100%);
 }
 
 /*La barre de navigation*/
@@ -127,12 +142,12 @@ table {
     margin: auto;
         margin-top: 1.5rem;
     border-collapse: collapse;
-    width: 75%;
+    width: 75vw;
 }
 
 th,
 td {
-    padding: 15px;
+    padding: 1rem;
 }
 table tbody tr:nth-child(odd) {
     background: #eb6969cc;
@@ -141,7 +156,7 @@ table tbody tr:nth-child(odd) {
 }
 
 caption {
-    margin-bottom: 15px;
+    margin-bottom: 1rem;
     font-size: 2.5em;
     text-decoration: underline;
 }
@@ -242,4 +257,200 @@ caption {
     display: flex;
     width: 100%;
     justify-content: space-between;
+}
+
+.pagination {
+    width: 75%;
+    margin: auto;
+    margin-top: 1rem;
+    font-size: 1.1rem;
+    display: grid;
+    grid-template-columns: 2fr 1fr 2fr;
+    border: 2px red solid;
+    border-radius: .5rem;
+    padding: .5rem;
+    text-align: center;
+
+    background-color: white;
+}
+
+.current {
+    justify-self: center;
+}
+
+.icon {
+    width: 1.2em;
+    height: 1.2em;
+    vertical-align: bottom;
+}
+
+.side-pagination {
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+}
+
+.pagination-right {
+    justify-self: end;
+}
+
+.content-section-caption {
+    text-align: center;
+    font-size: 1.7rem;
+}
+
+.space-bottom {
+    margin-bottom: 2rem;
+}
+
+#timer {
+    margin: 1rem auto;
+    width: max-content;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+}
+
+.timer-nbs {
+    text-align: center;
+    border: black solid 2px;
+    border-radius: .5rem;
+    padding: .5rem 1rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.timer-caption {
+    margin-top: .75rem;
+    font-size: 1.5rem;
+}
+
+.digit {
+    display: inline;
+    font-size: 4rem;
+    margin: 0;
+    position: relative;
+}
+
+.digit .from {
+    display: inline-block;
+}
+.digit .to {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0;
+}
+
+.digit-2 .from {
+    transition: color .2s;
+}
+
+.content-red {
+    color: red;
+    font-weight: bold;
+}
+
+.t42 {
+    color: red;
+}
+
+.matchs-td {
+    padding: 0;
+}
+
+.matchs-td a {
+    color: black;
+    display: block;
+}
+
+.match-inexistant {
+    background: gray;
+}
+
+.match-gagnant-1 {
+    background: hsl(109, 76%, 67%)
+}
+
+.match-gagnant-0 {
+    background-color: hsl(40, 98%, 60%);
+}
+
+.match-gagnant-2 {
+    background-color: hsl(0, 85%, 67%);
+}
+
+@media screen and (max-width: 700px) {
+    /* :root {
+        font-size: 0.75em;
+    } */
+
+    #timer {
+        gap: 1rem;
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.mw-max-content {
+    min-width: max-content;
+}
+
+.select-champ {
+    font-size: 2em;
+    background-color: white;
+    border: solid red 5px;
+    color: red;
+    border-radius: .8rem;
+    padding: .5rem 1rem;
+    box-shadow: 10px 10px 3px #000000;
+    text-decoration: none;
+    font-variant: small-caps;
+    font-weight: bold;
+    font-family: serif;
+}
+
+.select-champ-form {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.text-center {
+    margin: .3rem .3rem;
+    text-align: center;
+    font-size: larger;
+}
+
+.grid-key {
+    display: grid;
+    margin: .5rem auto;
+    grid-template-columns: max-content max-content;
+    width: max-content;
+    gap: 0 1rem;
+    font-size: 2rem;
+}
+
+.content-text-center {
+    text-align: center;
+    margin: .5rem 0;
+    font-size:  2rem;
+}
+
+.command-output {
+    font-size: 1rem;
+    font-family: monospace;
+    white-space: pre-line;
+    margin: 1rem auto;
+    padding: .5rem .8rem;
+
+    border: black solid 2px;
+    border-radius: .7rem;
+
+    background-color: white;
+}
+
+.max-90 {
+    max-width: 90%;
 }

@@ -39,10 +39,10 @@ action_jouee tour_precedent()
     return api_tour_precedent();
 }
 
-extern "C" int api_nb_carte_validee(joueur j, int g);
-int nb_carte_validee(joueur j, int g)
+extern "C" int api_nb_cartes_validees(joueur j, int g);
+int nb_cartes_validees(joueur j, int g)
 {
-    return api_nb_carte_validee(j, g);
+    return api_nb_cartes_validees(j, g);
 }
 
 extern "C" joueur api_possession_geisha(int g);
@@ -69,10 +69,10 @@ std::vector<int> cartes_en_main()
     return api_cartes_en_main();
 }
 
-extern "C" int api_carte_pioche();
-int carte_pioche()
+extern "C" int api_carte_piochee();
+int carte_piochee()
 {
-    return api_carte_pioche();
+    return api_carte_piochee();
 }
 
 extern "C" error api_action_valider(int c);

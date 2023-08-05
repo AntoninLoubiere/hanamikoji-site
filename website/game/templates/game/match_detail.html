@@ -3,9 +3,17 @@
 
 {% block content %}
 <div class="nav-matchs">
-    <a href="{{match.id_match|add:-1}}">Précédent</a>
+    {% if precedent != None %}
+    <a href="{% url 'match_detail' precedent.id_match %}">Précédent</a>
+    {% else %}
+    Début
+    {% endif %}
     <h1>Match N°{{ match.id_match }}</h1>
-    <a href="{{match.id_match|add:1}}">Suivant</a>
+    {% if suivant != None %}
+    <a href="{% url 'match_detail' suivant.id_match %}">Suivant</a>
+    {% else %}
+    Fin
+    {% endif %}
 
 </div>
 <div class="content-section">
@@ -18,19 +26,25 @@
         </div>
         <div class="champion-column {% if match.gagnant == 2 %}winner{% endif %}">
             <span class="champion-name">{{match.champion2.nom}}</span>
-            <span>{{ match.champion1.uploader }}</span>
+            <span>{{ match.champion2.uploader }}</span>
             {% if match.status == 'FI' %}<span class="score">{{match.score2}}</span>{% endif %}
         </div>
+        
     </div>
+    {% if match.tournoi != None %}<span class="champion-name">Ce match compte pour <a
+            href=" {% url 'tournoi_detail' match.tournoi.id_tournoi %}">le tournoi
+            n°{{match.tournoi.id_tournoi}}</a></span>{% endif %}
     {% if match.status == 'FI' %}
         <span class="content-center">Distribution des cartes</span>
         <div class="map">{{map}}</div>
-        <a class="content-center" href="/codes/match/{{ match.id_match }}/dump.json">Résumé</a>
-        {% if match.champion1.uploader_id == request.user.id %}
-            <a class="content-center" href="{% url 'redirection_out' id=match.id_match nb=1 %}">Sortie du champion 1</a>
+        <a class="content-center" href="/media/match/{{ match.id_match }}/dump.json" target="_blank">Résumé</a>
+        {% if match.champion1.uploader_id == request.user.id or user.is_superuser %}
+            <a class="content-center" href="{% url 'redirection_out' id=match.id_match nb=1 %}" target="_blank">Sortie du champion
+                1</a>
         {% endif %}
-        {% if match.champion2.uploader_id == request.user.id %}
-            <a class="content-center" href="{% url 'redirection_out' id=match.id_match nb=2 %}">Sortie du champion 2</a>
+        {% if match.champion2.uploader_id == request.user.id or user.is_superuser %}
+            <a class="content-center" href="{% url 'redirection_out' id=match.id_match nb=2 %}" target="_blank">Sortie du champion
+                2</a>
         {% endif %}
     {% endif %}
 </ul>
