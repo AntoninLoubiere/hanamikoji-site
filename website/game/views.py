@@ -13,6 +13,7 @@ from authentication.models import User
 from django.core.paginator import Paginator
 
 from django.db.models import Count
+import datetime
 
 MIMES_TYPES = {
     '.tar': 'application/x-tar',
@@ -66,8 +67,9 @@ def match_detail(request,id):
 def matchs(request: HttpRequest):
     message=''
     list_champions = get_champions_per_user(request.user)
+    tournois = Tournoi.objects.filter(date_lancement__lte = datetime.datetime.now())
+    
     matchs = None
-
     filt_type = "all"
     filt_id = -1
     if request.method == 'POST':
@@ -91,7 +93,7 @@ def matchs(request: HttpRequest):
     paginator = Paginator(matchs,15)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
-    return render(request,'game/matchs.html',context={'matchs':page_obj,'message':message, 'list_champions': list_champions, 'filter_type': filt_type, 'filter_id': filt_id})
+    return render(request,'game/matchs.html',context={'matchs':page_obj,'message':message, 'list_champions': list_champions, 'filter_type': filt_type, 'filter_id': filt_id, 'tournois': tournois})
 
 @login_required
 def champions(request):

@@ -18,6 +18,14 @@
                 </optgroup>
             {% endfor %}
         </select>
+        <select onchange="this.form.submit()" name="filter" class="ajout">
+            <option value="all_t">Tous les matchs</option>
+            <option value="since_t">Aucun tournoi</option>
+            {% for t in tournois %}
+            <option value="{{t.id_tournoi}}" {% if False %}selected{% endif %}>Tournoi n°{{ t.id_tournoi }} |
+                {{t.date_lancement|date:"l d F Y, H:i"}}</option>
+            {% endfor %}
+        </select>
     </form>
 </div>
 <table>

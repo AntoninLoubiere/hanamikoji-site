@@ -39,10 +39,12 @@
         <div class="map">{{map}}</div>
         <a class="content-center" href="/media/match/{{ match.id_match }}/dump.json" target="_blank">Résumé</a>
         {% if match.champion1.uploader_id == request.user.id or user.is_superuser %}
-            <a class="content-center" href="{% url 'redirection_out' id=match.id_match nb=1 %}">Sortie du champion 1</a>
+            <a class="content-center" href="{% url 'redirection_out' id=match.id_match nb=1 %}" target="_blank">Sortie du champion
+                1</a>
         {% endif %}
         {% if match.champion2.uploader_id == request.user.id or user.is_superuser %}
-            <a class="content-center" href="{% url 'redirection_out' id=match.id_match nb=2 %}">Sortie du champion 2</a>
+            <a class="content-center" href="{% url 'redirection_out' id=match.id_match nb=2 %}" target="_blank">Sortie du champion
+                2</a>
         {% endif %}
     {% endif %}
 </ul>
