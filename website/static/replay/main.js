@@ -10,13 +10,13 @@ const EGALITE = 2;
 
 function get_dump_from_url()
 {
-    const DUMP_PARAMETER = 'dump'
+    const DUMP_PARAMETER = 'match'
 
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-    const fileUrl = urlParams.get(DUMP_PARAMETER);
-    if (fileUrl) {
-        return fetch(fileUrl).then(r => r.json())
+    const matchId = Number(urlParams.get(DUMP_PARAMETER));
+    if (!isNaN(matchId)) {
+        return fetch(`/media/match/${matchId}/dump.json`).then(r => r.json())
     }
 }
 
@@ -119,7 +119,7 @@ function moveToMain(joueur, position) {
     return {
         top: joueur == JOUEUR1 ? CARTES_MAIN_HEIGHT_OFFSET : HEIGHT - CARTES_MAIN_HEIGHT_OFFSET,
         left: GEISHAS_LEFT_OFFSET[0] + position * GEISHA_SPACE_BETWEEN,
-        zIndex: 30,
+        zIndex: 10 + position,
     }
 }
 
@@ -141,6 +141,12 @@ function applyMoveTransition(el, f, reverse, t) {
 function processDump(dump) {
     /** @type{moveAction[]} */
     let cartes_positions = new Array(NB_CARTES_TOTALES);
+    /** @type{(JOUEUR1|JOUEUR2|EGALITE)[]} */
+    let cartes_main = new Array(NB_CARTES_TOTALES).fill(EGALITE);
+    /** @type{number[]} */
+    let cartes_main_position = new Array(NB_CARTES_TOTALES).fill(-1);
+    let cartes_main_length = [0, 0]
+    let pioche = [];
     let actions = [];
 
     /**
@@ -150,6 +156,22 @@ function processDump(dump) {
     function moveCard(c, t) {
         let act = { a: applyMoveTransition, f: cartes_positions[c], t, el: CARTES[c] }
         cartes_positions[c] = t;
+        return act;
+    }
+
+    function getCardMain(p, g) {
+        for (let j = NB_CARTES_TOTALES - 1; j > + 0; j--) {
+            if (CARTES_GEISHA[j] == g && cartes_main[j] == p) {
+                return j;
+            }
+        }
+    }
+
+    function addToMain(p, c) {
+        cartes_main[c] = p;
+        cartes_main_position[c] = cartes_main_length[p];
+        let act = moveCard(c, moveToMain(p, cartes_main_length[p]))
+        cartes_main_length[p]++;
         return act;
     }
 
@@ -169,16 +191,17 @@ function processDump(dump) {
             return -1;
         }
 
+        cartes_main.fill(EGALITE);
+        cartes_main_position.fill(-1);
+        cartes_main_length = [0, 0]
+
         for (let j = 0; j < 6; j++) {
             let c = firstCard(dumpData.joueur_0.main[j]);
             resetActs[c] = moveCard(
                 c,
                 moveToPioche(PIOCHE_CENTRAL_POSITION, 20 - 2 * j)
             )
-            acts[2 * j] = moveCard(
-                c,
-                moveToMain(JOUEUR1, j)
-            );
+            acts[2 * j] = addToMain(JOUEUR1, c);
         }
 
         for (let j = 0; j < 6; j++) {
@@ -187,24 +210,12 @@ function processDump(dump) {
                 c,
                 moveToPioche(PIOCHE_CENTRAL_POSITION, 19 - 2 * j)
             )
-            acts[2 * j + 1] = moveCard(
-                c,
-                moveToMain(JOUEUR2, j)
-            );
+            acts[2 * j + 1] = addToMain(JOUEUR2, c);
         }
 
-        for (let j = 0; j < 8; j++) {
-            let c = firstCard(dumpData.cartes_pioche[j]);
-            resetActs[c] = moveCard(
-                c,
-                moveToPioche(PIOCHE_CENTRAL_POSITION, 8 - j)
-            )
-            acts[12 + j] = moveCard(
-                c,
-                moveToPioche(8 - j)
-            );
-        }
+        pioche = [];
         let c = firstCard(dumpData.carte_ecartee);
+        pioche.push(c);
         resetActs[c] = moveCard(
             c,
             moveToPioche(PIOCHE_CENTRAL_POSITION, 0)
@@ -213,10 +224,21 @@ function processDump(dump) {
             c,
             moveToPioche(0)
         );
+        for (let j = 0; j < 8; j++) {
+            let c = firstCard(dumpData.cartes_pioche[7 - j]);
+            pioche.push(c);
+            resetActs[c] = moveCard(
+                c,
+                moveToPioche(PIOCHE_CENTRAL_POSITION, j + 1)
+            )
+            acts[12 + j] = moveCard(
+                c,
+                moveToPioche(j + 1)
+            );
+        }
 
         if (dumpData.manche == 0) {
-            console.log(resetActs);
-            for (let a of resetActs) {
+                for (let a of resetActs) {
                 a.a(a.el, a.f, false, a.t);
             }
         } else {
@@ -227,16 +249,28 @@ function processDump(dump) {
     }
 
     let manche = -1;
+    let attente_reponse = false;
 
     for (let currentLine = 0; currentLine < dump.length; currentLine++) {
         const dumpData = dump[currentLine];
+        let joueur_courant = (dumpData.manche + dumpData.tour) % 2 == 0 ? JOUEUR1 : JOUEUR2;
         if (manche != dumpData.manche && dumpData.manche < 3) {
             nouvelleManche(dumpData);
             manche = dumpData.manche;
             continue;
         }
 
+        if (!attente_reponse) {
+            actions.push([addToMain(joueur_courant, pioche.pop())])
+        }
 
+        if (!dumpData.attente_reponse) {
+            switch (dumpData.derniere_action.action) {
+                case "VALIDER":
+                    break;
+            }
+        }
+        attente_reponse = dumpData.attente_reponse;
     }
 
     return actions;
@@ -278,4 +312,11 @@ function prev() {
 
 init_geishas();
 init_cartes();
-main()
+main();
+document.onkeydown = (evt) => {
+    if (evt.key == 'ArrowRight') {
+        next();
+    } else if (evt.key == 'ArrowLeft') {
+        prev();
+    }
+}
