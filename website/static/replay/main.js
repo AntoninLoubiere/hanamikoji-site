@@ -8,6 +8,10 @@ const JOUEUR1 = 0;
 const JOUEUR2 = 1;
 const EGALITE = 2;
 
+function autre_joueur(j) {
+    return 1 - j;
+}
+
 function get_dump_from_url()
 {
     const DUMP_PARAMETER = 'match'
@@ -145,34 +149,81 @@ function processDump(dump) {
     let cartes_main = new Array(NB_CARTES_TOTALES).fill(EGALITE);
     /** @type{number[]} */
     let cartes_main_position = new Array(NB_CARTES_TOTALES).fill(-1);
+    /** @type{boolean[]} */
+    let cartes_invalidated_main = new Array(NB_CARTES_TOTALES).fill(false);
     let cartes_main_length = [0, 0]
+    /** @type{number[][]} */
+    let cartes_geisha = [
+        new Array(NB_GEISHAS).fill(0),
+        new Array(NB_GEISHAS).fill(0),
+    ]
     let pioche = [];
     let actions = [];
 
     /**
      * @param {number} c
      * @param {moveAction} t
+     * @param {boolean} [bypassPiocheCheck]
      */
-    function moveCard(c, t) {
+    function moveCard(c, t, bypassPiocheCheck) {
         let act = { a: applyMoveTransition, f: cartes_positions[c], t, el: CARTES[c] }
         cartes_positions[c] = t;
+
+        if (!bypassPiocheCheck && cartes_main[c] != EGALITE) {
+            let p = cartes_main_position[c];
+            let j = cartes_main[c];
+            cartes_main_length[j]--;
+            cartes_main[c] = EGALITE;
+            cartes_main_position[c] = -1;
+
+            for (let cd = 0; cd < NB_CARTES_TOTALES; cd++) {
+                if (cartes_main[cd] == j && cartes_main_position[cd] > p) {
+                    cartes_main_position[cd]--;
+                    cartes_invalidated_main[cd] = true;
+                }
+            }
+        }
+
         return act;
     }
 
-    function getCardMain(p, g) {
-        for (let j = NB_CARTES_TOTALES - 1; j > + 0; j--) {
+    function getCarteMain(p, g) {
+        for (let j = NB_CARTES_TOTALES - 1; j >= 0; j--) {
             if (CARTES_GEISHA[j] == g && cartes_main[j] == p) {
                 return j;
             }
         }
+        return -1;
     }
 
     function addToMain(p, c) {
+        let act = moveCard(c, moveToMain(p, cartes_main_length[p]))
         cartes_main[c] = p;
         cartes_main_position[c] = cartes_main_length[p];
-        let act = moveCard(c, moveToMain(p, cartes_main_length[p]))
         cartes_main_length[p]++;
         return act;
+    }
+
+    function addToGeisha(j, c) {
+        let g = CARTES_GEISHA[c];
+        let pos = cartes_geisha[j][g]++ + 1;
+        if (j == JOUEUR1) {
+            pos = -pos;
+        }
+        return moveCard(c, moveToGeisha(g, pos));
+    }
+
+    function refreshMain() {
+        let acts = []
+        for (let c = 0; c < NB_CARTES_TOTALES; c++) {
+            if (cartes_invalidated_main[c]) {
+                cartes_invalidated_main[c] = false;
+                if (cartes_main[c] != EGALITE) {
+                    acts.push(moveCard(c, moveToMain(cartes_main[c], cartes_main_position[c]), true))
+                }
+            }
+        }
+        return acts;
     }
 
     function nouvelleManche(dumpData) {
@@ -194,6 +245,9 @@ function processDump(dump) {
         cartes_main.fill(EGALITE);
         cartes_main_position.fill(-1);
         cartes_main_length = [0, 0]
+        cartes_geisha[0].fill(0);
+        cartes_geisha[1].fill(0);
+        cartes_invalidated_main.fill(false);
 
         for (let j = 0; j < 6; j++) {
             let c = firstCard(dumpData.joueur_0.main[j]);
@@ -259,14 +313,42 @@ function processDump(dump) {
             manche = dumpData.manche;
             continue;
         }
+        if (dumpData.manche >= 3) {
+            break;
+        }
 
         if (!attente_reponse) {
-            actions.push([addToMain(joueur_courant, pioche.pop())])
+            actions.push([addToMain(joueur_courant, pioche.pop())]);
         }
 
         if (!dumpData.attente_reponse) {
-            switch (dumpData.derniere_action.action) {
+            const da = dumpData.derniere_action;
+            switch (da.action) {
                 case "VALIDER":
+                    let c = getCarteMain(da.joueur, da.cartes[0])
+                    actions.push([addToGeisha(da.joueur, c), ...refreshMain()])
+                    break;
+                case "DEFAUSSER":
+                    break;
+                case "CHOIX_TROIS":
+                    actions.push([
+                        ...da.cartes.map((g, i) => {
+                            let c = getCarteMain(da.joueur, g)
+                            let j = i == dumpData.dernier_choix ? autre_joueur(da.joueur) : da.joueur;
+                            return addToGeisha(j, c)
+                        }),
+                        ...refreshMain()
+                    ]);
+                    break;
+                case "CHOIX_PAQUETS":
+                    actions.push([
+                        ...da.cartes.map((g, i) => {
+                            let c = getCarteMain(da.joueur, g)
+                            let j = Math.floor(i / 2) == dumpData.dernier_choix ? autre_joueur(da.joueur) : da.joueur;
+                            return addToGeisha(j, c)
+                        }),
+                        ...refreshMain()
+                    ]);
                     break;
             }
         }
