@@ -3,7 +3,7 @@ const NB_CARTES_TOTALES = 21;
 const NB_ACTIONS = 4;
 const GEISHA_VALEURS = [2, 2, 2, 3, 3, 4, 5]
 
-const HEIGHT = Math.max(window.innerHeight, 1000);
+const HEIGHT = Math.max(window.innerHeight, 900);
 
 const JOUEUR1 = 0;
 const JOUEUR2 = 1;
@@ -13,8 +13,7 @@ function autre_joueur(j) {
     return 1 - j;
 }
 
-function get_dump_from_url()
-{
+function get_dump_from_url() {
     const DUMP_PARAMETER = 'match'
 
     const queryString = window.location.search;
@@ -346,7 +345,7 @@ function processDump(dump) {
                 if (CARTES_GEISHA[j] == g && !used[j]) {
                     used[j] = true;
                     return j;
-                } 
+                }
             }
             return -1;
         }
@@ -420,21 +419,23 @@ function processDump(dump) {
         }
 
         if (dumpData.manche == 0) {
-                for (let a of resetActs) {
+            for (let a of resetActs) {
                 a.a(a.el, a.f, false, a.t);
             }
         } else {
-            actions.push(resetActs);
+            actions.push({ acts: resetActs });
         }
 
-        actions.push(acts);
+        actions.push({ acts });
     }
 
     function finishManche() {
-        actions.push([
-            addToGeisha(JOUEUR1, cartes_validees[JOUEUR1]),
-            addToGeisha(JOUEUR2, cartes_validees[JOUEUR2]),
-        ])
+        actions.push({
+            acts: [
+                addToGeisha(JOUEUR1, cartes_validees[JOUEUR1]),
+                addToGeisha(JOUEUR2, cartes_validees[JOUEUR2]),
+            ]
+        })
         let acts = [];
         for (let g = 0; g < NB_GEISHAS; g++) {
             if (cartes_geisha[JOUEUR1][g] > cartes_geisha[JOUEUR2][g]) {
@@ -443,7 +444,7 @@ function processDump(dump) {
                 acts.push(bougerMarker(JOUEUR2, g));
             }
         }
-        actions.push(acts);
+        actions.push({ acts, end: true });
     }
 
     function validerCarte(j, c) {
@@ -480,7 +481,7 @@ function processDump(dump) {
     for (let currentLine = 0; currentLine < dump.length; currentLine++) {
         const dumpData = dump[currentLine];
         let joueur_courant = (dumpData.manche + dumpData.tour) % 2 == 0 ? JOUEUR1 : JOUEUR2;
-        if (manche != dumpData.manche ) {
+        if (manche != dumpData.manche) {
             if (dumpData.manche > 0) {
                 finishManche();
             }
@@ -493,7 +494,7 @@ function processDump(dump) {
         }
 
         if (!attente_reponse) {
-            actions.push([addToMain(joueur_courant, pioche.pop())]);
+            actions.push({ acts: [addToMain(joueur_courant, pioche.pop())] });
         }
 
         if (!dumpData.attente_reponse) {
@@ -501,34 +502,38 @@ function processDump(dump) {
             switch (da.action) {
                 case "VALIDER":
                     let c = getCarteMain(da.joueur, da.cartes[0])
-                    actions.push([...validerCarte(da.joueur, c), ...refreshMain()])
+                    actions.push({ acts: [...validerCarte(da.joueur, c), ...refreshMain()] })
                     break;
                 case "DEFAUSSER":
                     let c0 = getCarteMain(da.joueur, da.cartes[0])
                     let c1 = getCarteMain(da.joueur, da.cartes[1])
-                    actions.push([...defausserCarte(da.joueur, c0, c1), ...refreshMain()]);
+                    actions.push({ acts: [...defausserCarte(da.joueur, c0, c1), ...refreshMain()] });
                     break;
                 case "CHOIX_TROIS":
-                    actions.push([
-                        ...da.cartes.map((g, i) => {
-                            let c = getCarteMain(da.joueur, g)
-                            let j = i == dumpData.dernier_choix ? autre_joueur(da.joueur) : da.joueur;
-                            return addToGeisha(j, c)
-                        }),
-                        jetonDone(da.joueur, 2),
-                        ...refreshMain()
-                    ]);
+                    actions.push({
+                        acts: [
+                            ...da.cartes.map((g, i) => {
+                                let c = getCarteMain(da.joueur, g)
+                                let j = i == dumpData.dernier_choix ? autre_joueur(da.joueur) : da.joueur;
+                                return addToGeisha(j, c)
+                            }),
+                            jetonDone(da.joueur, 2),
+                            ...refreshMain()
+                        ]
+                    });
                     break;
                 case "CHOIX_PAQUETS":
-                    actions.push([
-                        ...da.cartes.map((g, i) => {
-                            let c = getCarteMain(da.joueur, g)
-                            let j = Math.floor(i / 2) == dumpData.dernier_choix ? autre_joueur(da.joueur) : da.joueur;
-                            return addToGeisha(j, c)
-                        }),
-                        jetonDone(da.joueur, 3),
-                        ...refreshMain()
-                    ]);
+                    actions.push({
+                        acts: [
+                            ...da.cartes.map((g, i) => {
+                                let c = getCarteMain(da.joueur, g)
+                                let j = Math.floor(i / 2) == dumpData.dernier_choix ? autre_joueur(da.joueur) : da.joueur;
+                                return addToGeisha(j, c)
+                            }),
+                            jetonDone(da.joueur, 3),
+                            ...refreshMain()
+                        ]
+                    });
                     break;
             }
         }
@@ -544,8 +549,12 @@ function processDump(dump) {
  * @prop {any} f
  * @prop {any} t
  * @prop {HTMLElement} el
+ *
+ * @typedef actionsGroup
+ * @prop {action[]} acts
+ * @prop {boolean} [end]
  */
- /** @type {action[][]} */
+/** @type {actionsGroup[]} */
 let actions = [];
 let currentActionIndex = 0;
 async function main() {
@@ -554,21 +563,87 @@ async function main() {
     actions = r;
 }
 
-function next() {
-    if (currentActionIndex < actions.length) {
-        for (let a of actions[currentActionIndex]) {
-            a.a(a.el, a.f, false, a.t);
-        }
-        currentActionIndex++;
+/**
+ * @param {actionsGroup} g
+ * @param {boolean} reverse
+ */
+function applyActionGroup(g, reverse) {
+    for (let a of g.acts) {
+        a.a(a.el, a.f, reverse, a.t);
     }
 }
 
+function next(b) {
+    if (!b) {
+        stopRun();
+    }
+    if (currentActionIndex < actions.length) {
+        applyActionGroup(actions[currentActionIndex], false);
+        currentActionIndex++;
+        return true;
+    }
+    return false;
+}
+
 function prev() {
+    stopRun();
     if (currentActionIndex > 0) {
         currentActionIndex--;
-        for (let a of actions[currentActionIndex]) {
-            a.a(a.el, a.f, true, a.t);
+        applyActionGroup(actions[currentActionIndex], true)
+    }
+}
+
+function nextUntilEnd() {
+    stopRun();
+    while (currentActionIndex < actions.length) {
+        applyActionGroup(actions[currentActionIndex], false)
+        currentActionIndex++;
+        if (actions[currentActionIndex - 1].end) {
+            break;
         }
+    }
+}
+
+function prevUntilEnd() {
+    stopRun();
+    while (currentActionIndex > 0) {
+        currentActionIndex--;
+        applyActionGroup(actions[currentActionIndex], true)
+        if (currentActionIndex > 0 && actions[currentActionIndex - 1].end) {
+            break;
+        }
+    }
+}
+
+let runTimeoutId = -1;
+function runStep() {
+    if (next(true)) {
+        const time = actions[currentActionIndex - 1].end ? 2000 : 900
+        runTimeoutId = setTimeout(runStep, time);
+    } else {
+        runTimeoutId = -1;
+    }
+}
+
+function toggleRun() {
+    if (runTimeoutId < 0) {
+        if (currentActionIndex >= actions.length) {
+            for (let j = currentActionIndex; j >= 0; j--) {
+                applyActionGroup(actions[j], true);
+            }
+            runTimeoutId = setTimeout(runStep, 1000);
+        } else {
+            runStep();
+        }
+    } else {
+        stopRun();
+    }
+}
+
+function stopRun() {
+    if (runTimeoutId >= 0) {
+        clearTimeout(runTimeoutId);
+        runTimeoutId = -1;
     }
 }
 
@@ -578,8 +653,18 @@ init_jetons();
 main();
 document.onkeydown = (evt) => {
     if (evt.key == 'ArrowRight') {
-        next();
+        if (evt.ctrlKey) {
+            nextUntilEnd()
+        } else {
+            next();
+        }
     } else if (evt.key == 'ArrowLeft') {
-        prev();
+        if (evt.ctrlKey) {
+            prevUntilEnd()
+        } else {
+            prev();
+        }
+    } else if (evt.key == ' ') {
+        toggleRun();
     }
 }
