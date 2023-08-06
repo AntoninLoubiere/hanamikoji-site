@@ -29,7 +29,7 @@
     width: 120px;
     border-radius: .5rem;
 
-    transition: 1s ease-in-out all, 300ms ease-in-out transform;
+    transition: 1s ease-in-out all, 1s ease-in-out top, 300ms ease-in-out transform;
 }
 
 .carte:hover {
