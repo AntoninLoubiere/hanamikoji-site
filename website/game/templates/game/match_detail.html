@@ -1,6 +1,6 @@
 {% extends 'base_game.html' %}
 {% block title %}Matchs{% endblock title %}
-
+{% load static %}
 {% block content %}
 <div class="nav-matchs">
     {% if precedent != None %}
@@ -16,7 +16,7 @@
     {% endif %}
 
 </div>
-<div class="content-section">
+<div class="content-section" id="match_detail">
     <span class="content-center">{{ match.get_status_display }}</span>
     <div class="grid-2">
         <div class="champion-column {% if match.gagnant == 1 %}winner{% endif %}">
@@ -37,7 +37,11 @@
     {% if match.status == 'FI' %}
         <span class="content-center">Distribution des cartes</span>
         <div class="map">{{map}}</div>
-        <a class="content-center" href="/media/match/{{ match.id_match }}/dump.json" target="_blank">Résumé</a>
+        <iframe id="match-{{ match.id_match }}" src="/static/replay/index.html?match={{ match.id_match }}"></iframe>
+        <div class="content-center">
+            <a href="/static/replay/index.html?match={{ match.id_match }}" target="_blank">Replay</a>
+            <span id="dump">(<a href="/media/match/{{ match.id_match }}/dump.json" target="_blank">dump</a>)</span>
+        </div>
         {% if match.champion1.uploader_id == request.user.id or user.is_superuser %}
             <a class="content-center" href="{% url 'redirection_out' id=match.id_match nb=1 %}" target="_blank">Sortie du champion
                 1</a>
