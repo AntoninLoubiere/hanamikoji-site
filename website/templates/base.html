@@ -5,7 +5,7 @@
 <head>
     <title>{% block title %}{% endblock title %}</title>
     <link rel="stylesheet" href="{% static 'styles.css' %}" />
-    <link rel="icon" type="image/x-icon" href="{% static 'logo.jpg' %}">
+    <!-- <link rel="icon" type="image/x-icon" href="{% static 'logo.jpg' %}"> --->
     {% block css %}{% endblock css %}
     {% block head %}{% endblock head %}
 </head>
@@ -19,10 +19,11 @@
         <a href="{% url 'champions' %}">Champions</a>
         <a href="{% url 'matchs' %}">Matchs</a>
         <a href="{% url 'tournois' %}">Tournois</a>
-        <a href="{% url 'password_change' %}">Changer de mot de passe</a>
-        <a href="{% url 'logout' %}">Se déconnecter</a>
+        <a href="{% static 'replay/index.html' %}">Replay</a>
+        <a href="{% url 'password_change' %}">Changer de MDP</a>
+        <a href="{% url 'logout' %}">Déconnexion</a>
         {% if user.is_staff %}
-            <a href="/admin/" target="_blank">Administration</a>
+            <a href="/admin/" target="_blank">Admin</a>
         {% endif %}
     </nav>
     {% endif %}

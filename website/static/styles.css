@@ -209,6 +209,10 @@ caption {
     font-size: 3rem;
 }
 
+#dump {
+    font-size: 1rem;
+    text-transform: lowercase;
+}
 .grid-2 {
     justify-items: center;
     display: grid;
