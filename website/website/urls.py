@@ -21,6 +21,8 @@ import authentication.views
 import game.views
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic import RedirectView
+from django.contrib.staticfiles.storage import staticfiles_storage
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -52,7 +54,8 @@ urlpatterns = [
     path('tournois/ajouter/',game.views.add_tournoi,name='add_tournoi'),
     path('tournois/<int:id>/',game.views.tournoi_detail,name='tournoi_detail'),
     path('tournois/<int:id>/change',game.views.update_tournoi,name='update_tournoi'),
-    path('tournois/<int:id>/<str:nom>/delete',game.views.delete_champion_tournoi,name='delete_champion_tournoi')
+    path('tournois/<int:id>/<str:nom>/delete',game.views.delete_champion_tournoi,name='delete_champion_tournoi'),
+    path('favicon.ico', RedirectView.as_view(url=staticfiles_storage.url('favicon.ico')))
 ]
 if settings.DEBUG:
     urlpatterns += static(

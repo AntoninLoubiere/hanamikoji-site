@@ -38,8 +38,10 @@
         <span class="content-center">Distribution des cartes</span>
         <div class="map">{{map}}</div>
         <iframe id="match-{{ match.id_match }}" src="/static/replay/index.html?match={{ match.id_match }}"></iframe>
-        <a class="content-center" href="/static/replay/index.html?match={{ match.id_match }}" target="_blank">Replay</a>
-        <a class="content-center" href="/media/match/{{ match.id_match }}/dump.json" target="_blank">Résumé</a>
+        <div class="content-center">
+            <a href="/static/replay/index.html?match={{ match.id_match }}" target="_blank">Replay</a>
+            <span id="dump">(<a href="/media/match/{{ match.id_match }}/dump.json" target="_blank">dump</a>)</span>
+        </div>
         {% if match.champion1.uploader_id == request.user.id or user.is_superuser %}
             <a class="content-center" href="{% url 'redirection_out' id=match.id_match nb=1 %}" target="_blank">Sortie du champion
                 1</a>
