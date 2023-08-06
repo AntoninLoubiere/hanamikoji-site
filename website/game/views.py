@@ -1,4 +1,3 @@
-from datetime import datetime
 from django.utils import timezone
 from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
@@ -13,6 +12,7 @@ from authentication.models import User
 from django.core.paginator import Paginator
 
 from django.db.models import Count
+import datetime
 
 MIMES_TYPES = {
     '.tar': 'application/x-tar',
@@ -66,11 +66,23 @@ def match_detail(request,id):
 def matchs(request: HttpRequest):
     message=''
     list_champions = get_champions_per_user(request.user)
-    matchs = None
+    tournois = Tournoi.objects.filter(date_lancement__lte = timezone.now())
 
+    matchs = Match.objects
     filt_type = "all"
     filt_id = -1
+    filter_tournoi = "all_t"
     if request.method == 'POST':
+        filter_tournoi = request.POST.get('filter-tournois', 'all_t')
+        if filter_tournoi == 'none_t':
+            matchs = matchs.filter(tournoi__isnull=True)
+        elif filter_tournoi != 'all_t':
+            try:
+                filter_tournoi = int(filter_tournoi)
+                matchs = matchs.filter(tournoi__id_tournoi=filter_tournoi)
+            except ValueError:
+                pass
+
         filt = request.POST.get('filter', 'all')
         f = filt.split('-')
         if len(f) >= 1:
@@ -82,16 +94,17 @@ def matchs(request: HttpRequest):
                     pass
 
         if filt_type == 'user':
-            matchs = Match.objects.filter(Q(champion1__uploader__id=filt_id) | Q(champion2__uploader__id=filt_id)).order_by("-date")
+            matchs = matchs.filter(Q(champion1__uploader__id=filt_id) | Q(champion2__uploader__id=filt_id))
         elif filt_type == 'champ':
-            matchs = Match.objects.filter(Q(champion1__id=filt_id) | Q(champion2__id=filt_id)).order_by("-date")
+            matchs = matchs.filter(Q(champion1__id=filt_id) | Q(champion2__id=filt_id))
 
-    if matchs is None:
-        matchs =  Match.objects.all().order_by("-date")
+
+    matchs = matchs.order_by("-date")
+
     paginator = Paginator(matchs,15)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
-    return render(request,'game/matchs.html',context={'matchs':page_obj,'message':message, 'list_champions': list_champions, 'filter_type': filt_type, 'filter_id': filt_id})
+    return render(request,'game/matchs.html',context={'matchs':page_obj,'message':message, 'list_champions': list_champions, 'filter_type': filt_type, 'filter_id': filt_id, 'tournois': tournois, 'tournoi_selected': filter_tournoi})
 
 @login_required
 def champions(request):
@@ -201,7 +214,7 @@ def redirection_out(request,id,nb):
     if champion.uploader_id == request.user.id or request.user.is_superuser:
         response = HttpResponse()
         response["Content-Type"] = "text/plain"
-        response["Content-Disposition"] = f"attachment; filename=match_{id}_champion{nb}.out.txt"
+        response["Content-Disposition"] = f"inline; filename=match_{id}_champion{nb}.out.txt"
         response["X-Accel-Redirect"] = f"/media/match/{id}/champion{nb}.out.txt"
         return response
     return HttpResponseForbidden("Interdit")
