@@ -29,9 +29,38 @@
     width: 120px;
     border-radius: .5rem;
 
-    transition: 1s ease-in-out all, 1s ease-in-out top, 300ms ease-in-out transform;
+    transition: 1s ease-in-out all, 300ms ease-in-out transform;
 }
 
 .carte:hover {
     transform: translate(-50%, -50%) rotate(10deg);
+}
+
+.jeton {
+    position: absolute;
+    transform: translate(-50%, -50%);
+
+    border-radius: 1rem;
+    width: 90px;
+
+    transition: 0s z-index, 1s ease-in-out left, 1s ease-in-out top, 500ms ease-in-out filter;
+    transition-delay: 1s, 0s, 0s, 0s;
+}
+
+.jeton-off {
+    filter: grayscale(80%);
+    transition-delay: 0s, 0s, 0s, 0s;
+}
+
+@media screen and (max-height: 900px) {
+    body {
+        transform-origin: 0 0;
+        transform: scale(90%);
+    }
+}
+
+@media screen and (max-height: 800px) {
+    body {
+        transform: scale(80%);
+    }
 }

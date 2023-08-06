@@ -1,8 +1,9 @@
 const NB_GEISHAS = 7;
 const NB_CARTES_TOTALES = 21;
+const NB_ACTIONS = 4;
 const GEISHA_VALEURS = [2, 2, 2, 3, 3, 4, 5]
 
-const HEIGHT = window.innerHeight;
+const HEIGHT = Math.max(window.innerHeight, 1000);
 
 const JOUEUR1 = 0;
 const JOUEUR2 = 1;
@@ -53,6 +54,7 @@ const CARTES_TYPE = ["2_violet", "2_rouge", "2_jaune", "3_bleu", "3_orange", "4_
 function init_cartes() {
     let idx = 0;
     let nb = GEISHA_VALEURS[idx];
+    let target = /** @type {HTMLElement} */ (document.getElementById('cards-container'));
     for (let i = 0; i < NB_CARTES_TOTALES; i++) {
         if (nb <= 0) {
             idx++;
@@ -63,19 +65,50 @@ function init_cartes() {
         let c = CARTES[i] = document.createElement('img')
         c.src = `./assets/cartes/${CARTES_TYPE[idx]}.jpg`
         c.classList.add('carte')
-        document.body.append(c)
-        applyMove(c, moveToPioche(PIOCHE_CENTRAL_POSITION));
+        target.append(c);
+    }
+}
+
+/** @type{HTMLImageElement[][]} */
+const JETONS = [
+    new Array(NB_ACTIONS),
+    new Array(NB_ACTIONS),
+]
+const JETON_SPACE_BETWEEN = 100;
+const JETON_LEFT = 175;
+function get_jeton_left_top(j, i) {
+    let offset_left = JETON_LEFT;
+    let offset_top = 75;
+    if (1 <= i && i <= 2) {
+        offset_top += JETON_SPACE_BETWEEN
+    }
+    if (i >= 2) {
+        offset_left -= JETON_SPACE_BETWEEN;
+    }
+    return {
+        left: offset_left,
+        top: j == JOUEUR1 ? offset_top : HEIGHT - offset_top,
+        zIndex: 0
+    }
+}
+
+function init_jetons() {
+    for (let j = 0; j < 2; j++) {
+        for (let i = 0; i < NB_ACTIONS; i++) {
+            let jet = JETONS[j][i] = /** @type {HTMLImageElement} */ (document.getElementById(`j${j}-${i}`))
+            applyMove(jet, get_jeton_left_top(j, i));
+        }
     }
 }
 
 const CARTE_HEIGHT_OFFSET = 35;
 const PIOCHE_LEFT_OFFSET = 100
-const PIOCHE_CENTRAL_POSITION = 5;
+const PIOCHE_CENTRAL_POSITION = 4;
 /**
  * @typedef moveAction
  * @prop {number} top
  * @prop {number} left
- * @prop {number?} zIndex
+ * @prop {number} [zIndex]
  *
  * @param {HTMLElement} el
  * @param {moveAction} moveAction
@@ -127,6 +160,26 @@ function moveToMain(joueur, position) {
     }
 }
 
+const VALIDATE_HEIGHT_OFFSET = 172;
+const VALIDATE_LEFT_OFFSET = GEISHA_SPACE_BETWEEN * NB_GEISHAS + 300;
+function moveToValidate(joueur) {
+    return {
+        top: HEIGHT / 2 + (joueur == JOUEUR1 ? -VALIDATE_HEIGHT_OFFSET : VALIDATE_HEIGHT_OFFSET),
+        left: VALIDATE_LEFT_OFFSET,
+        zIndex: 50
+    }
+}
+
+const DEFAUSSER_HEIGHT_OFFSET = 2 * VALIDATE_HEIGHT_OFFSET;
+function moveToDefausser(joueur, o) {
+    const off = DEFAUSSER_HEIGHT_OFFSET + o * CARTE_HEIGHT_OFFSET;
+    return {
+        top: HEIGHT / 2 + (joueur == JOUEUR1 ? -off : off),
+        left: VALIDATE_LEFT_OFFSET,
+        zIndex: joueur == JOUEUR1 ? 50 - o : 50 + o
+    }
+}
+
 /**
  *
  * @param {HTMLElement} el
@@ -139,6 +192,31 @@ function applyMoveTransition(el, f, reverse, t) {
         applyMove(el, f);
     } else {
         applyMove(el, t);
+    }
+}
+
+/**
+ *
+ * @param {HTMLElement} el
+ * @param {string} f
+ * @param {string} t
+ * @param {boolean} reverse
+ */
+function applyClassTransition(el, f, reverse, t) {
+    if (reverse) {
+        if (f) {
+            el.classList.add(f)
+        }
+        if (t) {
+            el.classList.remove(t)
+        }
+    } else {
+        if (f) {
+            el.classList.remove(f)
+        }
+        if (t) {
+            el.classList.add(t)
+        }
     }
 }
 
@@ -159,6 +237,8 @@ function processDump(dump) {
     ]
     let pioche = [];
     let actions = [];
+    let cartes_validees = [-1, -1];
+    let markers = new Array(NB_GEISHAS);
 
     /**
      * @param {number} c
@@ -226,6 +306,35 @@ function processDump(dump) {
         return acts;
     }
 
+    function bougerMarker(j, g) {
+        let act = {
+            a: applyClassTransition,
+            f: markers[g],
+            t: j == JOUEUR1 ? 'marker-top' : 'marker-bot',
+            el: MARKERS[g]
+        }
+        markers[g] = act.t
+        return act
+    }
+
+    function jetonDone(j, i) {
+        let act = {
+            a: applyClassTransition,
+            t: 'jeton-off',
+            el: JETONS[j][i]
+        }
+        return act
+    }
+
+    function jetonToDo(j, i) {
+        let act = {
+            a: applyClassTransition,
+            f: 'jeton-off',
+            el: JETONS[j][i]
+        }
+        return act
+    }
+
     function nouvelleManche(dumpData) {
         let resetActs = new Array(NB_CARTES_TOTALES);
         let acts = new Array(NB_CARTES_TOTALES);
@@ -248,6 +357,25 @@ function processDump(dump) {
         cartes_geisha[0].fill(0);
         cartes_geisha[1].fill(0);
         cartes_invalidated_main.fill(false);
+        cartes_validees.fill(-1);
+
+        for (let j = 0; j < 2; j++) {
+            for (let i = 0; i < NB_ACTIONS; i++) {
+                resetActs.push(jetonToDo(j, i));
+            }
+            resetActs.push({
+                a: applyMoveTransition,
+                el: JETONS[j][0],
+                f: moveToValidate(j),
+                t: get_jeton_left_top(j, 0),
+            },)
+            resetActs.push({
+                a: applyMoveTransition,
+                el: JETONS[j][1],
+                f: moveToDefausser(j, j),
+                t: get_jeton_left_top(j, 1),
+            },)
+        }
 
         for (let j = 0; j < 6; j++) {
             let c = firstCard(dumpData.joueur_0.main[j]);
@@ -302,19 +430,66 @@ function processDump(dump) {
         actions.push(acts);
     }
 
+    function finishManche() {
+        actions.push([
+            addToGeisha(JOUEUR1, cartes_validees[JOUEUR1]),
+            addToGeisha(JOUEUR2, cartes_validees[JOUEUR2]),
+        ])
+        let acts = [];
+        for (let g = 0; g < NB_GEISHAS; g++) {
+            if (cartes_geisha[JOUEUR1][g] > cartes_geisha[JOUEUR2][g]) {
+                acts.push(bougerMarker(JOUEUR1, g));
+            } else if (cartes_geisha[JOUEUR1][g] < cartes_geisha[JOUEUR2][g]) {
+                acts.push(bougerMarker(JOUEUR2, g));
+            }
+        }
+        actions.push(acts);
+    }
+
+    function validerCarte(j, c) {
+        cartes_validees[j] = c;
+        return [
+            moveCard(c, moveToValidate(j)),
+            {
+                a: applyMoveTransition,
+                el: JETONS[j][0],
+                f: get_jeton_left_top(j, 0),
+                t: moveToValidate(j)
+            },
+            jetonDone(j, 0)
+        ]
+    }
+
+    function defausserCarte(j, c0, c1) {
+        return [
+            moveCard(c0, moveToDefausser(j, 0)),
+            moveCard(c1, moveToDefausser(j, 1)),
+            {
+                a: applyMoveTransition,
+                el: JETONS[j][1],
+                f: get_jeton_left_top(j, 1),
+                t: moveToDefausser(j, j)
+            },
+            jetonDone(j, 1)
+        ]
+    }
+
     let manche = -1;
     let attente_reponse = false;
 
     for (let currentLine = 0; currentLine < dump.length; currentLine++) {
         const dumpData = dump[currentLine];
         let joueur_courant = (dumpData.manche + dumpData.tour) % 2 == 0 ? JOUEUR1 : JOUEUR2;
-        if (manche != dumpData.manche && dumpData.manche < 3) {
-            nouvelleManche(dumpData);
+        if (manche != dumpData.manche ) {
+            if (dumpData.manche > 0) {
+                finishManche();
+            }
+
+            if (dumpData.manche < 3) {
+                nouvelleManche(dumpData);
+            }
             manche = dumpData.manche;
             continue;
-        }
-        if (dumpData.manche >= 3) {
-            break;
         }
 
         if (!attente_reponse) {
@@ -326,9 +501,12 @@ function processDump(dump) {
             switch (da.action) {
                 case "VALIDER":
                     let c = getCarteMain(da.joueur, da.cartes[0])
-                    actions.push([addToGeisha(da.joueur, c), ...refreshMain()])
+                    actions.push([...validerCarte(da.joueur, c), ...refreshMain()])
                     break;
                 case "DEFAUSSER":
+                    let c0 = getCarteMain(da.joueur, da.cartes[0])
+                    let c1 = getCarteMain(da.joueur, da.cartes[1])
+                    actions.push([...defausserCarte(da.joueur, c0, c1), ...refreshMain()]);
                     break;
                 case "CHOIX_TROIS":
                     actions.push([
@@ -337,6 +515,7 @@ function processDump(dump) {
                             let j = i == dumpData.dernier_choix ? autre_joueur(da.joueur) : da.joueur;
                             return addToGeisha(j, c)
                         }),
+                        jetonDone(da.joueur, 2),
                         ...refreshMain()
                     ]);
                     break;
@@ -347,6 +526,7 @@ function processDump(dump) {
                             let j = Math.floor(i / 2) == dumpData.dernier_choix ? autre_joueur(da.joueur) : da.joueur;
                             return addToGeisha(j, c)
                         }),
+                        jetonDone(da.joueur, 3),
                         ...refreshMain()
                     ]);
                     break;
@@ -394,6 +574,7 @@ function prev() {
 
 init_geishas();
 init_cartes();
+init_jetons();
 main();
 document.onkeydown = (evt) => {
     if (evt.key == 'ArrowRight') {
