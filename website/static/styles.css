@@ -454,3 +454,14 @@ caption {
 .max-90 {
     max-width: 90%;
 }
+/* Pour les iframes */
+
+iframe {
+    width: 97vw;
+    height: 97vh;
+}
+
+#match_detail {
+    margin: 0px 0px 0px 0px;
+    padding: 0px 0px 0px 0px;
+}
