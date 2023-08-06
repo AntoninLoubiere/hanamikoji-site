@@ -73,14 +73,14 @@
 }
 
 
-@media screen and (max-height: 900px) {
+@media screen and (max-height: 899px) {
     #game {
         transform-origin: 0 0;
         transform: scale(90%);
     }
 }
 
-@media screen and (max-height: 800px) {
+@media screen and (max-height: 799px) {
     #game {
         transform: scale(80%);
     }

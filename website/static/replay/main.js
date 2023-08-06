@@ -128,7 +128,7 @@ function moveToPioche(position, overrideZIndex) {
     return {
         top: HEIGHT / 2 - PIOCHE_CENTRAL_POSITION * CARTE_HEIGHT_OFFSET + position * CARTE_HEIGHT_OFFSET,
         left: PIOCHE_LEFT_OFFSET,
-        zIndex: 10 + (overrideZIndex ?? position)
+        zIndex: overrideZIndex ?? 10 + position
     }
 }
 
@@ -141,7 +141,7 @@ function moveToGeisha(geisha, position) {
     return {
         top: (position > 0 ? CARTES_GEISHA_OFFSET : -CARTES_GEISHA_OFFSET) + position * CARTE_HEIGHT_OFFSET + HEIGHT / 2,
         left: GEISHAS_LEFT_OFFSET[geisha],
-        zIndex: 10 + position
+        zIndex: 9 + position
     }
 }
 
@@ -155,7 +155,7 @@ function moveToMain(joueur, position) {
     return {
         top: joueur == JOUEUR1 ? CARTES_MAIN_HEIGHT_OFFSET : HEIGHT - CARTES_MAIN_HEIGHT_OFFSET,
         left: GEISHAS_LEFT_OFFSET[0] + position * GEISHA_SPACE_BETWEEN,
-        zIndex: 10 + position,
+        zIndex: 10 + 2 * position - joueur,
     }
 }
 
@@ -380,18 +380,18 @@ function processDump(dump) {
             let c = firstCard(dumpData.joueur_0.main[j]);
             resetActs[c] = moveCard(
                 c,
-                moveToPioche(PIOCHE_CENTRAL_POSITION, 20 - 2 * j)
+                moveToPioche(PIOCHE_CENTRAL_POSITION, 10 + 2 * j)
             )
-            acts[2 * j] = addToMain(JOUEUR1, c);
+            acts[10 - 2 * j] = addToMain(JOUEUR1, c);
         }
 
         for (let j = 0; j < 6; j++) {
             let c = firstCard(dumpData.joueur_1.main[j]);
             resetActs[c] = moveCard(
                 c,
-                moveToPioche(PIOCHE_CENTRAL_POSITION, 19 - 2 * j)
+                moveToPioche(PIOCHE_CENTRAL_POSITION, 9 + 2 * j)
             )
-            acts[2 * j + 1] = addToMain(JOUEUR2, c);
+            acts[11 - 2 * j] = addToMain(JOUEUR2, c);
         }
 
         pioche = [];
@@ -412,7 +412,7 @@ function processDump(dump) {
                 c,
                 moveToPioche(PIOCHE_CENTRAL_POSITION, j + 1)
             )
-            acts[12 + j] = moveCard(
+            acts[19 - j] = moveCard(
                 c,
                 moveToPioche(j + 1)
             );
@@ -426,7 +426,7 @@ function processDump(dump) {
             actions.push({ acts: resetActs });
         }
 
-        actions.push({ acts });
+        actions.push({ acts, delay: 30, runDelay: 1200 });
     }
 
     function finishManche() {
@@ -444,7 +444,7 @@ function processDump(dump) {
                 acts.push(bougerMarker(JOUEUR2, g));
             }
         }
-        actions.push({ acts, end: true });
+        actions.push({ acts, end: true, runDelay: 2000 });
     }
 
     function validerCarte(j, c) {
@@ -553,6 +553,8 @@ function processDump(dump) {
  * @typedef actionsGroup
  * @prop {action[]} acts
  * @prop {boolean} [end]
+ * @prop {number} [delay]
+ * @prop {number} [runDelay]
  */
 /** @type {actionsGroup[]} */
 let actions = [];
@@ -567,9 +569,27 @@ async function main() {
  * @param {actionsGroup} g
  * @param {boolean} reverse
  */
-function applyActionGroup(g, reverse) {
+function applyActionGroupSeq(g, reverse) {
     for (let a of g.acts) {
         a.a(a.el, a.f, reverse, a.t);
+    }
+}
+
+function applyActionGroupDelay(g, reverse, i) {
+    const a = reverse ? g.acts[g.acts.length - i - 1] : g.acts[i];
+    a.a(a.el, a.f, reverse, a.t);
+    i++;
+    if (i < g.acts.length) {
+        setTimeout(applyActionGroupDelay, g.delay, g, reverse, i);
+    }
+}
+
+function applyActionGroup(g, reverse) {
+    console.log(g);
+    if (g.delay) {
+        applyActionGroupDelay(g, reverse, 0);
+    } else {
+        applyActionGroupSeq(g, reverse)
     }
 }
 
@@ -618,8 +638,7 @@ function prevUntilEnd() {
 let runTimeoutId = -1;
 function runStep() {
     if (next(true)) {
-        const time = actions[currentActionIndex - 1].end ? 2000 : 900
-        runTimeoutId = setTimeout(runStep, time);
+        runTimeoutId = setTimeout(runStep, actions[currentActionIndex - 1].runDelay || 900);
     } else {
         runTimeoutId = -1;
     }
