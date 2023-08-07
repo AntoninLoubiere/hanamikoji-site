@@ -39,6 +39,10 @@ class Champion(models.Model):
     compile_task = models.ForeignKey(Task, null=True, editable=False, on_delete=models.SET_NULL)
     supprimer =  models.BooleanField(default=True)
 
+    class Meta:
+        models.Index(fields=["-date"])
+        models.Index(fields=["uploader","-date"])
+
     def __str__(self):
         return f'{self.nom}@{self.uploader}'
 
@@ -79,6 +83,9 @@ class Tournoi(models.Model):
     nb_matchs = models.IntegerField(default=10, validators=[even])
     date_lancement = models.DateTimeField(validators=[valide_date], null=True, blank=True)
     schedule = models.ForeignKey(Schedule, blank=True, null=True, default=None, on_delete=models.SET_NULL)
+
+    class Meta:
+        models.Index(fields=["date_lancement"])
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
@@ -129,6 +136,8 @@ class Inscrit(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['tournoi', 'champion'], name='champion unique dans un tournoi')
         ]
+        models.Index(fields=["tournoi","champion"])
+        models.Index(fields=["tournoi","classement"])
 
     def __str__(self) -> str:
         return f"Inscrit {self.champion} #{self.tournoi.id_tournoi}"
@@ -170,6 +179,14 @@ class Match(models.Model):
     match_task = models.ForeignKey(Task, null=True, editable=False, on_delete=models.SET_NULL)
     tournoi = models.ForeignKey(Tournoi, null=True,on_delete=models.CASCADE, blank=True)
     lanceur = models.ForeignKey(User, on_delete=models.PROTECT, null=True, blank=True)
+
+    class Meta:
+        models.Index(fields=["-date"])
+        models.Index(fields=["champion1","-date"])
+        models.Index(fields=["champion2","-date"])
+        models.Index(fields=["tournoi","champion1","-date"])
+        models.Index(fields=["tournoi","champion2","-date"])
+        models.Index(fields=["tournoi","-date"])
 
     def save(self, *args, run=True, **kwargs) -> None:
         if not self.is_correct():
