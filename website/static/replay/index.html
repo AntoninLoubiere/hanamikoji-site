@@ -7,49 +7,53 @@
     <title>Hanamikoji : replay</title>
 </head>
 <body>
-    <div id="game">
-        <img class="geisha" id="geisha0" src="./assets/geishas/purple-geisha.webp">
-        <img class="geisha" id="geisha1" src="./assets/geishas/red-geisha.webp">
-        <img class="geisha" id="geisha2" src="./assets/geishas/yellow-geisha.webp">
-        <img class="geisha" id="geisha3" src="./assets/geishas/blue-geisha.webp">
-        <img class="geisha" id="geisha4" src="./assets/geishas/orange-geisha.webp">
-        <img class="geisha" id="geisha5" src="./assets/geishas/green-geisha.webp">
-        <img class="geisha" id="geisha6" src="./assets/geishas/pink-geisha.webp">
-    
-        <!-- translateY(+- 100%) selon son état -->
-        <img class="marker" id="marker0" src="./assets/marker.png">
-        <img class="marker" id="marker1" src="./assets/marker.png">
-        <img class="marker" id="marker2" src="./assets/marker.png">
-        <img class="marker" id="marker3" src="./assets/marker.png">
-        <img class="marker" id="marker4" src="./assets/marker.png">
-        <img class="marker" id="marker5" src="./assets/marker.png">
-        <img class="marker" id="marker6" src="./assets/marker.png">
+    <div id="game-parent">
+        <div id="game">
+            <img class="geisha" id="geisha0" src="./assets/geishas/purple-geisha.webp">
+            <img class="geisha" id="geisha1" src="./assets/geishas/red-geisha.webp">
+            <img class="geisha" id="geisha2" src="./assets/geishas/yellow-geisha.webp">
+            <img class="geisha" id="geisha3" src="./assets/geishas/blue-geisha.webp">
+            <img class="geisha" id="geisha4" src="./assets/geishas/orange-geisha.webp">
+            <img class="geisha" id="geisha5" src="./assets/geishas/green-geisha.webp">
+            <img class="geisha" id="geisha6" src="./assets/geishas/pink-geisha.webp">
         
-        <div id="cards-container"></div>
-    
-        <img class="jeton" id="j0-0" src="./assets/actions/B1.jpg">
-        <img class="jeton" id="j0-1" src="./assets/actions/B2.jpg">
-        <img class="jeton" id="j0-2" src="./assets/actions/B3.jpg">
-        <img class="jeton" id="j0-3" src="./assets/actions/B4.jpg">
-    
-        <img class="jeton" id="j1-0" src="./assets/actions/A1.jpg" >
-        <img class="jeton" id="j1-1" src="./assets/actions/A2.jpg" >
-        <img class="jeton" id="j1-2" src="./assets/actions/A3.jpg" >
-        <img class="jeton" id="j1-3" src="./assets/actions/A4.jpg" >
-
-        <span class="title" id="title-j0">Joueur 1</span>
-        <span class="title" id="title-j1">Joueur 2</span>
-        <div class="info-section" id="info-section-0">
-            <span class="info-name" id="info-name-0">Joueur 1</span>
-            <span class="info-score" id="info-score-0">0 cartes, 0 points</span>
-        </div>
-        <div class="info-section" id="info-section-1">
-            <span class="info-name" id="info-name-1">Joueur 2</span>
-            <span class="info-score" id="info-score-1">0 cartes, 0 points</span>
+            <!-- translateY(+- 100%) selon son état -->
+            <img class="marker" id="marker0" src="./assets/marker.png">
+            <img class="marker" id="marker1" src="./assets/marker.png">
+            <img class="marker" id="marker2" src="./assets/marker.png">
+            <img class="marker" id="marker3" src="./assets/marker.png">
+            <img class="marker" id="marker4" src="./assets/marker.png">
+            <img class="marker" id="marker5" src="./assets/marker.png">
+            <img class="marker" id="marker6" src="./assets/marker.png">
+        
+            <div id="cards-container"></div>
+        
+            <img class="jeton" id="j0-0" src="./assets/actions/B1.jpg">
+            <img class="jeton" id="j0-1" src="./assets/actions/B2.jpg">
+            <img class="jeton" id="j0-2" src="./assets/actions/B3.jpg">
+            <img class="jeton" id="j0-3" src="./assets/actions/B4.jpg">
+        
+            <img class="jeton" id="j1-0" src="./assets/actions/A1.jpg" >
+            <img class="jeton" id="j1-1" src="./assets/actions/A2.jpg" >
+            <img class="jeton" id="j1-2" src="./assets/actions/A3.jpg" >
+            <img class="jeton" id="j1-3" src="./assets/actions/A4.jpg" >
+            <span class="title" id="title-j0">Joueur 1</span>
+            <span class="title" id="title-j1">Joueur 2</span>
+            <div class="info-section" id="info-section-0">
+                <span class="info-name" id="info-name-0">Joueur 1</span>
+                <span class="info-score" id="info-score-0">0 cartes, 0 points</span>
+            </div>
+            <div class="info-section" id="info-section-1">
+                <span class="info-name" id="info-name-1">Joueur 2</span>
+                <span class="info-score" id="info-score-1">0 cartes, 0 points</span>
+            </div>
         </div>
     </div>
-    
-    <div class="load-from-file hide" id="load-from-file-parent"><input id="load-from-file" type="file" onchange="loadFromFile(this)"></div>
+
+    <div class="load-from-file hide" id="load-from-file-parent">
+        <label for="load-from-file">Sélectionnez un fichier de dump</label>
+        <input id="load-from-file" type="file" accept="application/json,.json" onchange="loadFromFile(this)">
+    </div>
 
     <div class="control-list">
         <span class="manche-status" id="manche-status"></span>

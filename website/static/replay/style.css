@@ -8,7 +8,7 @@
 }
 
 
-body, #game {
+body, #game-parent {
     background-image: url('./assets/bg.jpg');
     min-height: 100%;
 }
@@ -126,8 +126,17 @@ body, #game {
     pointer-events: none;
 }
 
+.load-from-file label {
+    font: small-caps 40px sans-serif;
+    cursor: pointer;
+}
+
+.load-from-file label:hover {
+    text-decoration: underline;
+}
+
 #load-from-file {
-    font-size: 40px;
+    display: none;
 }
 
 .title.hide {
@@ -166,12 +175,11 @@ body, #game {
 @media screen and (max-height: 899px) {
     #game {
         transform-origin: 0 0;
-        transform: scale(90%);
     }
 }
 
-@media screen and (max-height: 799px) {
+/* @media screen and (max-height: 799px) {
     #game {
         transform: scale(80%);
     }
-}
+} */
