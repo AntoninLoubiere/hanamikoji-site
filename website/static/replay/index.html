@@ -6,40 +6,58 @@
     <link rel="stylesheet" href="style.css">
     <title>Hanamikoji : replay</title>
 </head>
-<body style="background-image: url('./assets/bg.jpg')">
-    <div id="game">
-        <img class="geisha" id="geisha0" src="./assets/geishas/geisha_2_violet.jpg">
-        <img class="geisha" id="geisha1" src="./assets/geishas/geisha_2_rouge.jpg">
-        <img class="geisha" id="geisha2" src="./assets/geishas/geisha_2_jaune.jpg">
-        <img class="geisha" id="geisha3" src="./assets/geishas/geisha_3_bleu.jpg">
-        <img class="geisha" id="geisha4" src="./assets/geishas/geisha_3_orange.jpg">
-        <img class="geisha" id="geisha5" src="./assets/geishas/geisha_4_vert.jpg">
-        <img class="geisha" id="geisha6" src="./assets/geishas/geisha_5_rose.jpg">
-    
-        <!-- translateY(+- 100%) selon son état -->
-        <img class="marker" id="marker0" src="./assets/marker.png">
-        <img class="marker" id="marker1" src="./assets/marker.png">
-        <img class="marker" id="marker2" src="./assets/marker.png">
-        <img class="marker" id="marker3" src="./assets/marker.png">
-        <img class="marker" id="marker4" src="./assets/marker.png">
-        <img class="marker" id="marker5" src="./assets/marker.png">
-        <img class="marker" id="marker6" src="./assets/marker.png">
+<body>
+    <div id="game-parent">
+        <div id="game">
+            <img class="geisha" id="geisha0" src="./assets/geishas/purple-geisha.webp">
+            <img class="geisha" id="geisha1" src="./assets/geishas/red-geisha.webp">
+            <img class="geisha" id="geisha2" src="./assets/geishas/yellow-geisha.webp">
+            <img class="geisha" id="geisha3" src="./assets/geishas/blue-geisha.webp">
+            <img class="geisha" id="geisha4" src="./assets/geishas/orange-geisha.webp">
+            <img class="geisha" id="geisha5" src="./assets/geishas/green-geisha.webp">
+            <img class="geisha" id="geisha6" src="./assets/geishas/pink-geisha.webp">
         
-        <div id="cards-container"></div>
-    
-        <img class="jeton" id="j0-0" src="./assets/actions/B1.jpg">
-        <img class="jeton" id="j0-1" src="./assets/actions/B2.jpg">
-        <img class="jeton" id="j0-2" src="./assets/actions/B3.jpg">
-        <img class="jeton" id="j0-3" src="./assets/actions/B4.jpg">
-    
-        <img class="jeton" id="j1-0" src="./assets/actions/A1.jpg" >
-        <img class="jeton" id="j1-1" src="./assets/actions/A2.jpg" >
-        <img class="jeton" id="j1-2" src="./assets/actions/A3.jpg" >
-        <img class="jeton" id="j1-3" src="./assets/actions/A4.jpg" >
+            <!-- translateY(+- 100%) selon son état -->
+            <img class="marker" id="marker0" src="./assets/marker.png">
+            <img class="marker" id="marker1" src="./assets/marker.png">
+            <img class="marker" id="marker2" src="./assets/marker.png">
+            <img class="marker" id="marker3" src="./assets/marker.png">
+            <img class="marker" id="marker4" src="./assets/marker.png">
+            <img class="marker" id="marker5" src="./assets/marker.png">
+            <img class="marker" id="marker6" src="./assets/marker.png">
+        
+            <div id="cards-container"></div>
+        
+            <img class="jeton" id="j0-0" src="./assets/actions/B1.jpg">
+            <img class="jeton" id="j0-1" src="./assets/actions/B2.jpg">
+            <img class="jeton" id="j0-2" src="./assets/actions/B3.jpg">
+            <img class="jeton" id="j0-3" src="./assets/actions/B4.jpg">
+        
+            <img class="jeton" id="j1-0" src="./assets/actions/A1.jpg" >
+            <img class="jeton" id="j1-1" src="./assets/actions/A2.jpg" >
+            <img class="jeton" id="j1-2" src="./assets/actions/A3.jpg" >
+            <img class="jeton" id="j1-3" src="./assets/actions/A4.jpg" >
+            <span class="title" id="title-j0">Joueur 1</span>
+            <span class="title" id="title-j1">Joueur 2</span>
+            <div class="info-section" id="info-section-0">
+                <span class="info-name" id="info-name-0">Joueur 1</span>
+                <span class="info-score" id="info-score-0">0 cartes, 0 points</span>
+            </div>
+            <div class="info-section" id="info-section-1">
+                <span class="info-name" id="info-name-1">Joueur 2</span>
+                <span class="info-score" id="info-score-1">0 cartes, 0 points</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="load-from-file hide" id="load-from-file-parent">
+        <label for="load-from-file">Sélectionnez un fichier de dump</label>
+        <input id="load-from-file" type="file" accept="application/json,.json" onchange="loadFromFile(this)">
     </div>
 
     <div class="control-list">
-        <button onclick="nextUntilEnd()"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+        <span class="manche-status" id="manche-status"></span>
+        <button onclick="nextUntilEnd()"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 8.688c0-.864.933-1.405 1.683-.977l7.108 4.062a1.125 1.125 0 010 1.953l-7.108 4.062A1.125 1.125 0 013 16.81V8.688zM12.75 8.688c0-.864.933-1.405 1.683-.977l7.108 4.062a1.125 1.125 0 010 1.953l-7.108 4.062a1.125 1.125 0 01-1.683-.977V8.688z" />
         </svg></button>
         <button onclick="next()"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon">
@@ -51,8 +69,11 @@
         <button onclick="prev()"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon">
             <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
         </svg></button>
-        <button onclick="prevUntilEnd()"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+        <button onclick="prevUntilEnd()"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon">
             <path stroke-linecap="round" stroke-linejoin="round" d="M21 16.811c0 .864-.933 1.405-1.683.977l-7.108-4.062a1.125 1.125 0 010-1.953l7.108-4.062A1.125 1.125 0 0121 8.688v8.123zM11.25 16.811c0 .864-.933 1.405-1.683.977l-7.108-4.062a1.125 1.125 0 010-1.953L9.567 7.71a1.125 1.125 0 011.683.977v8.123z" />
+        </svg></button>
+        <button onclick="toggleFullScreen()"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
         </svg></button>
     </div>
 

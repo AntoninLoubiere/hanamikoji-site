@@ -37,7 +37,7 @@
     {% if match.status == 'FI' %}
         <span class="content-center">Distribution des cartes</span>
         <div class="map">{{map}}</div>
-        <iframe id="match-{{ match.id_match }}" src="/static/replay/index.html?match={{ match.id_match }}"></iframe>
+        <iframe id="match-{{ match.id_match }}" src="/static/replay/index.html?match={{ match.id_match }}" allow="fullscreen" frameborder="0"></iframe>
         <div class="content-center">
             <a href="/static/replay/index.html?match={{ match.id_match }}" target="_blank">Replay</a>
             <span id="dump">(<a href="/media/match/{{ match.id_match }}/dump.json" target="_blank">dump</a>)</span>

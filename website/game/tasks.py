@@ -293,8 +293,9 @@ def on_end_tournoi(t: Tournoi):
 
 def launch_tournoi(tournoi_id: str):
     tournoi = Tournoi.objects.get(id_tournoi=int(tournoi_id))
-    inscrits = Inscrit.objects.filter(tournoi=tournoi)
-    nb = inscrits.count()
+    inscrits = list(Inscrit.objects.filter(tournoi=tournoi))
+    nb = len(inscrits)
+    print(f"Tournoi: inscrits {inscrits}")
     matchs = []
     for _ in range(tournoi.nb_matchs // 2):
         for i in range(nb):
