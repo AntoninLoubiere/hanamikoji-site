@@ -7,6 +7,12 @@
     transition: transform 300ms ease-in-out;
 }
 
+
+body, #game {
+    background-image: url('./assets/bg.jpg');
+    min-height: 100%;
+}
+
 .geisha:hover {
     transform: translate(-50%, -50%) rotate(-10deg)
 }

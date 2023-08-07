@@ -833,15 +833,24 @@ function runStep() {
 function toggleRun() {
     if (runTimeoutId < 0) {
         if (currentActionIndex >= actions.length) {
-            for (let j = currentActionIndex; j >= 0; j--) {
-                applyActionGroup(actions[j], true);
+            for (let j = actions.length - 1; j >= 0; j--) {
+                applyActionGroupSeq(actions[j], true);
             }
-            runTimeoutId = setTimeout(runStep, 1000);
+            currentActionIndex = 0;
+            runTimeoutId = setTimeout(runStep, actions[0].runDelay || 900);
         } else {
             runStep();
         }
     } else {
         stopRun();
+    }
+}
+
+function toggleFullScreen() {
+    if (document.fullscreenElement) {
+        document.exitFullscreen()
+    } else {
+        document.body.requestFullscreen()
     }
 }
 
