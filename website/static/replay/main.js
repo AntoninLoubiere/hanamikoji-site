@@ -31,7 +31,7 @@ const GEISHAS_LEFT_OFFSET = new Array(NB_GEISHAS)
 /** @type{HTMLImageElement[]} */
 const MARKERS = new Array(NB_GEISHAS)
 const GEISHA_FIRST_LEFT_OFFSET = 260
-const GEISHA_SPACE_BETWEEN = Math.max(130, (window.innerWidth - 300) / 9);
+const GEISHA_SPACE_BETWEEN = Math.max(130, (window.innerWidth - GEISHA_FIRST_LEFT_OFFSET) / 9);
 function init_geishas() {
     for (let i = 0; i < NB_GEISHAS; i++) {
         const left = GEISHAS_LEFT_OFFSET[i] = GEISHA_FIRST_LEFT_OFFSET + i * GEISHA_SPACE_BETWEEN;
@@ -87,7 +87,7 @@ function get_jeton_left_top(j, i) {
     return {
         left: offset_left,
         top: j == JOUEUR1 ? offset_top : HEIGHT - offset_top,
-        zIndex: 10
+        zIndex: 0
     }
 }
 
@@ -102,14 +102,29 @@ function init_jetons() {
 
 /** @type{HTMLSpanElement[]} */
 const TEXT_TITLES = new Array(2);
+const INFO_NAME = [
+    /** @type {HTMLSpanElement} */ (document.getElementById('info-name-0')),
+    /** @type {HTMLSpanElement} */ (document.getElementById('info-name-1')),
+];
+const INFO_SCORE = [
+    /** @type {HTMLSpanElement} */ (document.getElementById('info-score-0')),
+    /** @type {HTMLSpanElement} */ (document.getElementById('info-score-1')),
+]
 const MANCHE_STATUS = /** @type{HTMLSpanElement} */ (document.getElementById('manche-status'));
 function init_texts() {
-    let t = TEXT_TITLES[0] = /** @type{HTMLSpanElement} */(document.getElementById('title-j0'));
+    let t = TEXT_TITLES[0] = /** @type{HTMLElement} */(document.getElementById('title-j0'));
     t.style.top = `${HEIGHT / 4}px`
     t.style.left = `${GEISHAS_LEFT_OFFSET[3]}px`;
-    t = TEXT_TITLES[1] = /** @type{HTMLSpanElement} */(document.getElementById('title-j1'));
+    t = TEXT_TITLES[1] = /** @type{HTMLElement} */(document.getElementById('title-j1'));
     t.style.top = `${3 * HEIGHT / 4}px`
     t.style.left = `${GEISHAS_LEFT_OFFSET[3]}px`;
+
+    t = /** @type{HTMLElement} */ (document.getElementById('info-section-0'));
+    t.style.top = '0';
+    t.style.left = `${LAST_COLUMN}px`;
+    t = /** @type{HTMLElement} */ (document.getElementById('info-section-1'));
+    t.style.bottom = '0';
+    t.style.left = `${LAST_COLUMN}px`;
 }
 
 const CARTE_HEIGHT_OFFSET = 35;
@@ -171,23 +186,43 @@ function moveToMain(joueur, position) {
     }
 }
 
-const VALIDATE_HEIGHT_OFFSET = 172;
+const VALIDATE_HEIGHT_OFFSET = 120;
 const VALIDATE_LEFT_OFFSET = GEISHA_SPACE_BETWEEN * NB_GEISHAS + GEISHA_FIRST_LEFT_OFFSET;
 function moveToValidate(joueur) {
     return {
         top: HEIGHT / 2 + (joueur == JOUEUR1 ? -VALIDATE_HEIGHT_OFFSET : VALIDATE_HEIGHT_OFFSET),
         left: VALIDATE_LEFT_OFFSET,
-        zIndex: 50
+        zIndex: 20
     }
 }
 
-const DEFAUSSER_HEIGHT_OFFSET = 2 * VALIDATE_HEIGHT_OFFSET;
+const DEFAUSSER_HEIGHT_OFFSET = 300;
 function moveToDefausser(joueur, o) {
     const off = DEFAUSSER_HEIGHT_OFFSET + o * CARTE_HEIGHT_OFFSET;
     return {
         top: HEIGHT / 2 + (joueur == JOUEUR1 ? -off : off),
         left: VALIDATE_LEFT_OFFSET,
-        zIndex: joueur == JOUEUR1 ? 50 - o : 50 + o
+        zIndex: joueur == JOUEUR1 ? 20 - o : 20 + o
+    }
+}
+
+const LAST_COLUMN = VALIDATE_LEFT_OFFSET + GEISHA_SPACE_BETWEEN;
+const CARD_HEIGHT = 175;
+function moveToChoixTrois(i) {
+    return {
+        top: HEIGHT / 2 + (i - 1) * CARD_HEIGHT,
+        left: LAST_COLUMN,
+        zIndex: 80 + 4 * i,
+    }
+}
+
+const CHOIX_PAQUETS_OFFSET = VALIDATE_HEIGHT_OFFSET;
+function moveToChoixPaquets(i) {
+    const off = CHOIX_PAQUETS_OFFSET + (i % 2) * CARTE_HEIGHT_OFFSET;
+    return {
+        top: HEIGHT / 2 + (i < 2 ? -off : off),
+        left: LAST_COLUMN,
+        zIndex: i < 2 ? 80 - i * 4 : 80 + i * 4,
     }
 }
 
@@ -265,8 +300,11 @@ function processDump(dump) {
     let pioche = [];
     let actions = [];
     let cartes_validees = [-1, -1];
+    let cartes_choix_3 = [-1, -1, -1];
+    let cartes_choix_paquets = [-1, -1, -1, -1];
     let markers = new Array(NB_GEISHAS);
     let mancheText = "";
+    let scoreText = ["0 cartes, 0 points", "0 cartes, 0 points"];
 
     /**
      * @param {number} c
@@ -374,6 +412,57 @@ function processDump(dump) {
         return act
     }
 
+    function updateScore(j, s, c) {
+        let act = {
+            a: applyInnerTextTransition,
+            el: INFO_SCORE[j],
+            f: scoreText[j],
+            t: `${c} carte${c == 1 ? '' : 's'}, ${s} points`
+        }
+        scoreText[j] = act.t;
+        return act;
+    }
+
+    function montrerChoixTrois(j, gs) {
+        return gs.map((g, i) => {
+            let c = getCarteMain(j, g);
+            cartes_choix_3[i] = c;
+            return moveCard(
+                c,
+                moveToChoixTrois(i)
+            )
+        })
+    }
+
+    function ajouterMontrerChoixTrois(j, choix) {
+        let acts = cartes_choix_3.map((c, i) => {
+            let add_j = i == choix ? autre_joueur(j) : j;
+            return addToGeisha(add_j, c)
+        })
+        cartes_choix_3.fill(-1)
+        return acts;
+    }
+
+    function montrerChoixPaquets(j, gs) {
+        return gs.map((g, i) => {
+            let c = getCarteMain(j, g);
+            cartes_choix_paquets[i] = c;
+            return moveCard(
+                c,
+                moveToChoixPaquets(i)
+            )
+        })
+    }
+
+    function ajouterMontrerChoixPaquets(j, choix) {
+        let acts = cartes_choix_paquets.map((c, i) => {
+            let add_j = Math.floor(i / 2) == choix ? autre_joueur(j) : j;
+            return addToGeisha(add_j, c)
+        })
+        cartes_choix_paquets.fill(-1)
+        return acts;
+    }
+
     function nouvelleManche(dumpData) {
         let resetActs = new Array(NB_CARTES_TOTALES);
         let acts = new Array(NB_CARTES_TOTALES);
@@ -397,6 +486,8 @@ function processDump(dump) {
         cartes_geisha[1].fill(0);
         cartes_invalidated_main.fill(false);
         cartes_validees.fill(-1);
+        cartes_choix_3.fill(-1);
+        cartes_choix_paquets.fill(-1);
 
         resetActs.push(updateManche(dumpData));
 
@@ -488,13 +579,29 @@ function processDump(dump) {
             ]
         })
         let acts = [];
+        let nb_cartes = [0, 0];
+        let score = [0, 0];
         for (let g = 0; g < NB_GEISHAS; g++) {
             if (cartes_geisha[JOUEUR1][g] > cartes_geisha[JOUEUR2][g]) {
                 acts.push(bougerMarker(JOUEUR1, g));
+                score[JOUEUR1] += GEISHA_VALEURS[g];
+                nb_cartes[JOUEUR1] += 1;
             } else if (cartes_geisha[JOUEUR1][g] < cartes_geisha[JOUEUR2][g]) {
                 acts.push(bougerMarker(JOUEUR2, g));
+                score[JOUEUR2] += GEISHA_VALEURS[g];
+                nb_cartes[JOUEUR2] += 1;
+            } else {
+                if (markers[g] == 'marker-top') {
+                    score[JOUEUR1] += GEISHA_VALEURS[g];
+                    nb_cartes[JOUEUR1] += 1;
+                } else if (markers[g] == 'marker-bot') {
+                    score[JOUEUR2] += GEISHA_VALEURS[g];
+                    nb_cartes[JOUEUR2] += 1;
+                }
             }
         }
+        acts.push(updateScore(JOUEUR1, score[JOUEUR1], nb_cartes[JOUEUR1]))
+        acts.push(updateScore(JOUEUR2, score[JOUEUR2], nb_cartes[JOUEUR2]))
         actions.push({ acts, end: true, runDelay: 2000 });
     }
 
@@ -529,8 +636,17 @@ function processDump(dump) {
     let manche = -1;
     let attente_reponse = false;
 
-    TEXT_TITLES[0].innerText = dump[0].joueur_0.nom;
-    TEXT_TITLES[1].innerText = dump[0].joueur_1.nom;
+    /** @type {string} */
+    let nom0 = dump[0].joueur_0.nom;
+    let nom1 = dump[1].joueur_1.nom
+    if (nom0.endsWith('-1') && nom1.endsWith('-2')) {
+        nom0 = nom0.slice(0, nom0.length - 2);
+        nom1 = nom1.slice(0, nom1.length - 2);
+    }
+    TEXT_TITLES[0].innerText = nom0;
+    TEXT_TITLES[1].innerText = nom1;
+    INFO_NAME[0].innerText = nom0;
+    INFO_NAME[1].innerText = nom1;
 
     for (let currentLine = 0; currentLine < dump.length; currentLine++) {
         const dumpData = dump[currentLine];
@@ -551,7 +667,26 @@ function processDump(dump) {
             actions.push({ acts: [addToMain(joueur_courant, pioche.pop()), updateManche(dumpData)] });
         }
 
-        if (!dumpData.attente_reponse) {
+        if (dumpData.attente_reponse) {
+            const da = dumpData.derniere_action;
+            if (da.action == "CHOIX_TROIS") {
+                actions.push({
+                    acts: [
+                        ...montrerChoixTrois(da.joueur, da.cartes),
+                        jetonDone(da.joueur, 2),
+                        ...refreshMain(),
+                    ]
+                })
+            } else if (da.action == "CHOIX_PAQUETS") {
+                actions.push({
+                    acts: [
+                        ...montrerChoixPaquets(da.joueur, da.cartes),
+                        jetonDone(da.joueur, 3),
+                        ...refreshMain(),
+                    ]
+                })
+            }
+        } else {
             const da = dumpData.derniere_action;
             switch (da.action) {
                 case "VALIDER":
@@ -563,28 +698,12 @@ function processDump(dump) {
                     break;
                 case "CHOIX_TROIS":
                     actions.push({
-                        acts: [
-                            ...da.cartes.map((g, i) => {
-                                let c = getCarteMain(da.joueur, g)
-                                let j = i == dumpData.dernier_choix ? autre_joueur(da.joueur) : da.joueur;
-                                return addToGeisha(j, c)
-                            }),
-                            jetonDone(da.joueur, 2),
-                            ...refreshMain()
-                        ]
+                        acts: ajouterMontrerChoixTrois(da.joueur, dumpData.dernier_choix)
                     });
                     break;
                 case "CHOIX_PAQUETS":
                     actions.push({
-                        acts: [
-                            ...da.cartes.map((g, i) => {
-                                let c = getCarteMain(da.joueur, g)
-                                let j = Math.floor(i / 2) == dumpData.dernier_choix ? autre_joueur(da.joueur) : da.joueur;
-                                return addToGeisha(j, c)
-                            }),
-                            jetonDone(da.joueur, 3),
-                            ...refreshMain()
-                        ]
+                        acts: ajouterMontrerChoixPaquets(da.joueur, dumpData.dernier_choix)
                     });
                     break;
             }
@@ -728,9 +847,9 @@ function stopRun() {
 }
 
 init_geishas();
-init_cartes();
-init_jetons();
 init_texts();
+init_jetons();
+init_cartes();
 main();
 document.onkeydown = (evt) => {
     if (evt.key == 'ArrowRight') {
