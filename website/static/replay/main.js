@@ -266,10 +266,10 @@ function processDump(dump) {
         return act;
     }
 
-    function getCarteMain(p, g) {
-        for (let j = NB_CARTES_TOTALES - 1; j >= 0; j--) {
-            if (CARTES_GEISHA[j] == g && cartes_main[j] == p) {
-                return j;
+    function getCarteMain(j, g) {
+        for (let i = NB_CARTES_TOTALES - 1; i >= 0; i--) {
+            if (CARTES_GEISHA[i] == g && cartes_main[i] == j) {
+                return i;
             }
         }
         return -1;
@@ -461,10 +461,10 @@ function processDump(dump) {
         ]
     }
 
-    function defausserCarte(j, c0, c1) {
+    function defausserCarte(j, g0, g1) {
         return [
-            moveCard(c0, moveToDefausser(j, 0)),
-            moveCard(c1, moveToDefausser(j, 1)),
+            moveCard(getCarteMain(j, g0), moveToDefausser(j, 0)),
+            moveCard(getCarteMain(j, g1), moveToDefausser(j, 1)),
             {
                 a: applyMoveTransition,
                 el: JETONS[j][1],
@@ -505,9 +505,7 @@ function processDump(dump) {
                     actions.push({ acts: [...validerCarte(da.joueur, c), ...refreshMain()] })
                     break;
                 case "DEFAUSSER":
-                    let c0 = getCarteMain(da.joueur, da.cartes[0])
-                    let c1 = getCarteMain(da.joueur, da.cartes[1])
-                    actions.push({ acts: [...defausserCarte(da.joueur, c0, c1), ...refreshMain()] });
+                    actions.push({ acts: [...defausserCarte(da.joueur, da.cartes[0], da.cartes[1]), ...refreshMain()] });
                     break;
                 case "CHOIX_TROIS":
                     actions.push({
