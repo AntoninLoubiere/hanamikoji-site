@@ -48,7 +48,7 @@ function init_geishas() {
 const CARTES = new Array(NB_CARTES_TOTALES)
 /** @type{number[]} */
 const CARTES_GEISHA = new Array(NB_CARTES_TOTALES)
-const CARTES_TYPE = ["2_violet", "2_rouge", "2_jaune", "3_bleu", "3_orange", "4_vert", "5_rose"];
+const CARTES_TYPE = ["purple-item", "red-item", "yellow-item", "blue-item", "orange-item", "green-item", "pink-item"];
 
 function init_cartes() {
     let idx = 0;
@@ -62,7 +62,7 @@ function init_cartes() {
         nb--;
         CARTES_GEISHA[i] = idx;
         let c = CARTES[i] = document.createElement('img')
-        c.src = `./assets/cartes/${CARTES_TYPE[idx]}.jpg`
+        c.src = `./assets/cartes/${CARTES_TYPE[idx]}.webp`
         c.classList.add('carte')
         target.append(c);
     }
