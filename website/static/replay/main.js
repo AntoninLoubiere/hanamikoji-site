@@ -100,6 +100,18 @@ function init_jetons() {
     }
 }
 
+/** @type{HTMLSpanElement[]} */
+const TEXT_TITLES = new Array(2);
+const MANCHE_STATUS = /** @type{HTMLSpanElement} */ (document.getElementById('manche-status'));
+function init_texts() {
+    let t = TEXT_TITLES[0] = /** @type{HTMLSpanElement} */(document.getElementById('title-j0'));
+    t.style.top = `${HEIGHT / 4}px`
+    t.style.left = `${GEISHAS_LEFT_OFFSET[3]}px`;
+    t = TEXT_TITLES[1] = /** @type{HTMLSpanElement} */(document.getElementById('title-j1'));
+    t.style.top = `${3 * HEIGHT / 4}px`
+    t.style.left = `${GEISHAS_LEFT_OFFSET[3]}px`;
+}
+
 const CARTE_HEIGHT_OFFSET = 35;
 const PIOCHE_LEFT_OFFSET = 100
 const PIOCHE_CENTRAL_POSITION = 4;
@@ -194,6 +206,22 @@ function applyMoveTransition(el, f, reverse, t) {
     }
 }
 
+
+/**
+ *
+ * @param {HTMLElement} el
+ * @param {string} f
+ * @param {string} t
+ * @param {boolean} reverse
+ */
+function applyInnerTextTransition(el, f, reverse, t) {
+    if (reverse) {
+        el.innerText = f;
+    } else {
+        el.innerText = t;
+    }
+}
+
 /**
  *
  * @param {HTMLElement} el
@@ -238,6 +266,7 @@ function processDump(dump) {
     let actions = [];
     let cartes_validees = [-1, -1];
     let markers = new Array(NB_GEISHAS);
+    let mancheText = "";
 
     /**
      * @param {number} c
@@ -334,6 +363,17 @@ function processDump(dump) {
         return act
     }
 
+    function updateManche(data) {
+        let act = {
+            a: applyInnerTextTransition,
+            el: MANCHE_STATUS,
+            f: mancheText,
+            t: `${data.manche + 1} / ${data.tour + 1}`
+        }
+        mancheText = act.t;
+        return act
+    }
+
     function nouvelleManche(dumpData) {
         let resetActs = new Array(NB_CARTES_TOTALES);
         let acts = new Array(NB_CARTES_TOTALES);
@@ -357,6 +397,8 @@ function processDump(dump) {
         cartes_geisha[1].fill(0);
         cartes_invalidated_main.fill(false);
         cartes_validees.fill(-1);
+
+        resetActs.push(updateManche(dumpData));
 
         for (let j = 0; j < 2; j++) {
             for (let i = 0; i < NB_ACTIONS; i++) {
@@ -422,6 +464,15 @@ function processDump(dump) {
             for (let a of resetActs) {
                 a.a(a.el, a.f, false, a.t);
             }
+            acts.unshift({
+                el: TEXT_TITLES[0],
+                a: applyClassTransition,
+                t: 'hide'
+            }, {
+                el: TEXT_TITLES[1],
+                a: applyClassTransition,
+                t: 'hide'
+            })
         } else {
             actions.push({ acts: resetActs });
         }
@@ -478,6 +529,9 @@ function processDump(dump) {
     let manche = -1;
     let attente_reponse = false;
 
+    TEXT_TITLES[0].innerText = dump[0].joueur_0.nom;
+    TEXT_TITLES[1].innerText = dump[0].joueur_1.nom;
+
     for (let currentLine = 0; currentLine < dump.length; currentLine++) {
         const dumpData = dump[currentLine];
         let joueur_courant = (dumpData.manche + dumpData.tour) % 2 == 0 ? JOUEUR1 : JOUEUR2;
@@ -494,7 +548,7 @@ function processDump(dump) {
         }
 
         if (!attente_reponse) {
-            actions.push({ acts: [addToMain(joueur_courant, pioche.pop())] });
+            actions.push({ acts: [addToMain(joueur_courant, pioche.pop()), updateManche(dumpData)] });
         }
 
         if (!dumpData.attente_reponse) {
@@ -676,6 +730,7 @@ function stopRun() {
 init_geishas();
 init_cartes();
 init_jetons();
+init_texts();
 main();
 document.onkeydown = (evt) => {
     if (evt.key == 'ArrowRight') {
