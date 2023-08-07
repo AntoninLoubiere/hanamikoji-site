@@ -30,11 +30,11 @@ const GEISHAS = new Array(NB_GEISHAS)
 const GEISHAS_LEFT_OFFSET = new Array(NB_GEISHAS)
 /** @type{HTMLImageElement[]} */
 const MARKERS = new Array(NB_GEISHAS)
-const GEISHA_SPACE_BETWEEN = 150;
-
+const GEISHA_FIRST_LEFT_OFFSET = 260
+const GEISHA_SPACE_BETWEEN = Math.max(130, (window.innerWidth - 300) / 9);
 function init_geishas() {
     for (let i = 0; i < NB_GEISHAS; i++) {
-        const left = GEISHAS_LEFT_OFFSET[i] = 300 + i * GEISHA_SPACE_BETWEEN;
+        const left = GEISHAS_LEFT_OFFSET[i] = GEISHA_FIRST_LEFT_OFFSET + i * GEISHA_SPACE_BETWEEN;
         const g = GEISHAS[i] = /** @type{HTMLImageElement} */ (document.getElementById('geisha' + i));
         g.style.left = `${left}px`
         g.style.top = `${HEIGHT / 2}px`
@@ -74,7 +74,7 @@ const JETONS = [
     new Array(NB_ACTIONS),
 ]
 const JETON_SPACE_BETWEEN = 100;
-const JETON_LEFT = 175;
+const JETON_LEFT = 150;
 function get_jeton_left_top(j, i) {
     let offset_left = JETON_LEFT;
     let offset_top = 75;
@@ -87,7 +87,7 @@ function get_jeton_left_top(j, i) {
     return {
         left: offset_left,
         top: j == JOUEUR1 ? offset_top : HEIGHT - offset_top,
-        zIndex: 0
+        zIndex: 10
     }
 }
 
@@ -172,7 +172,7 @@ function moveToMain(joueur, position) {
 }
 
 const VALIDATE_HEIGHT_OFFSET = 172;
-const VALIDATE_LEFT_OFFSET = GEISHA_SPACE_BETWEEN * NB_GEISHAS + 300;
+const VALIDATE_LEFT_OFFSET = GEISHA_SPACE_BETWEEN * NB_GEISHAS + GEISHA_FIRST_LEFT_OFFSET;
 function moveToValidate(joueur) {
     return {
         top: HEIGHT / 2 + (joueur == JOUEUR1 ? -VALIDATE_HEIGHT_OFFSET : VALIDATE_HEIGHT_OFFSET),
