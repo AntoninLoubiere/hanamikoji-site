@@ -203,11 +203,11 @@ function applyMoveTransition(el, f, reverse, t) {
  */
 function applyClassTransition(el, f, reverse, t) {
     if (reverse) {
-        if (f) {
-            el.classList.add(f)
-        }
         if (t) {
             el.classList.remove(t)
+        }
+        if (f) {
+            el.classList.add(f)
         }
     } else {
         if (f) {
@@ -563,6 +563,8 @@ async function main() {
     actions = r;
 }
 
+let delayedInProgress = false;
+
 /**
  * @param {actionsGroup} g
  * @param {boolean} reverse
@@ -578,12 +580,14 @@ function applyActionGroupDelay(g, reverse, i) {
     a.a(a.el, a.f, reverse, a.t);
     i++;
     if (i < g.acts.length) {
+        delayedInProgress = true;
         setTimeout(applyActionGroupDelay, g.delay, g, reverse, i);
+    } else {
+        delayedInProgress = false;
     }
 }
 
 function applyActionGroup(g, reverse) {
-    console.log(g);
     if (g.delay) {
         applyActionGroupDelay(g, reverse, 0);
     } else {
@@ -592,6 +596,7 @@ function applyActionGroup(g, reverse) {
 }
 
 function next(b) {
+    if (delayedInProgress) return true;
     if (!b) {
         stopRun();
     }
@@ -604,6 +609,8 @@ function next(b) {
 }
 
 function prev() {
+    if (delayedInProgress) return;
+
     stopRun();
     if (currentActionIndex > 0) {
         currentActionIndex--;
@@ -612,9 +619,10 @@ function prev() {
 }
 
 function nextUntilEnd() {
+    if (delayedInProgress) return;
     stopRun();
     while (currentActionIndex < actions.length) {
-        applyActionGroup(actions[currentActionIndex], false)
+        applyActionGroupSeq(actions[currentActionIndex], false)
         currentActionIndex++;
         if (actions[currentActionIndex - 1].end) {
             break;
@@ -623,10 +631,11 @@ function nextUntilEnd() {
 }
 
 function prevUntilEnd() {
+    if (delayedInProgress) return;
     stopRun();
     while (currentActionIndex > 0) {
         currentActionIndex--;
-        applyActionGroup(actions[currentActionIndex], true)
+        applyActionGroupSeq(actions[currentActionIndex], true)
         if (currentActionIndex > 0 && actions[currentActionIndex - 1].end) {
             break;
         }
