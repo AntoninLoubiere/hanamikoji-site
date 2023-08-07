@@ -22,6 +22,7 @@ function get_dump_from_url() {
     if (!isNaN(matchId)) {
         return fetch(`/media/match/${matchId}/dump.json`).then(r => r.json())
     }
+    return Promise.reject();
 }
 
 /** @type{HTMLImageElement[]} */
@@ -123,7 +124,7 @@ function init_texts() {
     t.style.top = '0';
     t.style.left = `${LAST_COLUMN}px`;
     t = /** @type{HTMLElement} */ (document.getElementById('info-section-1'));
-    t.style.bottom = '0';
+    t.style.top = `${HEIGHT}px`;
     t.style.left = `${LAST_COLUMN}px`;
 }
 
@@ -298,7 +299,7 @@ function processDump(dump) {
         new Array(NB_GEISHAS).fill(0),
     ]
     let pioche = [];
-    let actions = [];
+    actions = [];
     let cartes_validees = [-1, -1];
     let cartes_choix_3 = [-1, -1, -1];
     let cartes_choix_paquets = [-1, -1, -1, -1];
@@ -656,7 +657,7 @@ function processDump(dump) {
                 finishManche();
             }
 
-            if (dumpData.manche < 3) {
+            if (dumpData.cartes_pioche != undefined) {
                 nouvelleManche(dumpData);
             }
             manche = dumpData.manche;
@@ -710,15 +711,13 @@ function processDump(dump) {
         }
         attente_reponse = dumpData.attente_reponse;
     }
-
-    return actions;
 }
 
 /**
  * @typedef action
  * @prop {any} a
- * @prop {any} f
- * @prop {any} t
+ * @prop {any} [f]
+ * @prop {any} [t]
  * @prop {HTMLElement} el
  *
  * @typedef actionsGroup
@@ -730,10 +729,17 @@ function processDump(dump) {
 /** @type {actionsGroup[]} */
 let actions = [];
 let currentActionIndex = 0;
-async function main() {
-    const dump = await get_dump_from_url();
-    const r = processDump(dump);
-    actions = r;
+function main() {
+    get_dump_from_url()
+        .then(processDump)
+        .catch(() => document.getElementById('load-from-file-parent')?.classList.remove('hide'));
+}
+
+async function loadFromFile(el) {
+    const f = el.files[0];
+    const dump = JSON.parse(await f.text());
+    processDump(dump);
+    document.getElementById('load-from-file-parent')?.classList.add('hide')
 }
 
 let delayedInProgress = false;
