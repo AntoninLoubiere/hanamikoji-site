@@ -3,7 +3,6 @@ const NB_CARTES_TOTALES = 21;
 const NB_ACTIONS = 4;
 const GEISHA_VALEURS = [2, 2, 2, 3, 3, 4, 5]
 
-const HEIGHT = Math.max(window.innerHeight, 900);
 
 const JOUEUR1 = 0;
 const JOUEUR2 = 1;
@@ -25,6 +24,33 @@ function get_dump_from_url() {
     return Promise.reject();
 }
 
+let HEIGHT = 0;
+let WIDTH_FACTOR = 0;
+let BASE_WIDTH = 1400;
+let BASE_HEIGHT = 900;
+function init_size() {
+    let game = /** @type {HTMLElement} */ (document.getElementById('game'));
+    let scaleFactor = 1;
+    if (window.innerHeight < BASE_HEIGHT) {
+        scaleFactor = (window.innerHeight) / BASE_HEIGHT;
+    }
+
+    let innerWidth = Math.min(window.innerWidth, 1.5 * BASE_WIDTH)
+    if (innerWidth / scaleFactor < BASE_WIDTH) {
+        scaleFactor = innerWidth / BASE_WIDTH
+    }
+
+    WIDTH_FACTOR = Math.max(1, innerWidth / (scaleFactor * BASE_WIDTH))
+    HEIGHT = window.innerHeight / scaleFactor
+
+    if (scaleFactor >= 1) {
+        game.style.transform = '';
+    } else {
+        game.style.transform = `scale(${scaleFactor})`;
+    }
+
+}
+
 /** @type{HTMLImageElement[]} */
 const GEISHAS = new Array(NB_GEISHAS)
 /** @type{number[]} */
@@ -32,15 +58,15 @@ const GEISHAS_LEFT_OFFSET = new Array(NB_GEISHAS)
 /** @type{HTMLImageElement[]} */
 const MARKERS = new Array(NB_GEISHAS)
 const GEISHA_FIRST_LEFT_OFFSET = 260
-const GEISHA_SPACE_BETWEEN = Math.max(130, (window.innerWidth - GEISHA_FIRST_LEFT_OFFSET) / 9);
-function init_geishas() {
+const GEISHA_SPACE_BETWEEN = 125;
+function place_geishas() {
     for (let i = 0; i < NB_GEISHAS; i++) {
         const left = GEISHAS_LEFT_OFFSET[i] = GEISHA_FIRST_LEFT_OFFSET + i * GEISHA_SPACE_BETWEEN;
         const g = GEISHAS[i] = /** @type{HTMLImageElement} */ (document.getElementById('geisha' + i));
-        g.style.left = `${left}px`
+        g.style.left = `${left * WIDTH_FACTOR}px`
         g.style.top = `${HEIGHT / 2}px`
         const m = MARKERS[i] = /** @type{HTMLImageElement} */ (document.getElementById('marker' + i));
-        m.style.left = `${left}px`
+        m.style.left = `${left * WIDTH_FACTOR}px`
         m.style.top = `${HEIGHT / 2}px`
     }
 }
@@ -87,12 +113,14 @@ function get_jeton_left_top(j, i) {
     }
     return {
         left: offset_left,
-        top: j == JOUEUR1 ? offset_top : HEIGHT - offset_top,
+        top: j == JOUEUR1 ? offset_top : - offset_top,
+        topAnchor: j == JOUEUR1 ? 0 : 1,
+        leftFixed: true,
         zIndex: 0
     }
 }
 
-function init_jetons() {
+function place_jetons() {
     for (let j = 0; j < 2; j++) {
         for (let i = 0; i < NB_ACTIONS; i++) {
             let jet = JETONS[j][i] = /** @type {HTMLImageElement} */ (document.getElementById(`j${j}-${i}`))
@@ -112,20 +140,23 @@ const INFO_SCORE = [
     /** @type {HTMLSpanElement} */ (document.getElementById('info-score-1')),
 ]
 const MANCHE_STATUS = /** @type{HTMLSpanElement} */ (document.getElementById('manche-status'));
-function init_texts() {
+
+function place_texts() {
     let t = TEXT_TITLES[0] = /** @type{HTMLElement} */(document.getElementById('title-j0'));
     t.style.top = `${HEIGHT / 4}px`
-    t.style.left = `${GEISHAS_LEFT_OFFSET[3]}px`;
+    t.style.left = `${GEISHAS_LEFT_OFFSET[3] * WIDTH_FACTOR}px`;
     t = TEXT_TITLES[1] = /** @type{HTMLElement} */(document.getElementById('title-j1'));
     t.style.top = `${3 * HEIGHT / 4}px`
-    t.style.left = `${GEISHAS_LEFT_OFFSET[3]}px`;
+    t.style.left = `${GEISHAS_LEFT_OFFSET[3] * WIDTH_FACTOR}px`;
 
     t = /** @type{HTMLElement} */ (document.getElementById('info-section-0'));
     t.style.top = '0';
-    t.style.left = `${LAST_COLUMN}px`;
+    t.style.left = `${(LAST_COLUMN - GEISHA_SPACE_BETWEEN / 2) * WIDTH_FACTOR}px`;
+    t.style.maxWidth = `${(GEISHA_SPACE_BETWEEN * 1.2) * WIDTH_FACTOR}px`
     t = /** @type{HTMLElement} */ (document.getElementById('info-section-1'));
     t.style.top = `${HEIGHT}px`;
-    t.style.left = `${LAST_COLUMN}px`;
+    t.style.left = `${(LAST_COLUMN - GEISHA_SPACE_BETWEEN / 2) * WIDTH_FACTOR}px`;
+    t.style.maxWidth = `${(GEISHA_SPACE_BETWEEN * 1.2) * WIDTH_FACTOR}px`
 }
 
 const CARTE_HEIGHT_OFFSET = 35;
@@ -134,15 +165,17 @@ const PIOCHE_CENTRAL_POSITION = 4;
 /**
  * @typedef moveAction
  * @prop {number} top
+ * @prop {number} topAnchor
  * @prop {number} left
+ * @prop {boolean} [leftFixed]
  * @prop {number} [zIndex]
  *
  * @param {HTMLElement} el
  * @param {moveAction} moveAction
  */
 function applyMove(el, moveAction) {
-    el.style.top = `${moveAction.top}px`
-    el.style.left = `${moveAction.left}px`
+    el.style.top = `${moveAction.top + HEIGHT * moveAction.topAnchor}px`
+    el.style.left = `${moveAction.leftFixed ? moveAction.left : moveAction.left * WIDTH_FACTOR}px`
     if (moveAction.zIndex != null) {
         el.style.zIndex = `${moveAction.zIndex}`
     }
@@ -154,8 +187,10 @@ function applyMove(el, moveAction) {
 */
 function moveToPioche(position, overrideZIndex) {
     return {
-        top: HEIGHT / 2 - PIOCHE_CENTRAL_POSITION * CARTE_HEIGHT_OFFSET + position * CARTE_HEIGHT_OFFSET,
+        top: - PIOCHE_CENTRAL_POSITION * CARTE_HEIGHT_OFFSET + position * CARTE_HEIGHT_OFFSET,
+        topAnchor: .5,
         left: PIOCHE_LEFT_OFFSET,
+        leftFixed: true,
         zIndex: overrideZIndex ?? 10 + position
     }
 }
@@ -167,7 +202,8 @@ const CARTES_GEISHA_OFFSET = 140;
 */
 function moveToGeisha(geisha, position) {
     return {
-        top: (position > 0 ? CARTES_GEISHA_OFFSET : -CARTES_GEISHA_OFFSET) + position * CARTE_HEIGHT_OFFSET + HEIGHT / 2,
+        top: (position > 0 ? CARTES_GEISHA_OFFSET : -CARTES_GEISHA_OFFSET) + position * CARTE_HEIGHT_OFFSET,
+        topAnchor: .5,
         left: GEISHAS_LEFT_OFFSET[geisha],
         zIndex: 9 + position
     }
@@ -181,7 +217,8 @@ const CARTES_MAIN_HEIGHT_OFFSET = 95;
 */
 function moveToMain(joueur, position) {
     return {
-        top: joueur == JOUEUR1 ? CARTES_MAIN_HEIGHT_OFFSET : HEIGHT - CARTES_MAIN_HEIGHT_OFFSET,
+        top: joueur == JOUEUR1 ? CARTES_MAIN_HEIGHT_OFFSET : - CARTES_MAIN_HEIGHT_OFFSET,
+        topAnchor: joueur == JOUEUR1 ? 0 : 1,
         left: GEISHAS_LEFT_OFFSET[0] + position * GEISHA_SPACE_BETWEEN,
         zIndex: 10 + 2 * position - joueur,
     }
@@ -191,7 +228,8 @@ const VALIDATE_HEIGHT_OFFSET = 120;
 const VALIDATE_LEFT_OFFSET = GEISHA_SPACE_BETWEEN * NB_GEISHAS + GEISHA_FIRST_LEFT_OFFSET;
 function moveToValidate(joueur) {
     return {
-        top: HEIGHT / 2 + (joueur == JOUEUR1 ? -VALIDATE_HEIGHT_OFFSET : VALIDATE_HEIGHT_OFFSET),
+        top: joueur == JOUEUR1 ? -VALIDATE_HEIGHT_OFFSET : VALIDATE_HEIGHT_OFFSET,
+        topAnchor: .5,
         left: VALIDATE_LEFT_OFFSET,
         zIndex: 20
     }
@@ -201,7 +239,8 @@ const DEFAUSSER_HEIGHT_OFFSET = 300;
 function moveToDefausser(joueur, o) {
     const off = DEFAUSSER_HEIGHT_OFFSET + o * CARTE_HEIGHT_OFFSET;
     return {
-        top: HEIGHT / 2 + (joueur == JOUEUR1 ? -off : off),
+        top: joueur == JOUEUR1 ? -off : off,
+        topAnchor: .5,
         left: VALIDATE_LEFT_OFFSET,
         zIndex: joueur == JOUEUR1 ? 20 - o : 20 + o
     }
@@ -211,7 +250,8 @@ const LAST_COLUMN = VALIDATE_LEFT_OFFSET + GEISHA_SPACE_BETWEEN;
 const CARD_HEIGHT = 175;
 function moveToChoixTrois(i) {
     return {
-        top: HEIGHT / 2 + (i - 1) * CARD_HEIGHT,
+        top: (i - 1) * CARD_HEIGHT,
+        topAnchor: .5,
         left: LAST_COLUMN,
         zIndex: 80 + 4 * i,
     }
@@ -221,7 +261,8 @@ const CHOIX_PAQUETS_OFFSET = VALIDATE_HEIGHT_OFFSET;
 function moveToChoixPaquets(i) {
     const off = CHOIX_PAQUETS_OFFSET + (i % 2) * CARTE_HEIGHT_OFFSET;
     return {
-        top: HEIGHT / 2 + (i < 2 ? -off : off),
+        top: i < 2 ? -off : off,
+        topAnchor: .5,
         left: LAST_COLUMN,
         zIndex: i < 2 ? 80 - i * 4 : 80 + i * 4,
     }
@@ -553,9 +594,7 @@ function processDump(dump) {
         }
 
         if (dumpData.manche == 0) {
-            for (let a of resetActs) {
-                a.a(a.el, a.f, false, a.t);
-            }
+            initActions = { acts: resetActs };
             acts.unshift({
                 el: TEXT_TITLES[0],
                 a: applyClassTransition,
@@ -711,6 +750,8 @@ function processDump(dump) {
         }
         attente_reponse = dumpData.attente_reponse;
     }
+
+    applyActionGroup(initActions, false);
 }
 
 /**
@@ -728,11 +769,21 @@ function processDump(dump) {
  */
 /** @type {actionsGroup[]} */
 let actions = [];
+/** @type {actionsGroup?} */
+let initActions = null;
 let currentActionIndex = 0;
 function main() {
+    updatePlaces();
     get_dump_from_url()
         .then(processDump)
         .catch(() => document.getElementById('load-from-file-parent')?.classList.remove('hide'));
+}
+
+function updatePlaces() {
+    init_size();
+    place_geishas();
+    place_texts();
+    place_jetons();
 }
 
 async function loadFromFile(el) {
@@ -861,9 +912,7 @@ function stopRun() {
     }
 }
 
-init_geishas();
-init_texts();
-init_jetons();
+
 init_cartes();
 main();
 document.onkeydown = (evt) => {
@@ -882,4 +931,13 @@ document.onkeydown = (evt) => {
     } else if (evt.key == ' ') {
         toggleRun();
     }
+}
+
+document.body.onresize = () => {
+    updatePlaces();
+    applyActionGroup(initActions, false);
+    for (let i = 0; i < currentActionIndex; i++) {
+        applyActionGroupSeq(actions[i], false); // On réapplique toutes les transitions
+    }
+    console.log("????");
 }

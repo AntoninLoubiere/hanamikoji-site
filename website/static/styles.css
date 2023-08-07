@@ -463,7 +463,6 @@ caption {
 iframe {
     width: 97vw;
     height: 100vh;
-    min-height: 799px;
 }
 
 #match_detail {
