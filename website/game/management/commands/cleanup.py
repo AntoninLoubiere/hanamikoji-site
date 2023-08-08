@@ -1,7 +1,6 @@
 from pathlib import Path
 import shutil
-from typing import Any, Optional
-from django.core.management.base import BaseCommand, CommandParser
+from django.core.management.base import BaseCommand
 
 from game.tasks import MATCH_OUT_DIR, PATH_BUILD_DIR
 from game.models import Champion, Match
@@ -68,10 +67,10 @@ def get_files_task(actual_dirs, used):
 class Command(BaseCommand):
     help = "Cleanup unused files"
 
-    def add_arguments(self, parser) -> None:
+    def add_arguments(self, parser):
         parser.add_argument("--dry", action="store_true", help="Make a dry run",)
 
-    def handle(self, *args, **options) -> str | None:
+    def handle(self, *args, **options):
         delete_files = not options['dry']
 
         print("# Delete build dir :")
