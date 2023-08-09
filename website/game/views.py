@@ -343,8 +343,8 @@ def delete_champion_tournoi(request,id,nom):
     if champion.uploader == request.user:
         supp = True
         matchs = Match.objects.filter(
-            Q(champion1__in=champion) |
-            Q(champion2__in=champion)
+            Q(champion1=champion) |
+            Q(champion2=champion)
         )
         for m in matchs:
             if m.champion1.uploader != m.champion2.uploader:
