@@ -5,9 +5,8 @@
 <h1>Tous les champions</h1>
 <div class="ajout-barre">
     <a href="{% url 'champion_upload' %}" class="ajout">Ajouter un champion</a>
-    <form action="" method="post">
-        {% csrf_token %}
-        <select onchange="this.form.submit()" name="filter" class="ajout">
+    <form action="" method="get">
+        <select onchange="this.form.submit()" name="user" class="ajout">
             <option value="all">Tous les utilisateurs</option>
             {% for u in users %}
                 <option value="{{u.id}}" {% if filter_id == u.id %}selected{% endif %}>{{u.username}}</option>
@@ -34,7 +33,7 @@
         <td>{{ champion.date|date:"l d F Y, H:i" }}</td>
         <td id="sans_casse">{{ champion.uploader }}</td>
         <td>{{ champion.get_compilation_status_display }}</td>
-        <td>{{ champion.nb_matchs }}</td>
+        <td><a href="{% url 'matchs' %}?champion=champ-{{ champion.pk }}">{{ champion.nb_matchs }}</a></td>
     </tr>
     {% endfor %}
 </table>

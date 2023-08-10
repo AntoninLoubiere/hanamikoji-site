@@ -71,26 +71,24 @@ def matchs(request: HttpRequest):
     matchs = Match.objects
     filt_type = "all"
     filt_id = -1
-    filter_tournoi = "all_t"
-    if request.method == 'POST':
-        filter_tournoi = request.POST.get('filter-tournois', 'all_t')
-        if filter_tournoi == 'none_t':
-            matchs = matchs.filter(tournoi__isnull=True)
-        elif filter_tournoi != 'all_t':
-            try:
-                filter_tournoi = int(filter_tournoi)
-                matchs = matchs.filter(tournoi__id_tournoi=filter_tournoi)
-            except ValueError:
-                pass
+    filter_tournoi = request.GET.get('tournoi', 'all_t')
+    if filter_tournoi == 'none_t':
+        matchs = matchs.filter(tournoi__isnull=True)
+    elif filter_tournoi != 'all_t':
+        try:
+            filter_tournoi = int(filter_tournoi)
+            matchs = matchs.filter(tournoi__id_tournoi=filter_tournoi)
+        except ValueError:
+            pass
 
-        filt = request.POST.get('filter', 'all')
-        f = filt.split('-')
-        if len(f) >= 1:
-            filt_type = f[0]
-            if len(f) >= 2:
-                try:
-                    filt_id = int(f[1])
-                except ValueError:
+    filt = request.GET.get('champion', 'all')
+    f = filt.split('-')
+    if len(f) >= 1:
+        filt_type = f[0]
+        if len(f) >= 2:
+            try:
+                filt_id = int(f[1])
+            except ValueError:
                     pass
 
         if filt_type == 'user':
@@ -112,15 +110,13 @@ def champions(request):
     champions = None
     users_ids = Champion.objects.all().values_list('uploader', flat=True).all()
     users = User.objects.filter(id__in = users_ids)
-    filter_id = -1
-    if request.method == 'POST':
-        filter_id = request.POST.get('filter', 'all')
-        if filter_id != 'all':
-            try:
-                filter_id = int(filter_id)
-                champions = Champion.objects.filter(uploader__id=filter_id).order_by("-date")
-            except ValueError:
-                pass
+    filter_id = request.GET.get('user', 'all')
+    if filter_id != 'all':
+        try:
+            filter_id = int(filter_id)
+            champions = Champion.objects.filter(uploader__id=filter_id).order_by("-date")
+        except ValueError:
+            pass
 
     if champions is None:
         champions =  Champion.objects.all().order_by("-date")

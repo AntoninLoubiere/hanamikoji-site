@@ -11,7 +11,7 @@
     <a href="{% static 'rules.zip' %}" class="ajout">Télécharger la base du code</a>
 </div>
 <table>
-    <caption>Les champions</caption>
+    <caption>Mes champions</caption>
     <tr>
         <th>Nom</th>
         <th>Date de création</th>
@@ -34,7 +34,7 @@
     {% endfor %}
 </table>
 <table>
-    <caption>Les matchs</caption>
+    <caption>Mes matchs</caption>
     <tr>
         <th>ID</th>
         <th>Champion n°1</th>
@@ -64,4 +64,5 @@
     </tr>
     {% endfor %}
 </table>
+<a class="content-center" href="{% url 'matchs' %}?champion=user-{{ user.pk }}">Tous mes matchs</a>
 {% endblock content %}
