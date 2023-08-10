@@ -11,7 +11,7 @@
     <a href="{% static 'rules.zip' %}" class="ajout">Télécharger la base du code</a>
 </div>
 <table>
-    <caption>Les champions</caption>
+    <caption>Mes champions</caption>
     <tr>
         <th>Nom</th>
         <th>Date de création</th>
@@ -34,7 +34,7 @@
     {% endfor %}
 </table>
 <table>
-    <caption>Les matchs</caption>
+    <caption>Mes matchs</caption>
     <tr>
         <th>ID</th>
         <th>Champion n°1</th>
@@ -45,16 +45,9 @@
     {% for match in matchs %}
     <tr>
         <td><a href="{% url 'match_detail' match.id_match %}">{{ match.id_match }}</a></td>
-        {% if match.gagnant == 0 or match.gagnant == 1 %}
-        <td id='champion_win'>{{ match.champion1.nom }}</td>
-        {% else %}
-        <td>{{ match.champion1.nom }}</td>
-        {% endif %}
-        {% if match.gagnant == 0 or match.gagnant == 2 %}
-        <td id='champion_win'>{{ match.champion2.nom }}</td>
-        {% else %}
-        <td>{{ match.champion2.nom }}</td>
-        {% endif %}
+        <td {% if match.gagnant == 0 or match.gagnant == 1 %}class='champion_win'{% endif %} title="{{match.champion1}}">{{ match.champion1.nom }}</td>
+        <td {% if match.gagnant == 0 or match.gagnant == 2 %}class='champion_win'{% endif %} title="{{match.champion2}}">{{ match.champion2.nom }}</td>
+
         {% if match.status == 'FI' %}
         <td>{{ match.score1 }} à {{ match.score2 }}</td>
         {% else %}
@@ -64,4 +57,5 @@
     </tr>
     {% endfor %}
 </table>
+<a class="content-center" href="{% url 'matchs' %}?champion=user-{{ user.pk }}">Tous mes matchs</a>
 {% endblock content %}

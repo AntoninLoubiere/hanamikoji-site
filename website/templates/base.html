@@ -19,7 +19,7 @@
         <a href="{% url 'champions' %}">Champions</a>
         <a href="{% url 'matchs' %}">Matchs</a>
         <a href="{% url 'tournois' %}">Tournois</a>
-        <a href="{% static 'replay/index.html' %}">Replay</a>
+        <a href="{% static 'replay/index.html' %}" target="_blank">Replay</a>
         <a href="{% url 'password_change' %}">Changer de MDP</a>
         <a href="{% url 'logout' %}">Déconnexion</a>
         {% if user.is_staff %}

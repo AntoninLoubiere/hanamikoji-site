@@ -5,9 +5,8 @@
 <h1>Tous les matchs</h1>
 <div class="ajout-barre">
     <a href="{% url 'add_match' %}" class="ajout">Lancer un match</a>
-    <form action="" method="post">
-        {% csrf_token %}
-        <select onchange="this.form.submit()" name="filter" class="ajout">
+    <form action="" method="get">
+        <select onchange="this.form.submit()" name="champion" class="ajout">
             <option value="all">Tous les champions</option>
             {% for u, champs in list_champions %}
                 <optgroup label={{u.username}}>
@@ -18,7 +17,7 @@
                 </optgroup>
             {% endfor %}
         </select>
-        <select onchange="this.form.submit()" name="filter-tournois" class="ajout">
+        <select onchange="this.form.submit()" name="tournoi" class="ajout">
             <option value="all_t">Tous les matchs</option>
             <option value="none_t" {% if tournoi_selected == "none_t" %}selected{% endif %}>Aucun tournoi</option>
             {% for t in tournois %}
