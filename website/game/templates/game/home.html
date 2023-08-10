@@ -45,16 +45,9 @@
     {% for match in matchs %}
     <tr>
         <td><a href="{% url 'match_detail' match.id_match %}">{{ match.id_match }}</a></td>
-        {% if match.gagnant == 0 or match.gagnant == 1 %}
-        <td id='champion_win'>{{ match.champion1.nom }}</td>
-        {% else %}
-        <td>{{ match.champion1.nom }}</td>
-        {% endif %}
-        {% if match.gagnant == 0 or match.gagnant == 2 %}
-        <td id='champion_win'>{{ match.champion2.nom }}</td>
-        {% else %}
-        <td>{{ match.champion2.nom }}</td>
-        {% endif %}
+        <td {% if match.gagnant == 0 or match.gagnant == 1 %}class='champion_win'{% endif %} title="{{match.champion1}}">{{ match.champion1.nom }}</td>
+        <td {% if match.gagnant == 0 or match.gagnant == 2 %}class='champion_win'{% endif %} title="{{match.champion2}}">{{ match.champion2.nom }}</td>
+
         {% if match.status == 'FI' %}
         <td>{{ match.score1 }} à {{ match.score2 }}</td>
         {% else %}
