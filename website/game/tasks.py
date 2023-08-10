@@ -261,10 +261,10 @@ def on_end_tournoi(t: Tournoi):
         i.victoires = 0
         i.egalites = 0
 
-    reverse_inscrits = {i.champion.pk: i for i in inscrits}
+    reverse_inscrits = {i.champion_id: i for i in inscrits}
     for m in matchs:
-        i1 = reverse_inscrits[m.champion1.pk]
-        i2 = reverse_inscrits[m.champion2.pk]
+        i1 = reverse_inscrits[m.champion1_id]
+        i2 = reverse_inscrits[m.champion2_id]
 
         i1.nb_points += m.score1
         i2.nb_points += m.score2

@@ -297,11 +297,11 @@ def tournoi_detail(request,id):
         match_matrix = []
         user_to_classement = {}
         for i in inscrits:
-            user_to_classement[i.champion.pk] = len(match_matrix)
+            user_to_classement[i.champion_id] = len(match_matrix)
             match_matrix.append((i, [[] for _ in range(nb_ins)]))
 
         for m in matchs:
-            match_matrix[user_to_classement[m.champion1.pk]][1][user_to_classement[m.champion2.pk]].append(m)
+            match_matrix[user_to_classement[m.champion1_id]][1][user_to_classement[m.champion2_id]].append(m)
     elif tournoi.status != Tournoi.Status.EN_COURS:
         nb_ins = inscrits.count()
         nb_matchs = nb_ins * (nb_ins - 1) * tournoi.nb_matchs // 2
