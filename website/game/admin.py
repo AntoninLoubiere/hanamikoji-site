@@ -28,6 +28,7 @@ class TournoiAdmin(admin.ModelAdmin):
     readonly_fields = ('inscrits', 'matchs')
     list_display = ('id_tournoi', 'status', 'max_champions', 'date_lancement', 'nb_champions', 'nb_matchs')
     list_filter = ('status', 'date_lancement')
+    actions = ('recompter_points', )
 
     def nb_matchs(self, t):
         return Match.objects.filter(tournoi=t).count()
@@ -37,6 +38,9 @@ class TournoiAdmin(admin.ModelAdmin):
 
     def inscrits(self, t):
         return format_html(f'<a href="/admin/game/inscrit/?tournoi__id_tournoi__exact={t.id_tournoi}">{t.nb_champions()} inscrits</a>')
+
+    def recompter_points(self, _, queryset):
+        queryset.update(status=Tournoi.Status.EN_COURS)
 
 
 @admin.register(Inscrit)
