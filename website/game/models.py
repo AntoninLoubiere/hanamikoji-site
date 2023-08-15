@@ -185,6 +185,7 @@ class Match(models.Model):
     match_task = models.ForeignKey(Task, null=True, editable=False, on_delete=models.SET_NULL)
     tournoi = models.ForeignKey(Tournoi, null=True,on_delete=models.CASCADE, blank=True)
     lanceur = models.ForeignKey(User, on_delete=models.PROTECT, null=True, blank=True)
+    fin_prematuree = models.BooleanField(default=False)
 
     class Meta:
         indexes = [
@@ -193,7 +194,8 @@ class Match(models.Model):
             models.Index(fields=["champion2","-date"]),
             models.Index(fields=["tournoi","champion1","-date"]),
             models.Index(fields=["tournoi","champion2","-date"]),
-            models.Index(fields=["tournoi","-date"])
+            models.Index(fields=["tournoi","-date"]),
+            models.Index(fields=["fin_prematuree", "tournoi","-date"])
         ]
 
     def save(self, *args, run=True, **kwargs) -> None:

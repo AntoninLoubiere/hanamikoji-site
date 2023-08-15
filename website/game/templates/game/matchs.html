@@ -18,12 +18,17 @@
             {% endfor %}
         </select>
         <select onchange="this.form.submit()" name="tournoi" class="ajout">
-            <option value="all_t">Tous les matchs</option>
-            <option value="none_t" {% if tournoi_selected == "none_t" %}selected{% endif %}>Aucun tournoi</option>
+            <option value="all">Tous les tournois</option>
+            <option value="none" {% if tournoi_selected == "none" %}selected{% endif %}>Aucun tournoi</option>
             {% for t in tournois %}
             <option value="{{t.id_tournoi}}" {% if tournoi_selected == t.id_tournoi %}selected{% endif %}>Tournoi n°{{ t.id_tournoi }} |
                 {{t.date_lancement|date:"l d F Y, H:i"}}</option>
             {% endfor %}
+        </select>
+        <select onchange="this.form.submit()" name="fin" class="ajout">
+            <option value="all">Toutes les fins</option>
+            <option value="oui" {% if fin_selected == "oui" %}selected{% endif %}>Fins prématurées</option>
+            <option value="non" {% if fin_selected == "non" %}selected{% endif %}>Fins non prématurées</option>
         </select>
     </form>
 </div>
@@ -37,13 +42,13 @@
         <th>Statut</th>
     </tr>
     {% for match in matchs %}
-    <tr>
+    <tr {% if match.fin_prematuree %}class="fin-prematuree"{% endif %}>
         <td><a href="{% url 'match_detail' match.id_match %}">{{ match.id_match }}</a></td>
         <td {% if match.gagnant == 0 or match.gagnant == 1 %}class='champion_win'{% endif %} title="{{match.champion1}}">{{ match.champion1.nom }}</td>
 
         <td {% if match.gagnant == 0 or match.gagnant == 2 %}class='champion_win'{% endif %} title="{{match.champion2}}">{{ match.champion2.nom }}</td>
         {% if match.status == 'FI' %}
-        <td>{{ match.score1 }} à {{ match.score2 }}</td>
+        <td {% if match.fin_prematuree %}class="score-fin-prematuree"{% endif %}>{{ match.score1 }} à {{ match.score2 }}</td>
         {% else %}
         <td>Non fini</td>
         {% endif %}

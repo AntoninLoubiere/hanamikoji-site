@@ -69,18 +69,24 @@ def matchs(request: HttpRequest):
     tournois = Tournoi.objects.filter(date_lancement__lte = timezone.now())
 
     matchs = Match.objects
-    filt_type = "all"
-    filt_id = -1
-    filter_tournoi = request.GET.get('tournoi', 'all_t')
-    if filter_tournoi == 'none_t':
+    filter_tournoi = request.GET.get('tournoi', 'all')
+    if filter_tournoi == 'none':
         matchs = matchs.filter(tournoi__isnull=True)
-    elif filter_tournoi != 'all_t':
+    elif filter_tournoi != 'all':
         try:
             filter_tournoi = int(filter_tournoi)
             matchs = matchs.filter(tournoi__id_tournoi=filter_tournoi)
         except ValueError:
             pass
 
+    fin_selected = request.GET.get('fin', 'all')
+    if fin_selected == 'oui':
+        matchs = matchs.filter(fin_prematuree=True)
+    elif fin_selected == 'non':
+        matchs = matchs.filter(fin_prematuree=False)
+
+    filt_type = "all"
+    filt_id = -1
     filt = request.GET.get('champion', 'all')
     f = filt.split('-')
     if len(f) >= 1:
@@ -102,7 +108,9 @@ def matchs(request: HttpRequest):
     paginator = Paginator(matchs,15)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
-    return render(request,'game/matchs.html',context={'matchs':page_obj,'message':message, 'list_champions': list_champions, 'filter_type': filt_type, 'filter_id': filt_id, 'tournois': tournois, 'tournoi_selected': filter_tournoi})
+    return render(request,'game/matchs.html',context={'matchs':page_obj,'message':message,
+    'list_champions': list_champions, 'filter_type': filt_type, 'filter_id': filt_id, 'tournois': tournois,
+    'tournoi_selected': filter_tournoi, 'fin_selected': fin_selected})
 
 @login_required
 def champions(request):
@@ -286,10 +294,16 @@ def tournoi_detail(request,id):
     termine = 0
     match_matrix = None
     nb_matchs = matchs.count()
+    temps_restant = -1
+    fin_date = None
     if tournoi.status == Tournoi.Status.EN_COURS:
         termine = Match.objects.filter(Q(tournoi=tournoi) & (Q(status=Match.Status.FINI) | Q(status=Match.Status.ERREUR))).count()
         if termine >= nb_matchs:
             on_end_tournoi(tournoi)
+        elif termine > 0:
+            delta = (timezone.now() - tournoi.date_lancement) * nb_matchs / termine
+            fin_date = delta + timezone.now()
+            temps_restant = int(delta.total_seconds() // 60)
 
     if tournoi.status == Tournoi.Status.FINI:
         nb_ins = inscrits.count()
@@ -311,7 +325,8 @@ def tournoi_detail(request,id):
         'tournoi':tournoi,'inscrits':inscrits, 'matchs':matchs,'termine':termine,'nb_matchs':nb_matchs,
         'match_matrix': match_matrix, 'champions_select': champions_select,
         'champions_non_select': champions_non_select, 'nb_select': champions_select.count(),
-        'message': message, 'timer': tournoi.date_lancement.isoformat() if tournoi.status == Tournoi.Status.LANCEMENT_PROGRAMMÉ else ''})
+        'message': message, 'timer': tournoi.date_lancement.isoformat() if tournoi.status == Tournoi.Status.LANCEMENT_PROGRAMMÉ else '',
+        'temps_restant': temps_restant, 'fin_date': fin_date})
 
 @login_required
 def update_tournoi(request,id):

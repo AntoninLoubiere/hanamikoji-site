@@ -8,6 +8,7 @@ import re
 import subprocess
 import shutil
 import tempfile
+from django.utils import timezone
 from django_q.tasks import Task, async_task
 
 from website.settings import ISOLATE_TIMEOUT, MATCH_RULES, MATCH_SERVER_TIMEOUT, SERVER_TIMEOUT, MEDIA_ROOT, STECHEC_CLIENT, STECHEC_SERVER, MAX_ISOLATE
@@ -35,6 +36,7 @@ LANGS = set(['python', 'c', 'cxx', 'caml'])
 IDS = set(range(1000))
 RE_MATCH_GAGNANT = re.compile('gagnant: (.*)')
 RE_MATCH_SCORE = re.compile('score: (.*)')
+RE_FIN_PREMATUREE = re.compile('Il perd donc.')
 MAX_ISOLATE_HALF = MAX_ISOLATE // 2
 MAX_ISOLATE_TRY = 10
 
@@ -128,7 +130,9 @@ def run_match(match: Match):
     if len(score) == 2:
         match.score1 = int(score[0])
         match.score2 = int(score[1])
+        match.fin_prematuree = RE_FIN_PREMATUREE.search(server_out) is not None
     else:
+        match.fin_prematuree = True
         print("Impossible de trouver le score ?")
 
     return server_out
@@ -247,6 +251,8 @@ async def run_client(match_dir, champion_name, champion_path: Path, req_addr, su
 def on_end_match(task: Task):
     m: Match = task.args[0]
     m.status = Match.Status.FINI if task.success else Match.Status.ERREUR
+    if not task.success:
+        m.fin_prematuree = True
     m.match_task = task
     m.save(run=False)
 
@@ -266,8 +272,8 @@ def on_end_tournoi(t: Tournoi):
         i1 = reverse_inscrits[m.champion1_id]
         i2 = reverse_inscrits[m.champion2_id]
 
-        i1.nb_points += m.score1
-        i2.nb_points += m.score2
+        i1.nb_points += m.score1 or 0
+        i2.nb_points += m.score2 or 0
 
         if m.gagnant == Match.Gagnant.CHAMPION_1:
             i1.victoires += 1
@@ -307,6 +313,7 @@ def launch_tournoi(tournoi_id: str):
 
     tournoi.status = Tournoi.Status.EN_COURS
     tournoi.nb_matchs_done = 0
+    tournoi.date_lancement = timezone.now()
     tournoi.nb_matchs = len(matchs)
     tournoi.save()
 
