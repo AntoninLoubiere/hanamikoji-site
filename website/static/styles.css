@@ -130,6 +130,12 @@ th {
     text-transform: capitalize;
 }
 
+.match-matrix,
+.match-matrix td,
+.match-matrix th {
+    font-size: 0.8rem;
+}
+
 th {
     background: #090f42d6;
     color: #fff;
