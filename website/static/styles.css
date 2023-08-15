@@ -185,6 +185,7 @@ caption {
     font-weight: bold;
     font-family: serif;
     background-color: white;
+    margin: 0 .25rem;
 }
 
 .ajout option, .ajout optgroup {
@@ -223,8 +224,17 @@ caption {
 .champion-name {
     max-width: max-content;
     margin-bottom: .5rem;
-    font: small-caps;
+    font-variant: small-caps;
     font-size: 2rem;
+}
+
+.fin-prematuree {
+    font-style: italic;
+    text-decoration-style: wavy;
+}
+
+.score-fin-prematuree {
+    text-decoration: underline wavy;
 }
 
 .champion-column {
@@ -468,4 +478,8 @@ iframe {
 #match_detail {
     margin: 0px 0px 0px 0px;
     padding: 0px 0px 0px 0px;
+}
+
+.margin-center {
+    margin: auto;
 }

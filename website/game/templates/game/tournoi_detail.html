@@ -60,7 +60,7 @@
     </form>
     {% endif %}
     {% elif tournoi.status == 'EC' %}
-    Nombres de matchs terminés : {{ termine }} sur {{ nb_matchs }}
+    Nombres de matchs terminés : {{ termine }} sur {{ nb_matchs }}. Date de fin estimée : {% if temps_restant >= 0 %}{{ temps_restant }} minute{{ temps_restant|pluralize }} ({{ fin_date|date:"H:i" }}){% else %} bientôt {% endif %}
     {% elif tournoi.status == 'FI' %}
     <table>
         <caption>Classement</caption>
@@ -82,7 +82,7 @@
         {% endfor %}
     </table>
 
-    <table>
+    <table class="match-matrix">
         <caption>Matchs</caption>
         <tr>
             <th>Champions</th>
@@ -94,7 +94,7 @@
             <tr>
                 <th title="{{ i.champion }}">{{ i.classement }}. {{ i.champion.nom }}</th>
                 {% for matchs in match_line %}
-                    <td class="matchs-td {% if not matchs %}match-inexistant{% endif %}">{% for m in matchs%}<a href="{% url 'match_detail' m.id_match %}" class="match-gagnant-{{m.gagnant}}">{{ m.score1 }} à {{ m.score2 }}</a>{% endfor %}</td>
+                    <td class="matchs-td {% if not matchs %}match-inexistant{% endif %}">{% for m in matchs%}<a href="{% url 'match_detail' m.id_match %}" class="match-gagnant-{{m.gagnant}}{% if m.fin_prematuree %} fin-prematuree{% endif %}">{{ m.score1 }} à {{ m.score2 }}</a>{% endfor %}</td>
                     {% endfor %}
                 </tr>
         {% endfor %}

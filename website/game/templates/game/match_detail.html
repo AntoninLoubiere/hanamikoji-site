@@ -18,7 +18,7 @@
 </div>
 <div class="content-section" id="match_detail">
     <span class="content-center">{{ match.get_status_display }}</span>
-    <div class="grid-2">
+    <div class="grid-2 {% if match.fin_prematuree %}fin-prematuree{% endif %}">
         <div class="champion-column {% if match.gagnant == 1 %}winner{% endif %}">
             <span class="champion-name">{{match.champion1.nom}}</span>
             <span>{{ match.champion1.uploader }}</span>
@@ -31,10 +31,13 @@
         </div>
         
     </div>
-    {% if match.tournoi != None %}<span class="champion-name">Ce match compte pour <a
+    {% if match.tournoi != None %}<div class="champion-name margin-center">Ce match compte pour <a
             href=" {% url 'tournoi_detail' match.tournoi.id_tournoi %}">le tournoi
-            n°{{match.tournoi.id_tournoi}}</a></span>{% endif %}
+            n°{{match.tournoi.id_tournoi}}</a></div>{% endif %}
     {% if match.status == 'FI' %}
+        {% if match.fin_prematuree %}
+            <div class="champion-name margin-center">Ce match s'est terminé prématurément</div>
+        {% endif %}
         <span class="content-center">Distribution des cartes</span>
         <div class="map">{{map}}</div>
         <iframe id="match-{{ match.id_match }}" src="/static/replay/index.html?match={{ match.id_match }}" allow="fullscreen" frameborder="0"></iframe>

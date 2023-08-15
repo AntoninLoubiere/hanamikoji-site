@@ -43,13 +43,13 @@
         <th>Statut</th>
     </tr>
     {% for match in matchs %}
-    <tr>
+    <tr {% if match.fin_prematuree %}class="fin-prematuree"{% endif %}>
         <td><a href="{% url 'match_detail' match.id_match %}">{{ match.id_match }}</a></td>
         <td {% if match.gagnant == 0 or match.gagnant == 1 %}class='champion_win'{% endif %} title="{{match.champion1}}">{{ match.champion1.nom }}</td>
         <td {% if match.gagnant == 0 or match.gagnant == 2 %}class='champion_win'{% endif %} title="{{match.champion2}}">{{ match.champion2.nom }}</td>
 
         {% if match.status == 'FI' %}
-        <td>{{ match.score1 }} à {{ match.score2 }}</td>
+        <td {% if match.fin_prematuree %}class="score-fin-prematuree"{% endif %}>{{ match.score1 }} à {{ match.score2 }}</td>
         {% else %}
         <td>Non fini</td>
         {% endif %}
