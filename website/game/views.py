@@ -262,6 +262,8 @@ def add_tournoi(request):
 @login_required
 def tournoi_detail(request,id):
     tournoi = get_object_or_404(Tournoi,id_tournoi=id)
+    suiv = Tournoi.objects.filter(date_lancement__gt=tournoi.date_lancement).order_by('date_lancement').first()
+    prec = Tournoi.objects.filter(date_lancement__lt=tournoi.date_lancement).order_by('-date_lancement').first()
     message = ''
     if request.method == 'POST':
         nb_inscrits = Inscrit.objects.filter(tournoi=tournoi,champion__uploader=request.user).count()
@@ -326,7 +328,7 @@ def tournoi_detail(request,id):
         'match_matrix': match_matrix, 'champions_select': champions_select,
         'champions_non_select': champions_non_select, 'nb_select': champions_select.count(),
         'message': message, 'timer': tournoi.date_lancement.isoformat() if tournoi.status == Tournoi.Status.LANCEMENT_PROGRAMMÉ else '',
-        'temps_restant': temps_restant, 'fin_date': fin_date})
+        'temps_restant': temps_restant, 'fin_date': fin_date, 'suivant':suiv, 'precedent':prec})
 
 @login_required
 def update_tournoi(request,id):
