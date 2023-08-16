@@ -11,13 +11,14 @@ import tempfile
 from django.utils import timezone
 from django_q.tasks import Task, async_task
 
-from website.settings import ISOLATE_TIMEOUT, MATCH_RULES, MATCH_SERVER_TIMEOUT, SERVER_TIMEOUT, MEDIA_ROOT, STECHEC_CLIENT, STECHEC_SERVER, MAX_ISOLATE
+from website.settings import ISOLATE_TIMEOUT, MATCH_RULES, MATCH_SERVER_TIMEOUT, SERVER_TIMEOUT, MEDIA_ROOT, STECHEC_CLIENT, STECHEC_SERVER, MAX_ISOLATE, BASE_DIR
 from .models import Champion, Inscrit, Match, Tournoi, relancer_matchs
 
-PATH_BUILD_DIR = Path('build').absolute()
-PATH_BUILD_DIR.mkdir(exist_ok=True)
-MAKEFILES = (Path('game') / 'makefiles').absolute()
-INTERFACES = (Path('game') / 'interface').absolute()
+
+PATH_BUILD_DIR = Path('/var/www/hanamikoji/build_champion')
+PATH_BUILD_DIR.mkdir(exist_ok=True, parents=True)
+MAKEFILES = (BASE_DIR / 'game' / 'makefiles').absolute()
+INTERFACES = (BASE_DIR / 'game' / 'interface').absolute()
 INTERFACE_FILE = 'interface.cc'
 
 MATCH_OUT_DIR = (MEDIA_ROOT / 'match').absolute()
