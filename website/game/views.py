@@ -79,16 +79,16 @@ def matchs(request: HttpRequest):
         except ValueError:
             pass
 
-    fin_selected = request.GET.get('fin', 'all')
-    if fin_selected == 'oui':
+    filter_fin = request.GET.get('fin', 'all')
+    if filter_fin == 'oui':
         matchs = matchs.filter(fin_prematuree=True)
-    elif fin_selected == 'non':
+    elif filter_fin == 'non':
         matchs = matchs.filter(fin_prematuree=False)
 
     filt_type = "all"
     filt_id = -1
-    filt = request.GET.get('champion', 'all')
-    f = filt.split('-')
+    filter_champion = request.GET.get('champion', 'all')
+    f = filter_champion.split('-')
     if len(f) >= 1:
         filt_type = f[0]
         if len(f) >= 2:
@@ -110,7 +110,7 @@ def matchs(request: HttpRequest):
     page_obj = paginator.get_page(page_number)
     return render(request,'game/matchs.html',context={'matchs':page_obj,'message':message,
     'list_champions': list_champions, 'filter_type': filt_type, 'filter_id': filt_id, 'tournois': tournois,
-    'tournoi_selected': filter_tournoi, 'fin_selected': fin_selected})
+    'tournoi_selected': filter_tournoi, 'filter_fin': filter_fin, 'filter_champion': filter_champion})
 
 @login_required
 def champions(request):
