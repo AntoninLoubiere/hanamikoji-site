@@ -12,7 +12,7 @@ from django.utils import timezone
 from django_q.tasks import Task, async_task
 
 from website.settings import ISOLATE_TIMEOUT, MATCH_RULES, MATCH_SERVER_TIMEOUT, SERVER_TIMEOUT, MEDIA_ROOT, STECHEC_CLIENT, STECHEC_SERVER, MAX_ISOLATE, BASE_DIR
-from .models import Champion, Inscrit, Match, Tournoi
+from .models import Champion, Inscrit, Match, Tournoi, relancer_matchs
 
 
 PATH_BUILD_DIR = Path('/var/www/hanamikoji/build_champion')
@@ -105,6 +105,8 @@ def on_end_compilation(task: Task):
     c.compilation_status = Champion.Status.FINI if task.success else Champion.Status.ERREUR
     c.compile_task = task
     c.save(compile=False)
+    if task.success:
+        relancer_matchs(Match.of_champion(c))
 
 def run_match(match: Match):
     match.status = Match.Status.EN_COURS

@@ -46,7 +46,7 @@ def champion_upload(request):
             champion = form.save(commit=False)
             champion.uploader = request.user
             champion.save()
-            return redirect('home')
+            return redirect('champion_detail', champion.nom)
     return render(request, 'game/champion_upload.html', context={'form': form})
 
 @login_required
@@ -353,10 +353,7 @@ def delete_champion_tournoi(request,id,nom):
     inscrit = get_object_or_404(Inscrit,tournoi=Tournoi.objects.get(id_tournoi=id),champion=champion)
     if champion.uploader == request.user:
         supp = True
-        matchs = Match.objects.filter(
-            Q(champion1=champion) |
-            Q(champion2=champion)
-        )
+        matchs = Match.of_champion(champion)
         for m in matchs:
             if m.champion1.uploader != m.champion2.uploader:
                 supp = False
@@ -374,5 +371,17 @@ def champion_detail(request, name):
     champion = get_object_or_404(Champion,nom=name)
     if champion.uploader != request.user and not request.user.is_superuser:
         return HttpResponseForbidden('Interdit')
+    code = champion.code
 
-    return render(request, 'game/champion_detail.html', context={'champion': champion})
+    form = None
+    if champion.supprimer:
+        form = forms.UpdateChampionsForm()
+        if request.method == 'POST':
+            form = forms.UpdateChampionsForm(request.POST, request.FILES, instance=champion)
+            if form.is_valid():
+                champion = form.save(commit=False)
+                champion.compilation_status = Champion.Status.EN_ATTENTE
+                champion.save()
+                return redirect('champion_detail', champion.nom)
+
+    return render(request, 'game/champion_detail.html', context={'code': code, 'champion': champion, 'form': form})

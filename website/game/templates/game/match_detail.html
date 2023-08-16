@@ -1,5 +1,5 @@
 {% extends 'base_game.html' %}
-{% block title %}Matchs{% endblock title %}
+{% block title %}Match n°{{ match.id_match }} | {{ match.champion1.nom }} vs {{ match.champion2.nom }} {% endblock title %}
 {% load static %}
 {% block content %}
 <div class="nav-matchs">
