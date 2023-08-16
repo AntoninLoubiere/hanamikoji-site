@@ -1,4 +1,5 @@
 from typing import Iterable
+from django import forms
 from django.db import models
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator, FileExtensionValidator
@@ -8,6 +9,7 @@ from django.utils.html import format_html
 from django.db.models import Q
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 import datetime
 
 from authentication.models import User
@@ -62,7 +64,7 @@ class Champion(models.Model):
         return format_link(f"/champions/code/{self.nom}", self.nom)
 
     def nb_matchs(self):
-        return Match.objects.filter(Q(champion1=self)|Q(champion2=self)).count()
+        return Match.of_champion(self).count()
 
 
 
@@ -150,6 +152,12 @@ class Inscrit(models.Model):
 
 
 
+def relancer_matchs(queryset):
+    queryset.update(status=Match.Status.EN_ATTENTE, score1=0, score2=0, gagnant=Match.Gagnant.NON_FINI,
+                    fin_prematuree=False, date=timezone.now())
+    for m in queryset:
+        m.launch_match()
+
 
 class Match(models.Model):
     class Status(models.TextChoices):
@@ -163,6 +171,10 @@ class Match(models.Model):
         CHAMPION_2 = 2
         NON_FINI =  -1
         EGALITE = 0
+
+    @staticmethod
+    def of_champion(c):
+        return Match.objects.filter(Q(champion1=c)|Q(champion2=c))
 
     id_match = models.AutoField(primary_key=True, unique=True)
     champion1 = models.ForeignKey(Champion, on_delete=models.CASCADE, related_name='champion1')

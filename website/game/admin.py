@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
-from game.models import Champion, Match, Tournoi, Inscrit
+from game.models import Champion, Match, Tournoi, Inscrit, relancer_matchs
 
 @admin.register(Champion)
 class ChampionAdmin(admin.ModelAdmin):
@@ -18,9 +18,7 @@ class MatchAdmin(admin.ModelAdmin):
     actions = ('relancer',)
 
     def relancer(modeladmin, _, queryset):
-        queryset.update(status=Match.Status.EN_ATTENTE)
-        for m in queryset:
-            m.launch_match()
+        relancer_matchs(queryset)
 
 
 @admin.register(Tournoi)

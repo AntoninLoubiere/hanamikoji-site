@@ -6,6 +6,17 @@ class ChampionsForm(forms.ModelForm):
     class Meta:
         model = models.Champion
         fields = ['code', 'nom']
+        widgets={
+            'code': forms.FileInput(attrs={'accept':'application/gzip,application/x-tar,application/zip'})
+        }
+
+class UpdateChampionsForm(forms.ModelForm):
+    class Meta:
+        model = models.Champion
+        fields = ['code']
+        widgets={
+            'code': forms.FileInput(attrs={'accept':'application/gzip,application/x-tar,application/zip,.tar,.tgz,.zip'})
+        }
 
 
 class TournoisForm(forms.ModelForm):

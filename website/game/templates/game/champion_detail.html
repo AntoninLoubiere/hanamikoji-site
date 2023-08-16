@@ -11,15 +11,26 @@
         <span>Date de création: </span>
         <span>{{ champion.date|date:"d F Y, H:i" }}</span>
         <span>Code: </span>
-        <a href="{% url 'redirection_code' champion.nom %}">{{ champion.code }}</a>
+        <a href="{% url 'redirection_code' champion.nom %}">{{ code }}</a>
+        <span>Matchs: </span>
+        <span><a href="{% url 'matchs' %}?champion=champ-{{ champion.pk }}">{{ champion.nb_matchs }}</a></span>
     </div>
     <div class="content-text-center">
         {% if champion.supprimer %}
         <a href="{% url 'delete_champion' champion.nom %}" class="supp">Supprimer {{ champion.nom }}</a>
+
         {% else %}
-            Impossible de supprimer {{ champion.nom }}
+            Impossible de supprimer et de modifier {{ champion.nom }}
         {% endif %}
     </div>
+    {% if champion.supprimer %}
+    <span class="content-center">Modifier le champion</span>
+    <form method="post" enctype="multipart/form-data">
+        {{ form.as_p }}
+        {% csrf_token %}
+        <button type="submit" id="envoi">Modifier</button>
+    </form>
+    {% endif %}
     {% if champion.compile_task %}
         <div class="content-center">Sortie de la compilation :</div>
         <div class="command-output">{{ champion.compile_task.result }}</div>
