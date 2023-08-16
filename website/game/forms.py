@@ -7,7 +7,7 @@ class ChampionsForm(forms.ModelForm):
         model = models.Champion
         fields = ['code', 'nom']
         widgets={
-            'code': forms.FileInput(attrs={'accept':'application/gzip,application/x-tar,application/zip'})
+            'code': forms.FileInput(attrs={'accept':'.tar,.tgz,.zip,application/gzip,application/x-tar,application/zip'})
         }
 
 class UpdateChampionsForm(forms.ModelForm):
@@ -15,7 +15,7 @@ class UpdateChampionsForm(forms.ModelForm):
         model = models.Champion
         fields = ['code']
         widgets={
-            'code': forms.FileInput(attrs={'accept':'application/gzip,application/x-tar,application/zip,.tar,.tgz,.zip'})
+            'code': forms.FileInput(attrs={'accept':'.tar,.tgz,.zip,application/gzip,application/x-tar,application/zip'})
         }
 
 
