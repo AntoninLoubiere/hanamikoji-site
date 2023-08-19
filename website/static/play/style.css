@@ -1,0 +1,53 @@
+.carte img {
+    width: 120px;
+    border-radius: .5rem;
+    backface-visibility: hidden;
+
+    transition: transform 800ms ease-out;
+}
+
+.carte {
+    cursor: pointer;
+}
+
+.carte-dos {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    left: 0;
+
+    transform: rotateY(180deg);
+}
+
+.hide .carte-front {
+    transform: rotateY(180deg);
+}
+
+.hide .carte-dos {
+    transform: none;
+}
+
+
+.jeton-selected {
+    cursor: pointer;
+    animation: jeton-selected-blink 500ms alternate infinite ease-in-out;
+}
+
+.jeton-selected:hover {
+    width: 100px !important;
+}
+
+@keyframes jeton-selected-blink {
+    from {
+        width: 90px;
+    }
+
+    to {
+        width: 100px;
+    }
+}
+
+/* .jeton-selected:hover {
+    filter: brightness(150%);
+} */

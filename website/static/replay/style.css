@@ -73,7 +73,7 @@ body, #game-parent {
 
 .jeton-off {
     filter: grayscale(80%);
-    transition-delay: 0s, 0s, 0s, 0s;
+    transition-delay: 0s, 0s, 0s, 0s, 0s;
 }
 
 .icon {
