@@ -314,6 +314,12 @@ function updatePlaces() {
 let delayedInProgress = false;
 
 /**
+ * @typedef actionsGroup
+ * @prop {action[]} acts
+ * @prop {boolean} [end]
+ * @prop {number} [delay]
+ * @prop {number} [runDelay]
+ *
  * @param {actionsGroup} g
  * @param {boolean} reverse
  */

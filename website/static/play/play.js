@@ -8,14 +8,12 @@ function connect() {
     connection.onmessage = (e) => {
         try {
             onMessage(JSON.parse(e.data));
-            console.log(e.data);
         } catch {
             console.error(e.data)
         }
     }
 
     connection.onclose = () => {
-        console.log("CLOSE")
         connection = null;
     }
 }
@@ -24,19 +22,45 @@ function onMessage(msg) {
     switch (msg.msg) {
         case 'run':
             if (msg.status == "started") {
-                initGame(msg.joueur);
+                initGame(msg);
+            } else if (msg.status == "ended") {
+                setTimeout(openNewGameModal, 1000)
             }
             break;
         case 'status':
             onStatus(msg);
             break;
+        case 'err':
+            if (msg.code == 'unk-champion' || msg.code == 'already-running') {
+                openNewGameModal();
+                break;
+            }
+            if (msg.code != 'eof') {
+                console.error("ERR", msg.code);
+            }
+            break;
+        case 'champions':
+            while (selectOpponent.firstChild) {
+                // @ts-ignore
+                selectOpponent.removeChild(selectOpponent.lastChild);
+            }
+            let group = document.createElement('optgroup');
+            group.label = 'Champions'
+            for (let c of msg.champions) {
+                let opt = document.createElement('option');
+                opt.value = `champ-${c}`;
+                opt.innerText = c;
+                group.appendChild(opt);
+            }
+            selectOpponent.appendChild(group);
+            break;
         default:
-            console.log(msg);
+            console.info(msg);
     }
 }
 
 function onStatus(data) {
-    console.log(data);
+    MANCHE_STATUS.innerText = `${data.manche + 1}/${data.tour + 1}`
     const isNotLast = data.carte_piochee >= 0 || data.attente_reponse
     if (manche != data.manche) {
         manche = data.manche;
@@ -45,6 +69,14 @@ function onStatus(data) {
             if (manche > 0) {
                 // Reset cartes
                 resetNouvelleManche();
+            } else {
+                setTimeout(
+                    () => {
+                        TEXT_TITLES[0].classList.add('hide');
+                        TEXT_TITLES[1].classList.add('hide');
+                    },
+                    0
+                )
             }
             for (let i = 0; i < 6; i++) {
                 let c = piocherCarte();
@@ -56,17 +88,27 @@ function onStatus(data) {
                 retournerGeisha(c, g);
                 ajouterALaMain(MAIN_USER, c);
             }
+        }
 
-            for (let g = 0; g < NB_GEISHAS; g++) {
-                if (data.possession[g] == MAIN_ADV) {
-                    MARKERS[g].classList.add('marker-top')
-                    MARKERS[g].classList.remove('marker-bot')
-                } else if (data.possession[g] == MAIN_USER) {
-                    MARKERS[g].classList.remove('marker-top')
-                    MARKERS[g].classList.add('marker-bot')
-                }
+        let nb_cartes = [0, 0];
+        let score = [0, 0];
+
+        for (let g = 0; g < NB_GEISHAS; g++) {
+            if (data.possession[g] == 1 - data.joueur) {
+                nb_cartes[MAIN_ADV] += 1;
+                score[MAIN_ADV] += GEISHA_VALEURS[g];
+                MARKERS[g].classList.add('marker-top')
+                MARKERS[g].classList.remove('marker-bot')
+            } else if (data.possession[g] == data.joueur) {
+                nb_cartes[MAIN_USER] += 1;
+                score[MAIN_USER] += GEISHA_VALEURS[g];
+                MARKERS[g].classList.remove('marker-top')
+                MARKERS[g].classList.add('marker-bot')
             }
         }
+
+        INFO_SCORE[MAIN_ADV].innerText = `${nb_cartes[MAIN_ADV]} carte${nb_cartes[MAIN_ADV] == 1 ? '' : 's'}, ${score[MAIN_ADV]} points`
+        INFO_SCORE[MAIN_USER].innerText = `${nb_cartes[MAIN_USER]} carte${nb_cartes[MAIN_USER] == 1 ? '' : 's'}, ${score[MAIN_USER]} points`
     } else if (data.carte_piochee >= 0 && data.tour > tour) {
         let c = piocherCarte();
         retournerGeisha(c, data.carte_piochee);
@@ -109,7 +151,7 @@ function onStatus(data) {
     tour = data.tour;
 
     let last_act = data.derniere_action.act;
-    if (last_act < NB_ACTIONS && actionsAvailable[0][last_act]) {
+    if (tour > 0 && last_act < NB_ACTIONS && actionsAvailable[0][last_act]) {
         JETONS[MAIN_ADV][last_act].classList.add('jeton-off');
         actionsAvailable[MAIN_ADV][last_act] = false;
 
@@ -224,10 +266,17 @@ let cartesValidees = [new Array(NB_GEISHAS), new Array(NB_GEISHAS)];
 let cartesSelectionnees = []
 let canSelect = false;
 let cartesEnAttenteAdv = 0;
-function initGame(joueur) {
-    joueur_user = joueur;
+function initGame(msg) {
+    MANCHE_STATUS.innerText = `1/1`
+    joueur_user = msg?.joueur ?? 0;
     manche = -1;
     mains = [[], []]
+    TEXT_TITLES[MAIN_ADV].innerText = msg?.champion ?? "Champion";
+    TEXT_TITLES[MAIN_USER].innerText = msg?.user ?? "Vous";
+    INFO_NAME[MAIN_ADV].innerText = msg?.champion ?? "Champion";
+    INFO_NAME[MAIN_USER].innerText = msg?.user ?? "Vous";
+    TEXT_TITLES[0].classList.remove('hide');
+    TEXT_TITLES[1].classList.remove('hide');
 
     resetNouvelleManche()
 
@@ -502,14 +551,59 @@ function play() {
     connect()
     if (connection) {
         connection.onopen = () => {
-            sendStartGame("PifOMetroKoji")
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            const adv = urlParams.get('adv');
+            if (adv) {
+                let first = urlParams.get('first');
+                sendStartGame(adv, first);
+            } else {
+                openNewGameModal();
+            }
+            connection?.send(JSON.stringify({ msg: "champions" }))
         }
     }
-
 }
 
-function sendStartGame(champion) {
-    connection?.send(JSON.stringify({ msg: "run", champion }))
+const modal = document.getElementById('new-match');
+const selectOpponent = /** @type {HTMLSelectElement} */ (document.getElementById('opponent-select'));
+const selectFirst = /** @type {HTMLSelectElement} */ (document.getElementById('first-select'));
+function openNewGameModal() {
+    modal?.classList.remove('hide');
+}
+
+function lancerMatch() {
+    sendStartGame(selectOpponent.value, selectFirst.value)
+    closeNewGameModal();
+}
+
+function closeNewGameModal() {
+    modal?.classList.add('hide');
+}
+
+function sendStartGame(value, firstTxt) {
+    const CHAMP = "champ-";
+    let first = undefined;
+    firstTxt = firstTxt?.toLocaleLowerCase()
+    if (firstTxt == 'true') {
+        first = true;
+    } else if (firstTxt == 'false') {
+        first = false;
+    }
+    if (value.startsWith(CHAMP)) {
+        _sendStartGame(value.slice(CHAMP.length), true, first);
+    } else if (false) {
+
+    } else {
+        _sendStartGame(value, true, first);
+    }
+}
+
+function _sendStartGame(name, isChampion, first) {
+    if (first == undefined) {
+        first = Math.random() < 0.5
+    }
+    connection?.send(JSON.stringify({ msg: "run", champion: name, first }))
 }
 
 function stopGame() {

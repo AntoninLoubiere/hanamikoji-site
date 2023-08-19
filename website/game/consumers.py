@@ -22,15 +22,20 @@ PLAY_MATCH_DIR.mkdir(parents=True, exist_ok=True)
 def get_champion(name):
     return Champion.objects.filter(nom=name).first()
 
+@database_sync_to_async
+def get_names():
+    return list(Champion.objects.order_by('-date').values_list('nom', flat=True)), list(User.objects.values_list('username', flat=True).all())
+
 class Game:
     games = {}
-    def __init__(self, channel: "PlayConsumer", champion: Champion) -> None:
+    def __init__(self, channel: "PlayConsumer", champion: Champion, first) -> None:
         self.channel = channel
         self.champion = champion
         self.username = self.channel.username
         self.games[self.username] = self
         self.user_proc = None
         self.last_line = ""
+        self.user_first = first
 
     @classmethod
     async def new_game(cls, channel: "PlayConsumer", msg):
@@ -38,7 +43,7 @@ class Game:
             await channel.send_json({"msg": "err", "code": "already-running"})
             return
 
-        if 'champion' not in msg or not isinstance(msg['champion'], str):
+        if 'champion' not in msg or not isinstance(msg['champion'], str) or 'first' not in msg or not isinstance(msg['first'], bool):
             await channel.send_json({"msg": "err", "code": "request"})
             return
 
@@ -47,7 +52,7 @@ class Game:
             await channel.send_json({"msg": "err", "code": "unk-champion"})
             return
 
-        await cls(channel, champion).start()
+        await cls(channel, champion, msg['first']).start()
 
     async def register_new_channel(self, channel: "PlayConsumer"):
         old_channel = self.channel
@@ -58,7 +63,7 @@ class Game:
 
     async def start(self):
         self.is_running = True
-        await self.channel.send_json({"msg": "run", "status": "started", "joueur": 1})
+        await self.channel.send_json({"msg": "run", "status": "started", "joueur": 1, "user": self.username, "champion": self.champion.nom})
         self.running_task = asyncio.create_task(self.run())
 
     async def run(self):
@@ -80,15 +85,12 @@ class Game:
         match_dir.mkdir(exist_ok=True)
 
         map_file = match_dir / 'map.txt'
-        if map_file.exists():
-            print("Réutilisation de la map précédente")
-        else:
-            print("Génération de la map")
-            with open(map_file, 'w') as fiw:
-                cards = [0, 0, 1, 1, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 6]
-                for _ in range(3):
-                    shuffle(cards)
-                    fiw.write(" ".join(map(str, cards)) + "\n")
+        print("Génération de la map")
+        with open(map_file, 'w') as fiw:
+            cards = [0, 0, 1, 1, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 6]
+            for _ in range(3):
+                shuffle(cards)
+                fiw.write(" ".join(map(str, cards)) + "\n")
 
         # Lancement du match
         # Build the domain sockets
@@ -106,8 +108,8 @@ class Game:
         box_user = isolate_init(1)
 
         try:
-            bot_proc = await run_client(match_dir, bot_name, bot_dir, s_reqrep, s_pubsub, 0, box_bot)
-            self.user_proc = await run_client(match_dir, self.username, USER_CHAMPION_PATH, s_reqrep, s_pubsub, 1, box_user, time_isolate=ISOLATE_USER_TIMEOUT, time=USER_TIMEOUT, stdin=subprocess.PIPE)
+            bot_proc = await run_client(match_dir, bot_name, bot_dir, s_reqrep, s_pubsub, 1 if self.user_first else 0, box_bot)
+            self.user_proc = await run_client(match_dir, self.username, USER_CHAMPION_PATH, s_reqrep, s_pubsub, 0 if self.user_first else 1, box_user, time_isolate=ISOLATE_USER_TIMEOUT, time=USER_TIMEOUT, stdin=subprocess.PIPE)
 
             while True:
                 line = await self.user_proc.stdout.readline()
@@ -144,7 +146,8 @@ class Game:
         self.user_proc.stdin.write(b'\n')
 
     def stop(self):
-        self.user_proc.stdin.close()
+        if self.user_proc:
+            self.user_proc.stdin.close()
 
 
 class PlayConsumer(AsyncJsonWebsocketConsumer):
@@ -181,5 +184,9 @@ class PlayConsumer(AsyncJsonWebsocketConsumer):
                 await self.send_json({"msg": "err", "code": "no-game"})
                 return
             game.stop()
+        elif msg == 'champions':
+            champions, users = await get_names()
+            print(champions, users)
+            await self.send_json({"msg": "champions", "champions": champions, "users": users})
 
 

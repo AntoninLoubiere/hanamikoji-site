@@ -536,12 +536,6 @@ async function loadFromFile(el) {
  * @prop {any} [f]
  * @prop {any} [t]
  * @prop {HTMLElement} el
- *
- * @typedef actionsGroup
- * @prop {action[]} acts
- * @prop {boolean} [end]
- * @prop {number} [delay]
- * @prop {number} [runDelay]
  */
 /** @type {actionsGroup[]} */
 let actions = [];

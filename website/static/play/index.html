@@ -54,9 +54,19 @@
         </div>
     </div>
 
-    <div class="load-from-file hide" id="load-from-file-parent">
-        <label for="load-from-file">Sélectionnez un fichier de dump</label>
-        <input id="load-from-file" type="file" accept="application/json,.json" onchange="loadFromFile(this)">
+    <div class="modal hide" id="new-match">
+        <h1 class="h1">Lancer un match</h1>
+        <div class="grid-input">
+            <label>Opposant :</label>
+            <select id="opponent-select"></select>
+            <label>Premier joueur :</label>
+            <select id="first-select">
+                <option value="">Au hasard</option>
+                <option value="true">Vous jouez en premier</option>
+                <option value="false">Votre adversaire joue en premier</option>
+            </select>
+        </div>
+        <div class="modal-send"><button onclick="lancerMatch()">Lancer le match</button></div>
     </div>
 
     <div class="control-list">
