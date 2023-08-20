@@ -8,6 +8,13 @@
 
 .carte {
     cursor: pointer;
+    line-height: 0;
+
+    outline: solid transparent .2rem;
+}
+
+.carte.outlined {
+    outline-color: white;
 }
 
 .carte-dos {
@@ -57,9 +64,6 @@
     background-color: #000000aa;
     padding: 1rem 2rem;
     border-radius: 3rem;
-
-    top: 50%;
-    left: 50%;
     transition: 500ms ease-in-out opacity;
 }
 
@@ -86,4 +90,20 @@
     display: grid;
     gap: .5rem;
     grid-template-columns: 1fr 1fr;
+}
+
+.status-title {
+    position: absolute;
+    transform: translate(-50%, 0);
+    font: small-caps 30px serif;
+    text-align: center;
+    color: white;
+    z-index: 2000;
+    width: max-content;
+    max-width: 80vw;
+    top: 10px;
+
+    background-color: #000000aa;
+    padding: .5rem 1rem;
+    border-radius: 100rem;
 }

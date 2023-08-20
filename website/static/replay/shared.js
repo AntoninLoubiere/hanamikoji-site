@@ -29,25 +29,27 @@ let HEIGHT = 0;
 let WIDTH_FACTOR = 0;
 let BASE_WIDTH = 1400;
 let BASE_HEIGHT = 900;
+let clampedInnerWidth = 0;
+let SCALE_FACTOR = 1;
 function init_size() {
     let game = /** @type {HTMLElement} */ (document.getElementById('game'));
-    let scaleFactor = 1;
+    SCALE_FACTOR = 1;
     if (window.innerHeight < BASE_HEIGHT) {
-        scaleFactor = (window.innerHeight) / BASE_HEIGHT;
+        SCALE_FACTOR = (window.innerHeight) / BASE_HEIGHT;
     }
 
-    let innerWidth = Math.min(window.innerWidth, 1.5 * BASE_WIDTH)
-    if (innerWidth / scaleFactor < BASE_WIDTH) {
-        scaleFactor = innerWidth / BASE_WIDTH
+    clampedInnerWidth = Math.min(window.innerWidth, 1.5 * BASE_WIDTH)
+    if (clampedInnerWidth / SCALE_FACTOR < BASE_WIDTH) {
+        SCALE_FACTOR = clampedInnerWidth / BASE_WIDTH
     }
 
-    WIDTH_FACTOR = Math.max(1, innerWidth / (scaleFactor * BASE_WIDTH))
-    HEIGHT = window.innerHeight / scaleFactor
+    WIDTH_FACTOR = Math.max(1, clampedInnerWidth / (SCALE_FACTOR * BASE_WIDTH))
+    HEIGHT = window.innerHeight / SCALE_FACTOR
 
-    if (scaleFactor >= 1) {
+    if (SCALE_FACTOR >= 1) {
         game.style.transform = '';
     } else {
-        game.style.transform = `scale(${scaleFactor})`;
+        game.style.transform = `scale(${SCALE_FACTOR})`;
     }
 
 }

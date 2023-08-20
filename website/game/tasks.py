@@ -197,7 +197,7 @@ def isolate_init(client_id):
     tries = 0
     while True:
         r = subprocess.run(['isolate', '--init', '--box-id', str(box_id)], stderr=PIPE)
-        if r.returncode == 2 and b'Box already exists' in r.stderr:
+        if r.returncode != 0 and b'Box already exists' in r.stderr:
             tries += 1
             if tries >= MAX_ISOLATE_TRY:
                 raise Exception("Impossible to find free box")
@@ -209,7 +209,7 @@ def isolate_cleanup(box_id):
     subprocess.run(['isolate', '--cleanup', '--box-id', str(box_id)])
 
 
-async def run_server(match_dir, rep_addr, pub_addr, time=MATCH_SERVER_TIMEOUT):
+async def run_server(match_dir, rep_addr, pub_addr, time=MATCH_SERVER_TIMEOUT, socket_timeout=45000):
     return await asyncio.create_subprocess_exec(
         STECHEC_SERVER,
         '--rules', MATCH_RULES,
@@ -217,7 +217,7 @@ async def run_server(match_dir, rep_addr, pub_addr, time=MATCH_SERVER_TIMEOUT):
         '--rep_addr', rep_addr,
         '--pub_addr', pub_addr,
         '--nb_clients', '2',
-        '--socket_timeout', '45000',
+        '--socket_timeout', str(socket_timeout),
         '--dump', str(match_dir / 'dump.json'),
         '--map', str(match_dir / 'map.txt'),
         '--verbose', '1',
@@ -225,7 +225,7 @@ async def run_server(match_dir, rep_addr, pub_addr, time=MATCH_SERVER_TIMEOUT):
         stderr=STDOUT
     )
 
-async def run_client(match_dir, champion_name, champion_path: Path, req_addr, sub_addr, client_id, box_id, time_isolate=ISOLATE_TIMEOUT, time=SERVER_TIMEOUT, stdin=None):
+async def run_client(match_dir, champion_name, champion_path: Path, req_addr, sub_addr, client_id, box_id, time_isolate=ISOLATE_TIMEOUT, time=SERVER_TIMEOUT, stdin=None, socket_timeout=45000):
     return await asyncio.create_subprocess_exec(
         'isolate',
         '--time', str(time_isolate),
@@ -243,7 +243,7 @@ async def run_client(match_dir, champion_name, champion_path: Path, req_addr, su
         '--champion', '/champion/champion.so',
         '--req_addr', req_addr,
         '--sub_addr', sub_addr,
-        '--socket_timeout', '45000',
+        '--socket_timeout', str(socket_timeout),
         '--verbose', '1',
         '--client-id', str(client_id),
         '--map', '/match/map.txt',
