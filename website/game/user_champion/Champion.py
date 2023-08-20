@@ -15,7 +15,7 @@ class Context:
         self.moi = id_joueur()
         self.adv = id_adversaire()
         self.manche = -1
-    def update(self, attente_reponse=False):
+    def update(self, attente_reponse=False, is_end=False):
         self.manche =  manche()
         self.tour = tour()
         self.actions_moi = [not est_jouee_action(self.moi, a) for a in range(NB_ACTIONS)]
@@ -29,7 +29,7 @@ class Context:
 
         send_line({
             "msg": "status", "manche": self.manche, "tour": self.tour, "cartes": self.cartes,
-            "carte_piochee": self.carte_piochee, "actions_moi": self.actions_moi, "actions_adv": self.actions_adv,
+            "carte_piochee": -1 if is_end else self.carte_piochee, "actions_moi": self.actions_moi, "actions_adv": self.actions_adv,
             "cv_moi": self.moi_cartes, "cv_adv": self.adv_cartes, "possession": self.posession,
             "derniere_action": {
                 "act": self.derniere_action.act,
@@ -122,4 +122,4 @@ def repondre_action_choix_paquets():
 
 # Fonction appelee à la fin du jeu
 def fin_jeu():
-    CTX.update()
+    CTX.update(is_end=True)

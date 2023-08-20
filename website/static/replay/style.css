@@ -146,6 +146,7 @@ body, #game-parent {
 
 .title.hide {
     opacity: 0;
+    pointer-events: none;
 }
 
 .manche-status {

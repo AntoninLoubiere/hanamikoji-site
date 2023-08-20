@@ -6,11 +6,14 @@ function connect() {
     }
     connection = new WebSocket(`${document.location.protocol == 'https' ? 'wss' : 'ws'}://${window.location.host}/play`)
     connection.onmessage = (e) => {
+        let data;
         try {
-            onMessage(JSON.parse(e.data));
+            data = JSON.parse(e.data);
         } catch {
             console.error(e.data)
+            return
         }
+        onMessage(data);
     }
 
     connection.onclose = () => {
@@ -21,10 +24,17 @@ function connect() {
 function onMessage(msg) {
     switch (msg.msg) {
         case 'run':
-            if (msg.status == "started") {
+            if (msg.status == "started" || msg.status == "waiting") {
                 initGame(msg);
+                if (msg.status == "started") {
+                    INFO_STATUS[MAIN_ADV].innerText = "À lui de jouer"
+                    INFO_STATUS[MAIN_USER].innerText = ''
+                } else {
+                    INFO_STATUS[MAIN_ADV].innerText = "En attente de l'adversaire"
+                    INFO_STATUS[MAIN_USER].innerText = "En attente de l'adversaire"
+                }
             } else if (msg.status == "ended") {
-                setTimeout(openNewGameModal, 1000)
+                setTimeout(openNewGameModal, 3000)
             }
             break;
         case 'status':
@@ -32,12 +42,14 @@ function onMessage(msg) {
             break;
         case 'err':
             if (msg.code == 'unk-champion' || msg.code == 'already-running') {
-                openNewGameModal();
                 break;
             }
             if (msg.code != 'eof') {
                 console.error("ERR", msg.code);
             }
+            INFO_STATUS[MAIN_ADV].innerText = `Erreur (${msg.code}) !`
+            INFO_STATUS[MAIN_USER].innerText = `Erreur (${msg.code}) !`
+            openNewGameModal();
             break;
         case 'champions':
             while (selectOpponent.firstChild) {
@@ -49,6 +61,16 @@ function onMessage(msg) {
             for (let c of msg.champions) {
                 let opt = document.createElement('option');
                 opt.value = `champ-${c}`;
+                opt.innerText = c;
+                group.appendChild(opt);
+            }
+            selectOpponent.appendChild(group);
+
+            group = document.createElement('optgroup');
+            group.label = 'Utilisateurs'
+            for (let c of msg.users) {
+                let opt = document.createElement('option');
+                opt.value = `user-${c}`;
                 opt.innerText = c;
                 group.appendChild(opt);
             }
@@ -148,6 +170,8 @@ function onStatus(data) {
     }
 
     if (!isNotLast || data.tour <= tour) return;
+    INFO_STATUS[MAIN_ADV].innerText = "";
+    INFO_STATUS[MAIN_USER].innerText = "À vous de jouer !";
     tour = data.tour;
 
     let last_act = data.derniere_action.act;
@@ -223,6 +247,7 @@ function validerCarte(c, j) {
 
 function resetNouvelleManche() {
     pioche_idx = 0;
+    canSelect = false;
     let pos = moveToPioche(PIOCHE_CENTRAL_POSITION)
     for (let i = 0; i < NB_CARTES_TOTALES; i++) {
         applyMove(PLAY_CARTES[i].el, pos);
@@ -484,6 +509,8 @@ function onEndAction(isChoix) {
         ajouterALaMain(MAIN_ADV, piocherCarte());
     }
     cartesSelectionnees = []
+    INFO_STATUS[MAIN_ADV].innerText = "À lui de jouer…";
+    INFO_STATUS[MAIN_USER].innerText = "";
 }
 
 function sendAction(cartes) {
@@ -540,7 +567,11 @@ function init_cartes() {
     }
 }
 
+/** @type {HTMLSpanElement[]} */
+const INFO_STATUS = new Array(2)
 function play() {
+    INFO_STATUS[0] = /** @type {HTMLSpanElement} */ (document.getElementById('info-status-0'));
+    INFO_STATUS[1] = /** @type {HTMLSpanElement} */ (document.getElementById('info-status-1'));
     updatePlaces();
 
     for (let i = 0; i < NB_ACTIONS; i++) {
@@ -583,6 +614,7 @@ function closeNewGameModal() {
 
 function sendStartGame(value, firstTxt) {
     const CHAMP = "champ-";
+    const USER = "user-";
     let first = undefined;
     firstTxt = firstTxt?.toLocaleLowerCase()
     if (firstTxt == 'true') {
@@ -592,8 +624,8 @@ function sendStartGame(value, firstTxt) {
     }
     if (value.startsWith(CHAMP)) {
         _sendStartGame(value.slice(CHAMP.length), true, first);
-    } else if (false) {
-
+    } else if (value.startsWith("user-")) {
+        _sendStartGame(value.slice(USER.length), false, first);
     } else {
         _sendStartGame(value, true, first);
     }
@@ -603,12 +635,22 @@ function _sendStartGame(name, isChampion, first) {
     if (first == undefined) {
         first = Math.random() < 0.5
     }
-    connection?.send(JSON.stringify({ msg: "run", champion: name, first }))
+    if (isChampion) {
+        connection?.send(JSON.stringify({ msg: "run", champion: name, first }))
+    } else {
+        connection?.send(JSON.stringify({ msg: "run", user: name, first }))
+    }
+    initGame({ joueur: first ? 0 : 1, user: 'Vous', champion: name })
 }
 
 function stopGame() {
     connection?.send(JSON.stringify({ msg: "stop" }))
+    openNewGameModal()
 }
 
 init_cartes();
 play();
+
+document.body.onresize = () => {
+    updatePlaces();
+}

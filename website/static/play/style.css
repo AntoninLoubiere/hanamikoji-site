@@ -20,11 +20,11 @@
     transform: rotateY(180deg);
 }
 
-.hide .carte-front {
+.carte.hide .carte-front {
     transform: rotateY(180deg);
 }
 
-.hide .carte-dos {
+.carte.hide .carte-dos {
     transform: none;
 }
 
