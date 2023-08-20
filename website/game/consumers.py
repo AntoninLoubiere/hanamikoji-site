@@ -1,5 +1,6 @@
 import asyncio
 from asyncio import subprocess
+import json
 import os
 from pathlib import Path
 from random import shuffle, random
@@ -41,6 +42,8 @@ class Game:
         self.waiting_user = other_user
         self.forward_to_game = forward_to_game
         self.is_running = False
+        assert self.waiting_user != self.game_name
+        # self.stopped = False
 
     @classmethod
     async def new_game(cls, channel: "PlayConsumer", msg):
@@ -83,15 +86,17 @@ class Game:
                     cls(channel, channel, None, other_user)
                 else:
                     cls(channel, None, channel, other_user)
-                await channel.send_json({"msg": "run", "status": "waiting", "joueur": 0, "user": channel.username, "champion": other_user})
+                await channel.send_json({"msg": "run", "status": "waiting", "user": channel.username, "champion": other_user})
 
             else:
+                assert (game is not None and game.waiting_user == channel.username)
                 if game.player1 is None:
                     game.player1 = channel
                     cls(channel, channel, game.player2, other_user, game)
                 elif game.player2 is None:
                     game.player2 = channel
                     cls(channel, game.player1, channel, other_user, game)
+                await channel.send_json({"msg": "run", "status": "waiting", "user": channel.username, "champion": other_user})
                 await game.start()
 
         else:
@@ -103,16 +108,19 @@ class Game:
     async def register_new_channel(self, channel: "PlayConsumer"):
         self.stop()
         if self.is_player(self.player1, channel.username):
-            asyncio.create_task(self.player1.send_json({"msg": "err", "code": "new-channel"}, close=True))
+            asyncio.create_task(self.player1.send_json({"msg": "err", "code": "new-channel"}))
         if self.is_player(self.player2, channel.username):
-            asyncio.create_task(self.player2.send_json({"msg": "err", "code": "new-channel"}, close=True))
+            asyncio.create_task(self.player2.send_json({"msg": "err", "code": "new-channel"}))
 
     async def start(self):
         self.is_running = True
-        self.running_task = asyncio.create_task(self.run())
         if self.waiting_user is not None:
-            game = self.games[self.waiting_user]
-            game.is_running = True
+            if self.waiting_user in self.games:
+                game = self.games[self.waiting_user]
+                game.is_running = True
+            else:
+                return
+        self.running_task = asyncio.create_task(self.run())
 
     async def run(self):
         stop_reason = "ok"
@@ -124,7 +132,10 @@ class Game:
             stop_reason = f"error {e.__class__.__name__}"
             traceback.print_exc()
         finally:
-            await self.on_end(stop_reason)
+            try:
+                await self.on_end(stop_reason)
+            except Exception as e:
+                traceback.print_exc()
 
     def get_name_dir(self, player):
         if isinstance(player, Champion):
@@ -135,6 +146,7 @@ class Game:
     async def _run(self):
         player1_name, player1_dir, is_player1_user = self.get_name_dir(self.player1)
         player2_name, player2_dir, is_player2_user = self.get_name_dir(self.player2)
+        print("Start match", player1_name, "vs", player2_name)
 
         if is_player1_user:
             await self.player1.send_json({"msg": "run", "status": "started", "joueur": 0, "user": player1_name, "champion": player2_name})
@@ -148,7 +160,6 @@ class Game:
         match_dir.mkdir(exist_ok=True)
 
         map_file = match_dir / 'map.txt'
-        print("Génération de la map")
         with open(map_file, 'w') as fiw:
             cards = [0, 0, 1, 1, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 6]
             for _ in range(3):
@@ -164,7 +175,7 @@ class Game:
         s_reqrep = 'ipc://' + f_reqrep
         s_pubsub = 'ipc://' + f_pubsub
 
-        server_task = await run_server(match_dir, s_reqrep, s_pubsub, time=USER_TIMEOUT * 2, socket_timeout=USER_TIMEOUT * 2)
+        server_task = await run_server(match_dir, s_reqrep, s_pubsub, time=USER_TIMEOUT, socket_timeout=USER_TIMEOUT + 30000)
 
         # On initialise les boite isolate
         box_player1 = isolate_init(0)
@@ -173,43 +184,38 @@ class Game:
         try:
             self.player1_proc = await run_client(match_dir, player1_name, player1_dir, s_reqrep,
                     s_pubsub, 0, box_player1, time_isolate=ISOLATE_USER_TIMEOUT if is_player1_user else ISOLATE_TIMEOUT,
-                    time=USER_TIMEOUT if is_player1_user else SERVER_TIMEOUT, stdin=subprocess.PIPE if is_player1_user else None, socket_timeout=USER_TIMEOUT)
+                    time=USER_TIMEOUT if is_player1_user else SERVER_TIMEOUT, stdin=subprocess.PIPE if is_player1_user else None, socket_timeout=USER_TIMEOUT + 30000)
             self.player2_proc = await run_client(match_dir, player2_name, player2_dir, s_reqrep,
                     s_pubsub, 1, box_player2, time_isolate=ISOLATE_USER_TIMEOUT if is_player2_user else ISOLATE_TIMEOUT,
-                    time=USER_TIMEOUT if is_player2_user else SERVER_TIMEOUT, stdin=subprocess.PIPE if is_player2_user else None, socket_timeout=USER_TIMEOUT)
+                    time=USER_TIMEOUT if is_player2_user else SERVER_TIMEOUT, stdin=subprocess.PIPE if is_player2_user else None, socket_timeout=USER_TIMEOUT + 30000)
 
             tasks = []
             if is_player1_user:
                 tasks.append(self.read_stdout(self.player1_proc, self.player1))
             if is_player2_user:
                 tasks.append(self.read_stdout(self.player2_proc, self.player2))
-            await asyncio.gather(*tasks)
 
-            await self.player1_proc.wait()
-            # print("Player1 out:", (await self.player1_proc.stdout.read()).decode())
+            await asyncio.gather(*tasks, self.player1_proc.wait(), self.player2_proc.wait(), server_task.wait())
             self.player1_proc = None
-            await self.player2_proc.wait()
-            # print("Player2 out:", (await self.player1_proc.stdout.read()).decode())
             self.player2_proc = None
-            await server_task.wait()
-            # print("Serverout out:", (await server_task.stdout.read()).decode())
+            print("Fin match", player1_name, "vs", player2_name)
         finally:
             isolate_cleanup(box_player1)
             isolate_cleanup(box_player2)
 
     async def on_end(self, stop_reason):
-        del self.games[self.game_name]
         self.is_running = False
-
-        if self.waiting_user:
-            game = self.games[self.waiting_user]
-            if game is not None:
-                game.on_other_end(self)
 
         if isinstance(self.player1, PlayConsumer):
             await self.player1.send_json({"msg": "run", "status": "ended", "reason": stop_reason})
         if isinstance(self.player2, PlayConsumer):
             await self.player2.send_json({"msg": "run", "status": "ended", "reason": stop_reason})
+
+        if self.waiting_user:
+            game = self.games[self.waiting_user]
+            if game is not None:
+                game.on_other_end()
+        del self.games[self.game_name]
 
     def on_other_end(self):
         self.is_running = False
@@ -225,11 +231,9 @@ class Game:
 
         proc = None
         if self.is_player(self.player1, channel.username):
-            print(channel.username, "is player 1")
             proc = self.player1_proc
         elif self.is_player(self.player2, channel.username):
             proc = self.player2_proc
-            print(channel.username, "is player 2")
 
         if proc is None:
             await channel.send_json({"msg": "err", "code": "no-game"})
@@ -239,7 +243,43 @@ class Game:
         proc.stdin.write(data.encode())
         proc.stdin.write(b'\n')
 
+    async def choix(self, channel, data):
+        if self.forward_to_game is not None:
+            return await self.forward_to_game.choix(channel, data)
+
+        if 'choix' not in data or not isinstance(data['choix'], int):
+            await channel.send_json({"msg": "err", "code": "request"})
+            return
+
+        proc = None
+        send_channel = None
+        if isinstance(self.player1, PlayConsumer):
+            if self.player1.username == channel.username:
+                proc = self.player1_proc
+            else:
+                send_channel = self.player1
+
+        if isinstance(self.player2, PlayConsumer):
+            if self.player2.username == channel.username:
+                proc = self.player2_proc
+            else:
+                send_channel = self.player2
+
+        if proc is None:
+            await channel.send_json({"msg": "err", "code": "no-game"})
+            return
+
+        proc.stdin.write(str(data['choix']).encode())
+        proc.stdin.write(b'\n')
+
+        if send_channel is not None:
+            await send_channel.send_json({"msg": "choix", "choix": data['choix']})
+
     def stop(self):
+        # self.stopped = True
+        if not self.is_running and self.game_name in self.games:
+            del self.games[self.game_name]
+
         if self.forward_to_game is not None:
             return self.forward_to_game.stop()
 
@@ -247,16 +287,34 @@ class Game:
             self.player1_proc.stdin.close()
         if self.player2_proc is not None and self.player2_proc.stdin is not None:
             self.player2_proc.stdin.close()
-        if not self.is_running:
-            del self.games[self.game_name]
 
-    async def read_stdout(self, proc, player):
+    async def read_stdout(self, proc, player: "PlayConsumer"):
+        NEW_MANCHE_BEACON = 'new-manche'
         while True:
             line = await proc.stdout.readline()
             if line == b'':
                 break
-            line = line.decode()
-            await player.send(line)
+            line: str = line.decode()
+            if line.startswith(NEW_MANCHE_BEACON):
+                line = line[len(NEW_MANCHE_BEACON):]
+
+                send_channel = None
+                if isinstance(self.player1, PlayConsumer) and self.player1.username != player.username:
+                    send_channel = self.player1
+                elif isinstance(self.player2, PlayConsumer) and self.player2.username != player.username:
+                    send_channel = self.player2
+
+                if send_channel:
+                    data = json.loads(line)
+                    await send_channel.send_json({
+                        'msg': 'new-manche',
+                        "possession": data["possession"],
+                        "manche": data["manche"],
+                    })
+            if player.connected:
+                await player.send(line)
+            else:
+                self.stop()
 
 class PlayConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
@@ -266,12 +324,11 @@ class PlayConsumer(AsyncJsonWebsocketConsumer):
             return
         self.username = user.username
         await self.accept()
-
+        self.connected = True
         game = Game.games.get(self.username, None)
-        if game is not None:
-            await game.register_new_channel(self)
 
     async def disconnect(self, code):
+        self.connected = False
         game = Game.games.get(self.username, None)
         if game is not None and (game.player1 is self or game.player2 is self):
             game.stop()
@@ -286,6 +343,12 @@ class PlayConsumer(AsyncJsonWebsocketConsumer):
                 await self.send_json({"msg": "err", "code": "no-game"})
                 return
             await game.actions(self, content)
+        elif msg == 'choix':
+            game = Game.games.get(self.username, None)
+            if game is None:
+                await self.send_json({"msg": "err", "code": "no-game"})
+                return
+            await game.choix(self, content)
         elif msg == 'stop':
             game = Game.games.get(self.username, None)
             if game is None:

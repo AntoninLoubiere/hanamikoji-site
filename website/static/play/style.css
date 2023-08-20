@@ -93,13 +93,14 @@
 }
 
 .status-title {
-        position: absolute;
+    position: absolute;
     transform: translate(-50%, 0);
     font: small-caps 30px serif;
     text-align: center;
     color: white;
     z-index: 2000;
-
+    width: max-content;
+    max-width: 80vw;
     top: 10px;
 
     background-color: #000000aa;

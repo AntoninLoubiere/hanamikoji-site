@@ -15,8 +15,9 @@ class Context:
         self.moi = id_joueur()
         self.adv = id_adversaire()
         self.manche = -1
+
     def update(self, attente_reponse=False, is_end=False):
-        self.manche =  manche()
+        m = manche()
         self.tour = tour()
         self.actions_moi = [not est_jouee_action(self.moi, a) for a in range(NB_ACTIONS)]
         self.actions_adv = [not est_jouee_action(self.moi, a) for a in range(NB_ACTIONS)]
@@ -26,6 +27,10 @@ class Context:
         self.cartes = cartes_en_main()
         self.carte_piochee = carte_piochee()
         self.derniere_action = tour_precedent()
+
+        if m != self.manche:
+            sys.stdout.write('new-manche')
+            self.manche = m
 
         send_line({
             "msg": "status", "manche": self.manche, "tour": self.tour, "cartes": self.cartes,

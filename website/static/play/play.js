@@ -55,6 +55,9 @@ function onMessage(msg) {
         case 'status':
             onStatus(msg);
             break;
+        case 'choix':
+            onChoix(msg)
+            break;
         case 'err':
             if (msg.code != 'unk-champion' && msg.code != 'already-running' && msg.code != 'eof') {
                 console.error("ERR", msg.code);
@@ -242,6 +245,49 @@ function onStatus(data) {
     }
 }
 
+function onChoix(data) {
+    if (cartesEnAttenteAdv == 2) {
+        for (let j = 0; j < 3; j++) {
+            let cid = cartes_en_attente[j];
+            let g = PLAY_CARTES[cid].geisha;
+            validerCarte(cid, data.choix == j ? MAIN_ADV : MAIN_USER);
+            outlineElement(PLAY_CARTES[cid].el);
+        }
+    } else if (cartesEnAttenteAdv == 3) {
+        let c0 = cartes_en_attente[0]
+        let c1 = cartes_en_attente[1]
+        let c2 = cartes_en_attente[2]
+        let c3 = cartes_en_attente[3]
+
+        if (data.choix == 0) {
+            validerCarte(c0, MAIN_ADV);
+            validerCarte(c1, MAIN_ADV);
+            validerCarte(c2, MAIN_USER);
+            validerCarte(c3, MAIN_USER);
+        } else {
+            validerCarte(c0, MAIN_USER);
+            validerCarte(c1, MAIN_USER);
+            validerCarte(c2, MAIN_ADV);
+            validerCarte(c3, MAIN_ADV);
+        }
+        outlineElement(PLAY_CARTES[c0].el);
+        outlineElement(PLAY_CARTES[c1].el);
+        outlineElement(PLAY_CARTES[c2].el);
+        outlineElement(PLAY_CARTES[c3].el);
+    } else {
+        console.error("Excepted choice !")
+    }
+    cartesEnAttenteAdv = 0;
+    cartes_en_attente.fill(-1);
+    adversairePiocherEndAction();
+}
+
+function adversairePiocherEndAction() {
+    if (tour < 8) {
+        ajouterALaMain(MAIN_ADV, piocherCarte());
+    }
+}
+
 function ajouterALaMain(j, c) {
     let pos = mains[j].push(c) - 1;
     PLAY_CARTES[c].status = j;
@@ -310,6 +356,7 @@ let canSelect = false;
 let cartesEnAttenteAdv = 0;
 let adv_name = "Champion";
 function initGame(msg) {
+    clearCartesOutlined();
     MANCHE_STATUS.innerText = `1/1`
     joueur_user = msg?.joueur ?? 0;
     manche = -1;
@@ -357,20 +404,20 @@ function onCarteClick(c) {
     const status = PLAY_CARTES[c].status;
     if (!cartesEnAttenteAdv && ATTENTE_CHOIX_TROIS[0] <= status && status <= ATTENTE_CHOIX_TROIS[2]) {
         let choice = status - ATTENTE_CHOIX_TROIS[0];
-        sendAction([choice])
+        sendChoix(choice)
         for (let i = 0; i < 3; i++) {
             validerCarte(cartes_en_attente[i], choice == i ? MAIN_USER : MAIN_ADV);
         }
         cartes_en_attente.fill(-1);
-        onEndAction(true)
+        onEndAction(false)
     } else if (!cartesEnAttenteAdv && ATTENTE_CHOIX_PAQUETS[0] <= status && status <= ATTENTE_CHOIX_PAQUETS[1]) {
         let choice = status - ATTENTE_CHOIX_PAQUETS[0];
-        sendAction([choice])
+        sendChoix(choice)
         for (let i = 0; i < 4; i++) {
             validerCarte(cartes_en_attente[i], choice == Math.floor(i / 2) ? MAIN_USER : MAIN_ADV);
         }
         cartes_en_attente.fill(-1);
-        onEndAction(true)
+        onEndAction(false)
     } else if (canSelect && PLAY_CARTES[c].status == MAIN_USER) {
         if (PLAY_CARTES[c].selected) {
             const index = cartesSelectionnees.indexOf(c);
@@ -463,7 +510,7 @@ function onJetonClick(i) {
         JETONS[MAIN_USER][i].classList.add('jeton-off');
         JETONS[MAIN_USER][i].classList.remove('jeton-selected');
         updateMain(MAIN_USER);
-        onEndAction(false);
+        onEndAction(i < 2);
         cartesSelectionnees = [];
         canSelect = false;
     }
@@ -535,18 +582,22 @@ function getMaxCardSelect() {
     return 0;
 }
 
-function onEndAction(isChoix) {
-    if (!isChoix) {
-        ajouterALaMain(MAIN_ADV, piocherCarte());
+function onEndAction(addCard) {
+    if (addCard) {
+        adversairePiocherEndAction();
     }
     cartesSelectionnees = []
-    setStatusMsg('user_turn');
+    setStatusMsg('adv_turn');
 
     clearCartesOutlined();
 }
 
 function sendAction(cartes) {
     connection?.send(JSON.stringify({ msg: "action", cartes }))
+}
+
+function sendChoix(choix) {
+    connection?.send(JSON.stringify({ msg: "choix", choix }))
 }
 
 /**
@@ -703,7 +754,7 @@ const MESSAGES = {
     ok_match_end: "Fin du match !",
     user_turn: "C'est à VOUS de jouer !",
     get adv_turn() {
-        return `Au tour de ${adv_name} jouer`;
+        return `Au tour de ${adv_name} de jouer`;
     },
     get adv_wait() {
         return `En attente de la connexion de ${adv_name}`;
