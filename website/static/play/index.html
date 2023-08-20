@@ -2,9 +2,8 @@
 <html>
 <head>
     <meta charset='utf-8'>
-    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
     <title>Jouer</title>
-    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <meta name='viewport' content='1'>
     <link rel='stylesheet' type='text/css' href='/static/replay/style.css'>
     <link rel='stylesheet' type='text/css' href='style.css'>
     <script src='/static/replay/shared.js' defer></script>
@@ -31,7 +30,7 @@
             <img class="marker" id="marker6" src="/static/replay/assets/marker.png">
         
             <div id="cards-container"></div>
-        
+
             <img class="jeton" id="j0-0" src="/static/replay/assets/actions/B1.jpg">
             <img class="jeton" id="j0-1" src="/static/replay/assets/actions/B2.jpg">
             <img class="jeton" id="j0-2" src="/static/replay/assets/actions/B3.jpg">
@@ -41,6 +40,7 @@
             <img class="jeton" id="j1-1" src="/static/replay/assets/actions/A2.jpg" >
             <img class="jeton" id="j1-2" src="/static/replay/assets/actions/A3.jpg" >
             <img class="jeton" id="j1-3" src="/static/replay/assets/actions/A4.jpg" >
+            <span class="status-title" id="status-title">Connexion en cours…</span>
             <span class="title" id="title-j0">Joueur 1</span>
             <span class="title" id="title-j1">Joueur 2</span>
             <div class="info-section" id="info-section-0">
@@ -75,6 +75,9 @@
         <span class="manche-status" id="manche-status"></span>
         <button onclick="stopGame()"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon">
             <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z" />
+        </svg></button>
+        <button onclick="toggleFullScreen()"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
         </svg></button>
     </div>
 </body>

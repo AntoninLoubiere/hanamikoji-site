@@ -1,10 +1,12 @@
 /** @type {WebSocket?} */
 let connection = null;
+let connectionTry = 0;
 function connect() {
     if (connection != null) {
         connection.close()
     }
-    connection = new WebSocket(`${document.location.protocol == 'https' ? 'wss' : 'ws'}://${window.location.host}/play`)
+    setStatusMsg('connection');
+    connection = new WebSocket(`${document.location.protocol == 'https:' ? 'wss' : 'ws'}://${window.location.host}/play`)
     connection.onmessage = (e) => {
         let data;
         try {
@@ -13,68 +15,75 @@ function connect() {
             console.error(e.data)
             return
         }
+        connectionTry = 0;
         onMessage(data);
     }
 
+    connection.addEventListener('open', () => {
+        setStatusMsg('connected');
+    })
+
     connection.onclose = () => {
         connection = null;
+        let reconnectSecondes = Math.max(1000, Math.min(60000, 5000 * connectionTry));
+        currentStatusMsg = 'connection-lost'
+        STATUS_TITLE.innerText = `Connexion perdue, reconnexion dans ${reconnectSecondes / 1000}s #${connectionTry + 1}`
+        connectionTry++;
+        openNewGameModal();
+        setTimeout(connect, reconnectSecondes)
     }
 }
 
+let openNewGameModalTimeout = -1;
 function onMessage(msg) {
     switch (msg.msg) {
         case 'run':
             if (msg.status == "started" || msg.status == "waiting") {
                 initGame(msg);
                 if (msg.status == "started") {
-                    INFO_STATUS[MAIN_ADV].innerText = "À lui de jouer"
-                    INFO_STATUS[MAIN_USER].innerText = ''
+                    setStatusMsg('adv_turn');
                 } else {
-                    INFO_STATUS[MAIN_ADV].innerText = "En attente de l'adversaire"
-                    INFO_STATUS[MAIN_USER].innerText = "En attente de l'adversaire"
+                    setStatusMsg('adv_wait');
                 }
             } else if (msg.status == "ended") {
-                setTimeout(openNewGameModal, 3000)
+                if (modal?.classList.contains('hide')) {
+                    openNewGameModalTimeout = setTimeout(openNewGameModal, 3000)
+                }
+                setStatusMsg('ok_match_end');
             }
             break;
         case 'status':
             onStatus(msg);
             break;
         case 'err':
-            if (msg.code == 'unk-champion' || msg.code == 'already-running') {
-                break;
-            }
-            if (msg.code != 'eof') {
+            if (msg.code != 'unk-champion' && msg.code != 'already-running' && msg.code != 'eof') {
                 console.error("ERR", msg.code);
             }
-            INFO_STATUS[MAIN_ADV].innerText = `Erreur (${msg.code}) !`
-            INFO_STATUS[MAIN_USER].innerText = `Erreur (${msg.code}) !`
-            openNewGameModal();
+            setStatusMsg(`err_${msg.code}${msg.nb || ''}`);
             break;
         case 'champions':
             while (selectOpponent.firstChild) {
                 // @ts-ignore
                 selectOpponent.removeChild(selectOpponent.lastChild);
             }
-            let group = document.createElement('optgroup');
-            group.label = 'Champions'
-            for (let c of msg.champions) {
-                let opt = document.createElement('option');
-                opt.value = `champ-${c}`;
-                opt.innerText = c;
-                group.appendChild(opt);
+            for (let i = 0; i < msg.champions.length; i++) {
+                let [user, champions] = msg.champions[i];
+                let group = document.createElement('optgroup');
+                group.label = `Champions de ${user}`
+                if (i != 0 || !msg.first_is_user) {
+                    let opt = document.createElement('option');
+                    opt.value = `user-${user}`;
+                    opt.innerText = `Utilisateur ${user}`;
+                    group.appendChild(opt)
+                }
+                for (let c of champions) {
+                    let opt = document.createElement('option');
+                    opt.value = `champ-${c}`;
+                    opt.innerText = c;
+                    group.appendChild(opt)
+                }
+                selectOpponent.appendChild(group);
             }
-            selectOpponent.appendChild(group);
-
-            group = document.createElement('optgroup');
-            group.label = 'Utilisateurs'
-            for (let c of msg.users) {
-                let opt = document.createElement('option');
-                opt.value = `user-${c}`;
-                opt.innerText = c;
-                group.appendChild(opt);
-            }
-            selectOpponent.appendChild(group);
             break;
         default:
             console.info(msg);
@@ -143,6 +152,7 @@ function onStatus(data) {
                 let cid = cartes_en_attente[j];
                 let g = PLAY_CARTES[cid].geisha;
                 validerCarte(cid, cartesValidees[MAIN_ADV][g] < data.cv_adv[g] ? MAIN_ADV : MAIN_USER);
+                outlineElement(PLAY_CARTES[cid].el);
             }
         } else if (cartesEnAttenteAdv == 3) {
             let c0 = cartes_en_attente[0]
@@ -164,14 +174,17 @@ function onStatus(data) {
                 validerCarte(c2, MAIN_ADV);
                 validerCarte(c3, MAIN_ADV);
             }
+            outlineElement(PLAY_CARTES[c0].el);
+            outlineElement(PLAY_CARTES[c1].el);
+            outlineElement(PLAY_CARTES[c2].el);
+            outlineElement(PLAY_CARTES[c3].el);
         }
         cartesEnAttenteAdv = 0;
         cartes_en_attente.fill(-1);
     }
 
     if (!isNotLast || data.tour <= tour) return;
-    INFO_STATUS[MAIN_ADV].innerText = "";
-    INFO_STATUS[MAIN_USER].innerText = "À vous de jouer !";
+    setStatusMsg('user_turn');
     tour = data.tour;
 
     let last_act = data.derniere_action.act;
@@ -184,11 +197,13 @@ function onStatus(data) {
             c.status = VALIDER_SECRETEMENT;
             applyMove(c.el, moveToValidate(MAIN_ADV));
             applyMove(JETONS[MAIN_ADV][0], moveToValidate(MAIN_ADV));
+            outlineElement(c.el);
         } else if (last_act == 1) {
             for (let i = 0; i < 2; i++) {
                 let c = PLAY_CARTES[mains[MAIN_ADV].pop() ?? -1];
                 c.status = DEFAUSSER_SECRETEMENT;
                 applyMove(c.el, moveToDefausser(MAIN_ADV, i));
+                outlineElement(c.el);
             }
             applyMove(JETONS[MAIN_ADV][1], moveToDefausser(MAIN_ADV, 0));
         }
@@ -289,16 +304,20 @@ let actionsAvailable = [
 let cartes_en_attente = new Array(4);
 let cartesValidees = [new Array(NB_GEISHAS), new Array(NB_GEISHAS)];
 let cartesSelectionnees = []
+/** @type {HTMLElement[]} */
+let cartesOutlined = [];
 let canSelect = false;
 let cartesEnAttenteAdv = 0;
+let adv_name = "Champion";
 function initGame(msg) {
     MANCHE_STATUS.innerText = `1/1`
     joueur_user = msg?.joueur ?? 0;
     manche = -1;
     mains = [[], []]
-    TEXT_TITLES[MAIN_ADV].innerText = msg?.champion ?? "Champion";
+    adv_name = msg?.champion ?? "Champion";
+    TEXT_TITLES[MAIN_ADV].innerText = adv_name;
     TEXT_TITLES[MAIN_USER].innerText = msg?.user ?? "Vous";
-    INFO_NAME[MAIN_ADV].innerText = msg?.champion ?? "Champion";
+    INFO_NAME[MAIN_ADV].innerText = adv_name;
     INFO_NAME[MAIN_USER].innerText = msg?.user ?? "Vous";
     TEXT_TITLES[0].classList.remove('hide');
     TEXT_TITLES[1].classList.remove('hide');
@@ -309,6 +328,18 @@ function initGame(msg) {
         MARKERS[g].classList.remove('marker-top')
         MARKERS[g].classList.remove('marker-bot')
     }
+}
+
+function clearCartesOutlined() {
+    for (let el of cartesOutlined) {
+        el.classList.remove('outlined');
+    }
+    cartesOutlined = [];
+}
+
+function outlineElement(el) {
+    cartesOutlined.push(el);
+    el.classList.add('outlined');
 }
 
 function piocherCarte() {
@@ -509,8 +540,9 @@ function onEndAction(isChoix) {
         ajouterALaMain(MAIN_ADV, piocherCarte());
     }
     cartesSelectionnees = []
-    INFO_STATUS[MAIN_ADV].innerText = "À lui de jouer…";
-    INFO_STATUS[MAIN_USER].innerText = "";
+    setStatusMsg('user_turn');
+
+    clearCartesOutlined();
 }
 
 function sendAction(cartes) {
@@ -567,12 +599,9 @@ function init_cartes() {
     }
 }
 
-/** @type {HTMLSpanElement[]} */
-const INFO_STATUS = new Array(2)
+const STATUS_TITLE = /** @type {HTMLSpanElement} */ (document.getElementById('status-title'));
 function play() {
-    INFO_STATUS[0] = /** @type {HTMLSpanElement} */ (document.getElementById('info-status-0'));
-    INFO_STATUS[1] = /** @type {HTMLSpanElement} */ (document.getElementById('info-status-1'));
-    updatePlaces();
+    updatePlayPlaces();
 
     for (let i = 0; i < NB_ACTIONS; i++) {
         JETONS[MAIN_USER][i].onclick = () => onJetonClick(i);
@@ -596,16 +625,25 @@ function play() {
     }
 }
 
-const modal = document.getElementById('new-match');
+const modal = /** @type {HTMLElement} */ (document.getElementById('new-match'));
 const selectOpponent = /** @type {HTMLSelectElement} */ (document.getElementById('opponent-select'));
 const selectFirst = /** @type {HTMLSelectElement} */ (document.getElementById('first-select'));
 function openNewGameModal() {
+    canSelect = false;
+    if (openNewGameModalTimeout >= 0) {
+        clearTimeout(openNewGameModalTimeout);
+        openNewGameModalTimeout = -1;
+    }
     modal?.classList.remove('hide');
+    TEXT_TITLES[0].classList.remove('hide');
+    TEXT_TITLES[1].classList.remove('hide');
 }
 
 function lancerMatch() {
-    sendStartGame(selectOpponent.value, selectFirst.value)
-    closeNewGameModal();
+    if (connection?.readyState == WebSocket.OPEN) {
+        sendStartGame(selectOpponent.value, selectFirst.value)
+        closeNewGameModal();
+    }
 }
 
 function closeNewGameModal() {
@@ -648,9 +686,53 @@ function stopGame() {
     openNewGameModal()
 }
 
-init_cartes();
-play();
+function updatePlayPlaces() {
+    updatePlaces();
+    modal.style.left = `${GEISHAS_LEFT_OFFSET[3] * clampedInnerWidth / BASE_WIDTH}px`
+    modal.style.top = `${window.innerHeight / 2}px`; innerHeight
+    STATUS_TITLE.style.left = `${GEISHAS_LEFT_OFFSET[3] * WIDTH_FACTOR}px`
+}
 
 document.body.onresize = () => {
-    updatePlaces();
+    updatePlayPlaces();
 }
+
+const MESSAGES = {
+    connection: "Connexion en cours…",
+    connected: "Connecté",
+    ok_match_end: "Fin du match !",
+    user_turn: "C'est à VOUS de jouer !",
+    get adv_turn() {
+        return `Au tour de ${adv_name} jouer`;
+    },
+    get adv_wait() {
+        return `En attente de la connexion de ${adv_name}`;
+    },
+    err_eof: "Erreur: Le match a été interrompu !",
+    'err_no-game': "Erreur: Pas de partie en cours !",
+    'err_already-running': "Erreur: Une partie est déjà en cours !",
+    err_request: "Erreur: Requête invalide !",
+    "err_unk-champion": "Erreur: Champion inconnu !",
+    "err_self-match": "Erreur: Vous ne pouvez pas faire de match contre vous même !",
+    "err_new-channel": "Erreur: Vous avez ouvert une nouvelle fenêtre !",
+    "err_action-err1": "Erreur: Erreur lors de l'action: action déjà jouée",
+    "err_action-err2": "Erreur: Erreur lors de l'action: cartes invalides",
+    "err_action-err3": "Erreur: Erreur lors de l'action: paquet invalide",
+    "err_action-err4": "Erreur: Erreur lors de l'action: geisha invalide",
+    "err_action-err5": "Erreur: Erreur lors de l'action: joueur invalide",
+    "err_action-err6": "Erreur: Erreur lors de l'action: choix invalide",
+    "err_action-err7": "Erreur: Erreur lors de l'action: action invalide",
+    "err_cartes-value-error": "Erreur: Erreur lors de l'action: cartes invalides",
+    "err_choix-value-error": "Erreur: Erreur lors de l'action: choix invalides",
+}
+let currentStatusMsg = "connection";
+function setStatusMsg(id) {
+    if (currentStatusMsg.startsWith('err') && id.startsWith('ok')) {
+        return;
+    }
+    currentStatusMsg = id;
+    STATUS_TITLE.innerText = MESSAGES[id] ?? id;
+}
+
+init_cartes();
+play();

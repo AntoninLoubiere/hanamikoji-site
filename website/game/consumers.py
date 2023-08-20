@@ -11,11 +11,13 @@ import traceback
 from authentication.models import User
 from game.models import Champion
 from game.tasks import get_build_dir, isolate_cleanup, isolate_init, run_client, run_server
+from game.views import get_champions_per_user
 from website.settings import ISOLATE_TIMEOUT, MEDIA_ROOT, SERVER_TIMEOUT
 
 USER_CHAMPION_PATH = (Path('game') / 'user_champion').absolute()
 USER_TIMEOUT = 300_000
 ISOLATE_USER_TIMEOUT = 3600
+
 PLAY_MATCH_DIR = (MEDIA_ROOT / 'play').absolute()
 PLAY_MATCH_DIR.mkdir(parents=True, exist_ok=True)
 @database_sync_to_async
@@ -23,8 +25,8 @@ def get_champion(name):
     return Champion.objects.filter(nom=name).first()
 
 @database_sync_to_async
-def get_names():
-    return list(Champion.objects.order_by('-date').values_list('nom', flat=True)), list(User.objects.values_list('username', flat=True).all())
+def get_names(user):
+    return get_champions_per_user(user)
 
 class Game:
     games: "dict[str, Game]" = {}
@@ -162,7 +164,7 @@ class Game:
         s_reqrep = 'ipc://' + f_reqrep
         s_pubsub = 'ipc://' + f_pubsub
 
-        server_task = await run_server(match_dir, s_reqrep, s_pubsub, time=USER_TIMEOUT)
+        server_task = await run_server(match_dir, s_reqrep, s_pubsub, time=USER_TIMEOUT * 2, socket_timeout=USER_TIMEOUT * 2)
 
         # On initialise les boite isolate
         box_player1 = isolate_init(0)
@@ -171,10 +173,10 @@ class Game:
         try:
             self.player1_proc = await run_client(match_dir, player1_name, player1_dir, s_reqrep,
                     s_pubsub, 0, box_player1, time_isolate=ISOLATE_USER_TIMEOUT if is_player1_user else ISOLATE_TIMEOUT,
-                    time=USER_TIMEOUT if is_player1_user else SERVER_TIMEOUT, stdin=subprocess.PIPE if is_player1_user else None)
+                    time=USER_TIMEOUT if is_player1_user else SERVER_TIMEOUT, stdin=subprocess.PIPE if is_player1_user else None, socket_timeout=USER_TIMEOUT)
             self.player2_proc = await run_client(match_dir, player2_name, player2_dir, s_reqrep,
-                    s_pubsub, 1, box_player1, time_isolate=ISOLATE_USER_TIMEOUT if is_player2_user else ISOLATE_TIMEOUT,
-                    time=USER_TIMEOUT if is_player2_user else SERVER_TIMEOUT, stdin=subprocess.PIPE if is_player2_user else None)
+                    s_pubsub, 1, box_player2, time_isolate=ISOLATE_USER_TIMEOUT if is_player2_user else ISOLATE_TIMEOUT,
+                    time=USER_TIMEOUT if is_player2_user else SERVER_TIMEOUT, stdin=subprocess.PIPE if is_player2_user else None, socket_timeout=USER_TIMEOUT)
 
             tasks = []
             if is_player1_user:
@@ -184,25 +186,30 @@ class Game:
             await asyncio.gather(*tasks)
 
             await self.player1_proc.wait()
+            # print("Player1 out:", (await self.player1_proc.stdout.read()).decode())
             self.player1_proc = None
             await self.player2_proc.wait()
+            # print("Player2 out:", (await self.player1_proc.stdout.read()).decode())
             self.player2_proc = None
             await server_task.wait()
+            # print("Serverout out:", (await server_task.stdout.read()).decode())
         finally:
             isolate_cleanup(box_player1)
             isolate_cleanup(box_player2)
 
     async def on_end(self, stop_reason):
-        if isinstance(self.player1, PlayConsumer):
-            await self.player1.send_json({"msg": "run", "status": "ended", "reason": stop_reason})
-        if isinstance(self.player2, PlayConsumer):
-            await self.player2.send_json({"msg": "run", "status": "ended", "reason": stop_reason})
+        del self.games[self.game_name]
+        self.is_running = False
+
         if self.waiting_user:
             game = self.games[self.waiting_user]
             if game is not None:
                 game.on_other_end(self)
-        self.is_running = False
-        del self.games[self.game_name]
+
+        if isinstance(self.player1, PlayConsumer):
+            await self.player1.send_json({"msg": "run", "status": "ended", "reason": stop_reason})
+        if isinstance(self.player2, PlayConsumer):
+            await self.player2.send_json({"msg": "run", "status": "ended", "reason": stop_reason})
 
     def on_other_end(self):
         self.is_running = False
@@ -286,8 +293,8 @@ class PlayConsumer(AsyncJsonWebsocketConsumer):
                 return
             game.stop()
         elif msg == 'champions':
-            champions, users = await get_names()
-            print(champions, users)
-            await self.send_json({"msg": "champions", "champions": champions, "users": users})
+            champions = await get_names(self.scope['user'])
+            await self.send_json({"msg": "champions", "champions": [(u.username, [c.nom for c in cs]) for u, cs in champions],
+                                  "first_is_user": len(champions) > 0 and champions[0][0].username == self.username})
 
 
