@@ -2,7 +2,20 @@
 {% block title %}Tournoi n°{{ tournoi.id_tournoi }}{% endblock title %}
 {% load static %}
 {% block content %}
-<h1>Tournoi n°{{ tournoi.id_tournoi }}</h1>
+<div class="nav-matchs">
+    {% if precedent != None %}
+    <a href="{% url 'tournoi_detail' precedent.id_tournoi %}">Précédent</a>
+    {% else %}
+    Début
+    {% endif %}
+    <h1>Match N°{{ tournoi.id_tournoi }}</h1>
+    {% if suivant != None %}
+    <a href="{% url 'tournoi_detail' suivant.id_tournoi %}">Suivant</a>
+    {% else %}
+    Fin
+    {% endif %}
+
+</div>
 <div class="content-section">
     <span class="content-center">{{ tournoi.get_status_display }}</span>
     {% if tournoi.status == 'LP' %}

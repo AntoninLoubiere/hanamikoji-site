@@ -31,7 +31,7 @@
         <button type="submit" id="envoi">Modifier</button>
     </form>
     {% endif %}
-    {% if champion.compile_task %}
+    {% if champion.compile_task and champion.status == 'FI' or champion.compile_task and champion.status == 'ER' %}
         <div class="content-center">Sortie de la compilation :</div>
         <div class="command-output">{{ champion.compile_task.result }}</div>
     {% endif%}

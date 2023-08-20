@@ -1,0 +1,89 @@
+.carte img {
+    width: 120px;
+    border-radius: .5rem;
+    backface-visibility: hidden;
+
+    transition: transform 800ms ease-out;
+}
+
+.carte {
+    cursor: pointer;
+}
+
+.carte-dos {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    left: 0;
+
+    transform: rotateY(180deg);
+}
+
+.carte.hide .carte-front {
+    transform: rotateY(180deg);
+}
+
+.carte.hide .carte-dos {
+    transform: none;
+}
+
+
+.jeton-selected {
+    cursor: pointer;
+    animation: jeton-selected-blink 500ms alternate infinite ease-in-out;
+}
+
+.jeton-selected:hover {
+    width: 100px !important;
+}
+
+@keyframes jeton-selected-blink {
+    from {
+        width: 90px;
+    }
+
+    to {
+        width: 100px;
+    }
+}
+
+.modal {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    color: white;
+    z-index: 2000;
+
+    background-color: #000000aa;
+    padding: 1rem 2rem;
+    border-radius: 3rem;
+
+    top: 50%;
+    left: 50%;
+    transition: 500ms ease-in-out opacity;
+}
+
+.modal.hide {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.h1 {
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.modal-send {
+    text-align: center;
+    margin-top: 1rem;
+}
+.modal-send button {
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.grid-input {
+    display: grid;
+    gap: .5rem;
+    grid-template-columns: 1fr 1fr;
+}

@@ -197,7 +197,7 @@ def isolate_init(client_id):
     tries = 0
     while True:
         r = subprocess.run(['isolate', '--init', '--box-id', str(box_id)], stderr=PIPE)
-        if r.returncode == 2 and 'Box already exists' in r.stderr:
+        if r.returncode == 2 and b'Box already exists' in r.stderr:
             tries += 1
             if tries >= MAX_ISOLATE_TRY:
                 raise Exception("Impossible to find free box")
@@ -209,11 +209,11 @@ def isolate_cleanup(box_id):
     subprocess.run(['isolate', '--cleanup', '--box-id', str(box_id)])
 
 
-async def run_server(match_dir, rep_addr, pub_addr):
+async def run_server(match_dir, rep_addr, pub_addr, time=MATCH_SERVER_TIMEOUT):
     return await asyncio.create_subprocess_exec(
         STECHEC_SERVER,
         '--rules', MATCH_RULES,
-        '--time', str(MATCH_SERVER_TIMEOUT),
+        '--time', str(time),
         '--rep_addr', rep_addr,
         '--pub_addr', pub_addr,
         '--nb_clients', '2',
@@ -225,10 +225,10 @@ async def run_server(match_dir, rep_addr, pub_addr):
         stderr=STDOUT
     )
 
-async def run_client(match_dir, champion_name, champion_path: Path, req_addr, sub_addr, client_id, box_id):
+async def run_client(match_dir, champion_name, champion_path: Path, req_addr, sub_addr, client_id, box_id, time_isolate=ISOLATE_TIMEOUT, time=SERVER_TIMEOUT, stdin=None):
     return await asyncio.create_subprocess_exec(
         'isolate',
-        '--time', str(ISOLATE_TIMEOUT),
+        '--time', str(time_isolate),
         f'--dir=match={match_dir}',
         f'--dir=champion={champion_path}',
         '--dir=/tmp',
@@ -239,7 +239,7 @@ async def run_client(match_dir, champion_name, champion_path: Path, req_addr, su
         '--run', '--', STECHEC_CLIENT,
         '--name', f'{champion_name}-{client_id + 1}',
         '--rules', MATCH_RULES,
-        '--time', str(SERVER_TIMEOUT),
+        '--time', str(time),
         '--champion', '/champion/champion.so',
         '--req_addr', req_addr,
         '--sub_addr', sub_addr,
@@ -247,6 +247,7 @@ async def run_client(match_dir, champion_name, champion_path: Path, req_addr, su
         '--verbose', '1',
         '--client-id', str(client_id),
         '--map', '/match/map.txt',
+        stdin=stdin,
         stdout=PIPE
     )
 

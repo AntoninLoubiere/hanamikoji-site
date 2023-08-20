@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Jouer</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' href='/static/replay/style.css'>
+    <link rel='stylesheet' type='text/css' href='style.css'>
+    <script src='/static/replay/shared.js' defer></script>
+    <script src='play.js' defer></script>
+</head>
+<body>
+    <div id="game-parent">
+        <div id="game">
+            <img class="geisha" id="geisha0" src="/static/replay/assets/geishas/purple-geisha.webp">
+            <img class="geisha" id="geisha1" src="/static/replay/assets/geishas/red-geisha.webp">
+            <img class="geisha" id="geisha2" src="/static/replay/assets/geishas/yellow-geisha.webp">
+            <img class="geisha" id="geisha3" src="/static/replay/assets/geishas/blue-geisha.webp">
+            <img class="geisha" id="geisha4" src="/static/replay/assets/geishas/orange-geisha.webp">
+            <img class="geisha" id="geisha5" src="/static/replay/assets/geishas/green-geisha.webp">
+            <img class="geisha" id="geisha6" src="/static/replay/assets/geishas/pink-geisha.webp">
+        
+            <!-- translateY(+- 100%) selon son état -->
+            <img class="marker" id="marker0" src="/static/replay/assets/marker.png">
+            <img class="marker" id="marker1" src="/static/replay/assets/marker.png">
+            <img class="marker" id="marker2" src="/static/replay/assets/marker.png">
+            <img class="marker" id="marker3" src="/static/replay/assets/marker.png">
+            <img class="marker" id="marker4" src="/static/replay/assets/marker.png">
+            <img class="marker" id="marker5" src="/static/replay/assets/marker.png">
+            <img class="marker" id="marker6" src="/static/replay/assets/marker.png">
+        
+            <div id="cards-container"></div>
+        
+            <img class="jeton" id="j0-0" src="/static/replay/assets/actions/B1.jpg">
+            <img class="jeton" id="j0-1" src="/static/replay/assets/actions/B2.jpg">
+            <img class="jeton" id="j0-2" src="/static/replay/assets/actions/B3.jpg">
+            <img class="jeton" id="j0-3" src="/static/replay/assets/actions/B4.jpg">
+
+            <img class="jeton" id="j1-0" src="/static/replay/assets/actions/A1.jpg" >
+            <img class="jeton" id="j1-1" src="/static/replay/assets/actions/A2.jpg" >
+            <img class="jeton" id="j1-2" src="/static/replay/assets/actions/A3.jpg" >
+            <img class="jeton" id="j1-3" src="/static/replay/assets/actions/A4.jpg" >
+            <span class="title" id="title-j0">Joueur 1</span>
+            <span class="title" id="title-j1">Joueur 2</span>
+            <div class="info-section" id="info-section-0">
+                <span class="info-name" id="info-name-0">Joueur 1</span>
+                <span class="info-score" id="info-score-0">0 cartes, 0 points</span>
+                <span class="info-score" id="info-status-0"></span>
+            </div>
+            <div class="info-section" id="info-section-1">
+                <span class="info-name" id="info-name-1">Joueur 2</span>
+                <span class="info-score" id="info-score-1">0 cartes, 0 points</span>
+                <span class="info-score" id="info-status-1"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal hide" id="new-match">
+        <h1 class="h1">Lancer un match</h1>
+        <div class="grid-input">
+            <label>Opposant :</label>
+            <select id="opponent-select"></select>
+            <label>Premier joueur :</label>
+            <select id="first-select">
+                <option value="">Au hasard</option>
+                <option value="true">Vous jouez en premier</option>
+                <option value="false">Votre adversaire joue en premier</option>
+            </select>
+        </div>
+        <div class="modal-send"><button onclick="lancerMatch()">Lancer le match</button></div>
+    </div>
+
+    <div class="control-list">
+        <span class="manche-status" id="manche-status"></span>
+        <button onclick="stopGame()"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z" />
+        </svg></button>
+    </div>
+</body>
+</html>

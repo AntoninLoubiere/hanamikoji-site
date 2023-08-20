@@ -73,7 +73,7 @@ body, #game-parent {
 
 .jeton-off {
     filter: grayscale(80%);
-    transition-delay: 0s, 0s, 0s, 0s;
+    transition-delay: 0s, 0s, 0s, 0s, 0s;
 }
 
 .icon {
@@ -123,7 +123,6 @@ body, #game-parent {
 
     top: 50%;
     left: 50%;
-
 }
 
 .load-from-file.hide {
@@ -147,6 +146,7 @@ body, #game-parent {
 
 .title.hide {
     opacity: 0;
+    pointer-events: none;
 }
 
 .manche-status {
