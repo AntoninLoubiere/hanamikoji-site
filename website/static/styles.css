@@ -489,3 +489,14 @@ iframe {
 .margin-center {
     margin: auto;
 }
+.green_bg {
+    background-color: greenyellow;
+}
+
+#green {
+    color: green
+}
+
+#red {
+    color: red
+}
