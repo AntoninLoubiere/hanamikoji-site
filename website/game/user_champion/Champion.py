@@ -28,9 +28,9 @@ class Context:
         self.carte_piochee = carte_piochee()
         self.derniere_action = tour_precedent()
 
-        if m != self.manche:
+        if self.tour == 0 and not attente_reponse and not is_end:
             sys.stdout.write('new-manche')
-            self.manche = m
+        self.manche = m
 
         send_line({
             "msg": "status", "manche": self.manche, "tour": self.tour, "cartes": self.cartes,

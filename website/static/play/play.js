@@ -13,6 +13,9 @@ function connect() {
             data = JSON.parse(e.data);
         } catch {
             console.error(e.data)
+            if (e.data.includes("Il perd donc.") || e.data.includes("socket.cc")) {
+                setStatusMsg("err_eof");
+            }
             return
         }
         connectionTry = 0;
@@ -23,7 +26,10 @@ function connect() {
         setStatusMsg('connected');
     })
 
-    connection.onclose = () => {
+    connection.onclose = (err) => {
+        if (err.code == 4003) {
+            document.location = `/?next=${encodeURIComponent(document.location.pathname)}`
+        }
         connection = null;
         let reconnectSecondes = Math.max(1000, Math.min(60000, 5000 * connectionTry));
         currentStatusMsg = 'connection-lost'
@@ -57,6 +63,9 @@ function onMessage(msg) {
             break;
         case 'choix':
             onChoix(msg)
+            break;
+        case 'new-manche':
+            onNewMancheMsg(msg);
             break;
         case 'err':
             if (msg.code != 'unk-champion' && msg.code != 'already-running' && msg.code != 'eof') {
@@ -93,56 +102,46 @@ function onMessage(msg) {
     }
 }
 
+function onNewMancheMsg(data) {
+    MANCHE_STATUS.innerText = `${data.manche + 1}/${data.tour + 1}`
+    if (data.manche > 0) {
+        // Reset cartes
+        resetNouvelleManche();
+    }
+
+    for (let j = 0; j < 6; j++) {
+        ajouterALaMain(MAIN_USER, piocherCarte());
+        ajouterALaMain(MAIN_ADV, piocherCarte());
+    }
+    ajouterALaMain(MAIN_ADV, piocherCarte());
+    updateScore(data);
+}
+
 function onStatus(data) {
     MANCHE_STATUS.innerText = `${data.manche + 1}/${data.tour + 1}`
     const isNotLast = data.carte_piochee >= 0 || data.attente_reponse
     if (manche != data.manche) {
         manche = data.manche;
-        tour = -1;
         if (isNotLast) {
             if (manche > 0) {
                 // Reset cartes
                 resetNouvelleManche();
             } else {
-                setTimeout(
-                    () => {
-                        TEXT_TITLES[0].classList.add('hide');
-                        TEXT_TITLES[1].classList.add('hide');
-                    },
-                    0
-                )
-            }
-            for (let i = 0; i < 6; i++) {
-                let c = piocherCarte();
-                ajouterALaMain(MAIN_ADV, c);
+                TEXT_TITLES[0].classList.add('hide');
+                TEXT_TITLES[1].classList.add('hide');
             }
 
-            for (let g of data.cartes) {
-                let c = piocherCarte();
-                retournerGeisha(c, g);
-                ajouterALaMain(MAIN_USER, c);
+            for (let j = mains[MAIN_USER].length; j < data.cartes.length; j++) {
+                ajouterALaMain(MAIN_USER, piocherCarte());
+            }
+
+            for (let i = 0; i < data.cartes.length; i++) {
+                let c = mains[MAIN_USER][i];
+                retournerGeisha(c, data.cartes[i]);
             }
         }
 
-        let nb_cartes = [0, 0];
-        let score = [0, 0];
-
-        for (let g = 0; g < NB_GEISHAS; g++) {
-            if (data.possession[g] == 1 - data.joueur) {
-                nb_cartes[MAIN_ADV] += 1;
-                score[MAIN_ADV] += GEISHA_VALEURS[g];
-                MARKERS[g].classList.add('marker-top')
-                MARKERS[g].classList.remove('marker-bot')
-            } else if (data.possession[g] == data.joueur) {
-                nb_cartes[MAIN_USER] += 1;
-                score[MAIN_USER] += GEISHA_VALEURS[g];
-                MARKERS[g].classList.remove('marker-top')
-                MARKERS[g].classList.add('marker-bot')
-            }
-        }
-
-        INFO_SCORE[MAIN_ADV].innerText = `${nb_cartes[MAIN_ADV]} carte${nb_cartes[MAIN_ADV] == 1 ? '' : 's'}, ${score[MAIN_ADV]} points`
-        INFO_SCORE[MAIN_USER].innerText = `${nb_cartes[MAIN_USER]} carte${nb_cartes[MAIN_USER] == 1 ? '' : 's'}, ${score[MAIN_USER]} points`
+        updateScore(data);
     } else if (data.carte_piochee >= 0 && data.tour > tour) {
         let c = piocherCarte();
         retournerGeisha(c, data.carte_piochee);
@@ -167,8 +166,8 @@ function onStatus(data) {
 
             if ((g0 == g1 && cartesValidees[MAIN_ADV][g0] < data.cv_adv[g0] - 1) ||
                 (cartesValidees[MAIN_ADV][g0] < data.cv_adv[g0] && cartesValidees[MAIN_ADV][g1] < data.cv_adv[g1])) {
-                validerCarte(c0, MAIN_ADV);
                 validerCarte(c1, MAIN_ADV);
+                validerCarte(c0, MAIN_ADV);
                 validerCarte(c2, MAIN_USER);
                 validerCarte(c3, MAIN_USER);
             } else {
@@ -196,15 +195,17 @@ function onStatus(data) {
         actionsAvailable[MAIN_ADV][last_act] = false;
 
         if (last_act == 0) {
-            let c = PLAY_CARTES[mains[MAIN_ADV].pop() ?? -1];
+            let c = PLAY_CARTES[popCardFromAdv()]
             c.status = VALIDER_SECRETEMENT;
+            c.statusPosition = MAIN_ADV;
             applyMove(c.el, moveToValidate(MAIN_ADV));
             applyMove(JETONS[MAIN_ADV][0], moveToValidate(MAIN_ADV));
             outlineElement(c.el);
         } else if (last_act == 1) {
             for (let i = 0; i < 2; i++) {
-                let c = PLAY_CARTES[mains[MAIN_ADV].pop() ?? -1];
+                let c = PLAY_CARTES[popCardFromAdv()];
                 c.status = DEFAUSSER_SECRETEMENT;
+                c.statusPosition = i;
                 applyMove(c.el, moveToDefausser(MAIN_ADV, i));
                 outlineElement(c.el);
             }
@@ -216,20 +217,22 @@ function onStatus(data) {
         if (last_act == 2) {
             let cartes = [data.derniere_action.c1, data.derniere_action.c2, data.derniere_action.c3]
             for (let i = 0; i < 3; i++) {
-                let c = mains[MAIN_ADV].pop() ?? -1;
+                let c = popCardFromAdv();
                 cartes_en_attente[i] = c;
                 retournerGeisha(c, cartes[i]);
                 PLAY_CARTES[c].status = ATTENTE_CHOIX_TROIS[i];
+                outlineElement(PLAY_CARTES[c].el)
                 applyMove(PLAY_CARTES[c].el, moveToChoixTrois(i))
             }
         } else if (last_act == 3) {
             let cartes = [data.derniere_action.c1, data.derniere_action.c2, data.derniere_action.c3, data.derniere_action.c4]
             for (let i = 0; i < 4; i++) {
-                let c = mains[MAIN_ADV].pop() ?? -1;
+                let c = popCardFromAdv();
                 cartes_en_attente[i] = c;
 
                 retournerGeisha(c, cartes[i]);
                 PLAY_CARTES[c].status = ATTENTE_CHOIX_PAQUETS[i < 2 ? 0 : 1];
+                outlineElement(PLAY_CARTES[c].el)
                 applyMove(PLAY_CARTES[c].el, moveToChoixPaquets(i))
             }
 
@@ -260,8 +263,8 @@ function onChoix(data) {
         let c3 = cartes_en_attente[3]
 
         if (data.choix == 0) {
-            validerCarte(c0, MAIN_ADV);
             validerCarte(c1, MAIN_ADV);
+            validerCarte(c0, MAIN_ADV);
             validerCarte(c2, MAIN_USER);
             validerCarte(c3, MAIN_USER);
         } else {
@@ -283,7 +286,7 @@ function onChoix(data) {
 }
 
 function adversairePiocherEndAction() {
-    if (tour < 8) {
+    if (tour < 7) {
         ajouterALaMain(MAIN_ADV, piocherCarte());
     }
 }
@@ -291,23 +294,32 @@ function adversairePiocherEndAction() {
 function ajouterALaMain(j, c) {
     let pos = mains[j].push(c) - 1;
     PLAY_CARTES[c].status = j;
-    PLAY_CARTES[c].mainPosition = pos;
+    PLAY_CARTES[c].statusPosition = pos;
     PLAY_CARTES[c].selected = false;
     applyMove(PLAY_CARTES[c].el, moveToMain(j, pos));
 }
 
-function validerCarte(c, j) {
-    PLAY_CARTES[c].status = VALIDER_ADV + j;
-    const g = PLAY_CARTES[c].geisha;
+function popCardFromAdv() {
+    return mains[MAIN_ADV].pop() ?? piocherCarte();
+}
+
+function validerCarte(cid, j) {
+    let c = PLAY_CARTES[cid];
+    c.status = VALIDER_ADV + j;
+    const g = c.geisha;
     let nb = ++cartesValidees[j][g];
     if (j == MAIN_ADV) {
         nb *= -1;
     }
-    applyMove(PLAY_CARTES[c].el, moveToGeisha(g, nb))
+    c.statusPosition = nb;
+    applyMove(c.el, moveToGeisha(g, nb))
 }
 
-function resetNouvelleManche() {
+function resetNouvelleManche(force) {
+    if (!force && tour < 0) return; // Already reseted.
+    clearCartesOutlined();
     pioche_idx = 0;
+    tour = -1;
     canSelect = false;
     let pos = moveToPioche(PIOCHE_CENTRAL_POSITION)
     for (let i = 0; i < NB_CARTES_TOTALES; i++) {
@@ -320,6 +332,7 @@ function resetNouvelleManche() {
     for (let a = 0; a < NB_ACTIONS; a++) {
         JETONS[0][a].classList.remove('jeton-off')
         JETONS[1][a].classList.remove('jeton-off')
+        JETONS[MAIN_USER][a].classList.remove('jeton-selected')
         applyMove(JETONS[0][a], get_jeton_left_top(0, a));
         applyMove(JETONS[1][a], get_jeton_left_top(1, a));
     }
@@ -335,6 +348,28 @@ function resetNouvelleManche() {
     cartesEnAttenteAdv = 0;
     cartes_en_attente.fill(-1);
     cartesSelectionnees = []
+}
+
+function updateScore(data) {
+    let nb_cartes = [0, 0];
+    let score = [0, 0];
+
+    for (let g = 0; g < NB_GEISHAS; g++) {
+        if (data.possession[g] == 1 - data.joueur) {
+            nb_cartes[MAIN_ADV] += 1;
+            score[MAIN_ADV] += GEISHA_VALEURS[g];
+            MARKERS[g].classList.add('marker-top')
+            MARKERS[g].classList.remove('marker-bot')
+        } else if (data.possession[g] == data.joueur) {
+            nb_cartes[MAIN_USER] += 1;
+            score[MAIN_USER] += GEISHA_VALEURS[g];
+            MARKERS[g].classList.remove('marker-top')
+            MARKERS[g].classList.add('marker-bot')
+        }
+    }
+
+    INFO_SCORE[MAIN_ADV].innerText = `${nb_cartes[MAIN_ADV]} carte${nb_cartes[MAIN_ADV] == 1 ? '' : 's'}, ${score[MAIN_ADV]} points`
+    INFO_SCORE[MAIN_USER].innerText = `${nb_cartes[MAIN_USER]} carte${nb_cartes[MAIN_USER] == 1 ? '' : 's'}, ${score[MAIN_USER]} points`
 }
 
 let joueur_user = 2;
@@ -356,7 +391,6 @@ let canSelect = false;
 let cartesEnAttenteAdv = 0;
 let adv_name = "Champion";
 function initGame(msg) {
-    clearCartesOutlined();
     MANCHE_STATUS.innerText = `1/1`
     joueur_user = msg?.joueur ?? 0;
     manche = -1;
@@ -369,7 +403,7 @@ function initGame(msg) {
     TEXT_TITLES[0].classList.remove('hide');
     TEXT_TITLES[1].classList.remove('hide');
 
-    resetNouvelleManche()
+    resetNouvelleManche(true)
 
     for (let g = 0; g < NB_GEISHAS; g++) {
         MARKERS[g].classList.remove('marker-top')
@@ -424,7 +458,7 @@ function onCarteClick(c) {
             console.assert(index > -1)
             cartesSelectionnees.splice(index, 1);
             PLAY_CARTES[c].selected = false;
-            applyMove(PLAY_CARTES[c].el, moveToMain(MAIN_USER, PLAY_CARTES[c].mainPosition));
+            applyMove(PLAY_CARTES[c].el, moveToMain(MAIN_USER, PLAY_CARTES[c].statusPosition));
             updateSelected(-1);
         } else {
             let mc = getMaxCardSelect();
@@ -446,6 +480,7 @@ function onJetonClick(i) {
             sendAction([c.geisha]);
             c.status = VALIDER_SECRETEMENT;
             c.selected = false;
+            c.statusPosition = MAIN_USER;
             applyMove(c.el, moveToValidate(MAIN_USER));
             applyMove(JETONS[MAIN_USER][0], moveToValidate(MAIN_USER));
 
@@ -460,6 +495,7 @@ function onJetonClick(i) {
                 let cid = cartesSelectionnees[j];
                 let c = PLAY_CARTES[cid];
                 c.status = DEFAUSSER_SECRETEMENT;
+                c.statusPosition = i + 2;
                 c.selected = false;
                 cartes[j] = c.geisha;
                 applyMove(c.el, moveToDefausser(MAIN_USER));
@@ -529,8 +565,8 @@ function updateSelectedGetAction() {
 function updateMain(j) {
     for (let i = 0; i < mains[j].length; i++) {
         let c = PLAY_CARTES[mains[j][i]]
-        if (i != c.mainPosition) {
-            c.mainPosition = i;
+        if (i != c.statusPosition) {
+            c.statusPosition = i;
             applyMove(c.el, moveToMain(MAIN_USER, i));
         }
     }
@@ -586,6 +622,9 @@ function onEndAction(addCard) {
     if (addCard) {
         adversairePiocherEndAction();
     }
+    if (tour < 7) {
+        MANCHE_STATUS.innerText = `${manche + 1}/${tour + 1}`
+    }
     cartesSelectionnees = []
     setStatusMsg('adv_turn');
 
@@ -607,7 +646,7 @@ function sendChoix(choix) {
  * @property {number} status
  * @property {number} geisha
  * @property {boolean} selected
- * @property {number} mainPosition
+ * @property {number} statusPosition
  */
 /** @type {Cartes[]} */
 const PLAY_CARTES = new Array(NB_CARTES_TOTALES);
@@ -644,8 +683,9 @@ function init_cartes() {
             status: PIOCHE,
             geisha: NB_GEISHAS,
             selected: false,
-            mainPosition: -1
+            statusPosition: -1
         }
+        applyMove(el, moveToPioche(PIOCHE_CENTRAL_POSITION));
         el.onclick = () => onCarteClick(i);
     }
 }
@@ -746,6 +786,46 @@ function updatePlayPlaces() {
 
 document.body.onresize = () => {
     updatePlayPlaces();
+    for (let j = 0; j < 2; j++) {
+        if (!actionsAvailable[j][0]) {
+            applyMove(JETONS[j][0], moveToValidate(j));
+        }
+        if (!actionsAvailable[j][1]) {
+            applyMove(JETONS[j][1], moveToDefausser(j, j));
+        }
+    }
+
+    for (let c of PLAY_CARTES) {
+        switch (c.status) {
+            case MAIN_ADV:
+            case MAIN_USER:
+                applyMove(c.el, moveToMain(c.status, c.statusPosition));
+                break;
+            case PIOCHE:
+                applyMove(c.el, moveToPioche(PIOCHE_CENTRAL_POSITION));
+                break;
+            case ATTENTE_CHOIX_TROIS[0]:
+            case ATTENTE_CHOIX_TROIS[1]:
+            case ATTENTE_CHOIX_TROIS[2]:
+                applyMove(c.el, moveToChoixTrois(c.status - ATTENTE_CHOIX_TROIS[0]));
+                break;
+            case ATTENTE_CHOIX_PAQUETS[0]:
+            case ATTENTE_CHOIX_PAQUETS[1]:
+                applyMove(c.el, moveToChoixPaquets(c.status - ATTENTE_CHOIX_PAQUETS[0]));
+                break;
+            case VALIDER_ADV:
+            case VALIDER_USER:
+                applyMove(c.el, moveToGeisha(c.geisha, c.statusPosition));
+                break;
+            case VALIDER_SECRETEMENT:
+                applyMove(c.el, moveToValidate(c.statusPosition));
+                break;
+            case DEFAUSSER_SECRETEMENT:
+                applyMove(c.el, moveToDefausser(Math.floor(c.statusPosition / 2), c.statusPosition));
+                break;
+        }
+    }
+    updateSelected(0);
 }
 
 const MESSAGES = {

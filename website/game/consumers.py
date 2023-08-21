@@ -16,7 +16,7 @@ from game.views import get_champions_per_user
 from website.settings import ISOLATE_TIMEOUT, MEDIA_ROOT, SERVER_TIMEOUT
 
 USER_CHAMPION_PATH = (Path('game') / 'user_champion').absolute()
-USER_TIMEOUT = 300_000
+USER_TIMEOUT = 30_000
 ISOLATE_USER_TIMEOUT = 3600
 
 PLAY_MATCH_DIR = (MEDIA_ROOT / 'play').absolute()
@@ -308,8 +308,10 @@ class Game:
                     data = json.loads(line)
                     await send_channel.send_json({
                         'msg': 'new-manche',
+                        'joueur': 1 - data['joueur'],
                         "possession": data["possession"],
                         "manche": data["manche"],
+                        "tour": data["tour"],
                     })
             if player.connected:
                 await player.send(line)
@@ -319,13 +321,14 @@ class Game:
 class PlayConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
         user: User = self.scope['user']
+        self.username = ""
         if not user.is_authenticated:
-            await self.close(403)
+            await self.accept()
+            await self.close(code=4003)
             return
         self.username = user.username
         await self.accept()
         self.connected = True
-        game = Game.games.get(self.username, None)
 
     async def disconnect(self, code):
         self.connected = False
