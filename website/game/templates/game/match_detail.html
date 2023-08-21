@@ -21,12 +21,12 @@
     <div class="grid-2 {% if match.fin_prematuree %}fin-prematuree{% endif %}">
         <div class="champion-column {% if match.gagnant == 1 %}winner{% endif %}">
             <span class="champion-name">{{match.champion1.nom}}</span>
-            <span>{{ match.champion1.uploader }}</span>
+            <span><a href="{% url 'user_detail' match.champion1.uploader.username %}">{{ match.champion1.uploader }}</a></span>
             {% if match.status == 'FI' %}<span class="score">{{match.score1}}</span>{% endif %}
         </div>
         <div class="champion-column {% if match.gagnant == 2 %}winner{% endif %}">
             <span class="champion-name">{{match.champion2.nom}}</span>
-            <span>{{ match.champion2.uploader }}</span>
+            <span><a href="{% url 'user_detail' match.champion2.uploader.username %}">{{ match.champion2.uploader }}</a></span>
             {% if match.status == 'FI' %}<span class="score">{{match.score2}}</span>{% endif %}
         </div>
         

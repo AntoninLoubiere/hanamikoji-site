@@ -133,24 +133,32 @@ def champions(request):
     page_obj = paginator.get_page(page_number)
     return render(request,'game/champions.html',context={'champions':page_obj, 'users': users, 'message':message, 'filter_id': filter_id})
 
-def get_champions_per_user(current_user=None, filter_champions=False):
+def get_champions_per_user(current_user=None, filter_champions=False, all_users=False):
     champs = Champion.objects.filter(compilation_status=Champion.Status.FINI) if filter_champions else Champion.objects.all()
     champs = champs.order_by('-date')
     users = {}
+    users_champions = {}
+    if all_users:
+        for pk in User.objects.all():
+            if pk.is_active:
+                users[pk.pk] = pk
+                users_champions[pk.pk] = []
+
     for c in champs:
-        l = users.get(c.uploader, None)
+        l = users_champions.get(c.uploader_id, None)
         if l is None:
             l = []
-            users[c.uploader] = l
+            users_champions[c.uploader_id] = l
+            users[c.uploader_id] = c.uploader
         l.append(c)
 
     r = []
-    if current_user in users:
-        r.append((current_user, users[current_user]))
-        del users[current_user]
+    if current_user.pk in users_champions:
+        r.append((users[current_user.pk], users_champions[current_user.pk]))
+        del users_champions[current_user.pk]
 
-    for u in sorted(users, key=lambda u: u.username):
-        r.append((u, users[u]))
+    for pk in sorted(users_champions, key=lambda pk: users[pk].username):
+        r.append((users[pk], users_champions[pk]))
 
     return r
 
@@ -387,3 +395,21 @@ def champion_detail(request, name):
                 return redirect('champion_detail', champion.nom)
 
     return render(request, 'game/champion_detail.html', context={'code': code, 'champion': champion, 'form': form})
+
+@login_required
+def play(request):
+    champions = get_champions_per_user(request.user, all_users=True)
+    return render(request, 'game/play.html', context={"champions": champions})
+
+@login_required
+def users(request):
+    users = User.objects.all()
+    paginator = Paginator(users,15)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'game/utilisateurs.html',context={'utilisateurs':page_obj})
+
+@login_required
+def user_detail(request,name):
+    user = get_object_or_404(User,username=name)
+    return render(request, 'game/user_detail.html',context={'utilisateur':user})

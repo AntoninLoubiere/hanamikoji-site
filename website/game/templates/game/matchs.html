@@ -9,7 +9,7 @@
         <select onchange="this.form.submit()" name="champion" class="ajout">
             <option value="all">Tous les champions</option>
             {% for u, champs in list_champions %}
-                <optgroup label={{u.username}}>
+                <optgroup label="{{u.username}}">
                     <option value="user-{{u.id}}" {% if filter_type == "user" and filter_id == u.id %}selected{% endif %}>Champions de {{u.username}}</option>
                     {% for c in champs %}
                         <option value="champ-{{c.id}}" {% if filter_type == "champ" and filter_id == c.id %}selected{% endif %}>{{c.nom}}</option>

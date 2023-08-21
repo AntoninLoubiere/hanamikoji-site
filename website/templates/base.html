@@ -16,10 +16,12 @@
         <strong>Bonjour {{ request.user }}</strong>
         <a href="{%url 'home' %}">Home</a>
         <a href="{% static 'documentation/index.html' %}" target="_blank">Documentation</a>
+        <a href="{% url 'utilisateurs' %}">Utilisateurs</a>
         <a href="{% url 'champions' %}">Champions</a>
         <a href="{% url 'matchs' %}">Matchs</a>
         <a href="{% url 'tournois' %}">Tournois</a>
         <a href="{% static 'replay/index.html' %}" target="_blank">Replay</a>
+        <a href="{% url 'play' %}" target="_blank">Jouer</a>
         <a href="{% url 'password_change' %}">Changer de MDP</a>
         <a href="{% url 'logout' %}">Déconnexion</a>
         {% if user.is_staff %}

@@ -1,0 +1,24 @@
+{% extends 'base_game.html' %}
+{% load static %}
+{% block title %}{{ utilisateur.username }}{% endblock title %}
+
+{% block content %}
+<h1>{{ utilisateur.username }}</h1>
+<div class="content-section max-90">
+    {% if utilisateur.online %}
+    <span class="content-center" id="green">En ligne</span>
+    {% elif utilisateur.last_seen %}
+    <span class="content-center">Vu il y a {{ utilisateur.last_seen|timesince }}</span>
+    {% else %}
+    <span class="content-center" id="red">Vu il y a longtemps</span>
+    {% endif %}
+    <div class="grid-key">
+        
+        <span>Date de création: {{ utilisateur.date_joined|date:"d F Y, H:i" }}</span><br />
+        <span>Nombre de champions : <a
+                href="{% url 'champions' %}?user={{ utilisateur.pk }}">{{utilisateur.nb_champions}}</a></span><br />
+        <span><a class="content-center" href="{% url 'play' %}?adv=user-{{ utilisateur.username }}"
+                target="_blank">Défier</a></span>
+    </div>
+</div>
+{% endblock %}

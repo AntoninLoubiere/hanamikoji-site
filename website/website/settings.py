@@ -52,7 +52,15 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'middleware.activeuser_middleware.ActiveUserMiddleware',
 ]
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'default-cache'
+    }
+}
 
 ROOT_URLCONF = 'website.urls'
 
@@ -165,6 +173,11 @@ Q_CLUSTER = {
     # 'bulk': 10,
     'orm': 'default'
 }
+
+
+USER_ONLINE_TIMEOUT = 300
+USER_LASTSEEN_TIMEOUT = 60 * 60 * 24 * 7
+
 
 MAX_ISOLATE = 1000
 SERVER_TIMEOUT = 1500

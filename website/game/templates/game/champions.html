@@ -1,4 +1,5 @@
 {% extends 'base_game.html' %}
+{% load static %}
 {% block title %}Les champions{% endblock title %}
 
 {% block content %}
@@ -22,6 +23,7 @@
         <th>Auteur</th>
         <th>Statut de compilation</th>
         <th>Nombre de matchs</th>
+        <th>Jouer</th>
     </tr>
     {% for champion in champions %}
     <tr>
@@ -31,9 +33,10 @@
             <td title="{{champion}}">{{ champion.nom }}</td>
         {% endif %}
         <td>{{ champion.date|date:"l d F Y, H:i" }}</td>
-        <td id="sans_casse">{{ champion.uploader }}</td>
+        <td id="sans_casse"><a href="{% url 'user_detail' champion.uploader.username %}">{{ champion.uploader }}</a></td>
         <td>{{ champion.get_compilation_status_display }}</td>
         <td><a href="{% url 'matchs' %}?champion=champ-{{ champion.pk }}">{{ champion.nb_matchs }}</a></td>
+        <td><a href="{% url 'play' %}?adv=champ-{{ champion.nom }}" target="_blank">Défier</a></td>
     </tr>
     {% endfor %}
 </table>
