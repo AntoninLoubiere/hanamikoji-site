@@ -18,7 +18,7 @@
         <td><a href="{% url 'user_detail' utilisateur.username %}" id="sans_casse">{{ utilisateur.username }}</a></td>
         <td>{{ utilisateur.date_joined|date:"l d F Y, H:i" }}</td>
         <td><a href="{% url 'champions' %}?user={{ utilisateur.pk }}">{{ utilisateur.nb_champions }}</a></td>
-        <td>{% with request.user.get_profile as profile %}{{ profile.last_seen|timesince }}{% endwith %}</td>
+        <td>{{ utilisateur.last_seen|timesince }}</td>
         <td><a href="{% static 'play/index.html' %}?adv=user-{{ utilisateur.username }}" target="_blank">Défier</a></td>
     </tr>
     {% endfor %}

@@ -10,7 +10,7 @@ class ActiveUserMiddleware:
         current_user = request.user
         if request.user.is_authenticated:
             now = datetime.datetime.now()
-            cache.set('seen_%s' % (current_user.username), now,
+            cache.set(f'seen_{current_user.username}', now,
                            settings.USER_LASTSEEN_TIMEOUT)
 
         return self.get_response(request)

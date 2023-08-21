@@ -12,9 +12,9 @@ class User(AbstractUser):
     def nb_champions(self):
         from game.models import Champion
         return Champion.objects.filter(uploader=self).count()
-    
+
     def last_seen(self):
-        return cache.get('seen_%s' % self.user.username)
+        return cache.get(f'seen_{self.username}')
 
     def online(self):
         if self.last_seen():
