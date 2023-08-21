@@ -25,7 +25,7 @@
         {% else %}
         <td id="sans_casse">Il y a longtemps</td>
         {% endif %}
-        <td><a href="{% static 'play/index.html' %}?adv=user-{{ utilisateur.username }}" target="_blank">Défier</a></td>
+        <td><a href="{% url 'play' %}?adv=user-{{ utilisateur.username }}" target="_blank">Défier</a></td>
     </tr>
     {% endfor %}
 </table>

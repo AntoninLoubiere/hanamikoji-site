@@ -36,7 +36,7 @@
         <td id="sans_casse"><a href="{% url 'user_detail' champion.uploader.username %}">{{ champion.uploader }}</a></td>
         <td>{{ champion.get_compilation_status_display }}</td>
         <td><a href="{% url 'matchs' %}?champion=champ-{{ champion.pk }}">{{ champion.nb_matchs }}</a></td>
-        <td><a href="{% static 'play/index.html' %}?adv=champ-{{ champion.nom }}" target="_blank">Défier</a></td>
+        <td><a href="{% url 'play' %}?adv=champ-{{ champion.nom }}" target="_blank">Défier</a></td>
     </tr>
     {% endfor %}
 </table>

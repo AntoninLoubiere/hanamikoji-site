@@ -92,7 +92,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
-        "timeout": 120,
+        # "timeout": 120,
         # "ENGINE": "django.db.backends.postgresql",
         # "OPTIONS": {
         #     "service": "hanamikoji",
