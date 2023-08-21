@@ -18,7 +18,12 @@ function get_dump_from_url() {
 
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-    const matchId = Number(urlParams.get(DUMP_PARAMETER));
+    const PLAY_BEACON = 'play-';
+    const matchTxt = urlParams.get(DUMP_PARAMETER);
+    if (matchTxt?.startsWith(PLAY_BEACON)) {
+        return fetch(`/media/play/${encodeURIComponent(matchTxt.slice(PLAY_BEACON.length))}/dump.json`).then(r => r.json())
+    }
+    const matchId = Number(matchTxt);
     if (!isNaN(matchId)) {
         return fetch(`/media/match/${matchId}/dump.json`).then(r => r.json())
     }

@@ -5,9 +5,10 @@
     <title>Jouer</title>
     <meta name='viewport' content='1'>
     <link rel='stylesheet' type='text/css' href='/static/replay/style.css'>
-    <link rel='stylesheet' type='text/css' href='style.css'>
+    <link rel='stylesheet' type='text/css' href='/static/play/style.css'>
     <script src='/static/replay/shared.js' defer></script>
-    <script src='play.js' defer></script>
+    <script src='/static/play/play.js' defer></script>
+    <script>let username = "{{ user.username }}";</script>
 </head>
 <body>
     <div id="game-parent">
@@ -53,14 +54,34 @@
                 <span class="info-score" id="info-score-1">0 cartes, 0 points</span>
                 <span class="info-score" id="info-status-1"></span>
             </div>
+            <button id="end-manche" class="hide" onclick="onStartNewMancheClick()">Continuer</button>
         </div>
     </div>
 
     <div class="modal hide" id="new-match">
         <h1 class="h1">Lancer un match</h1>
+        <div class="action-bar">
+            <div>
+                <a href="/static/replay/index.html?match=play-{{ user.username }}" target="_blank">Replay</a>
+                <span id="dump">(<a href="/media/play/{{ user.username }}/dump.json" target="_blank">dump</a>)</span>
+            </div>
+            <a href="/media/play/{{ user.username }}/map.txt" target="_blank">Cartes</a>
+            <a href="/media/play/{{ user.username }}/out.txt" target="_blank">Sortie</a>
+         </div>
         <div class="grid-input">
             <label>Opposant :</label>
-            <select id="opponent-select"></select>
+            <select id="opponent-select">
+                {% for u, champs in champions %}
+                    {% if u != user or champs %}
+                        <optgroup label="Champions de {{u.username}}">
+                            {% if u != user %}<option value="user-{{u.username}}">Utilisateur {{u.username}}</option>{% endif %}
+                            {% for c in champs %}
+                                <option value="champ-{{c.nom}}">{{c.nom}}</option>
+                            {% endfor %}
+                        </optgroup>
+                    {% endif %}
+                {% endfor %}
+            </select>
             <label>Premier joueur :</label>
             <select id="first-select">
                 <option value="">Au hasard</option>

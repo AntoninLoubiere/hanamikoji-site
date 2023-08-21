@@ -396,6 +396,10 @@ def champion_detail(request, name):
 
     return render(request, 'game/champion_detail.html', context={'code': code, 'champion': champion, 'form': form})
 
+@login_required
+def play(request):
+    champions = get_champions_per_user(request.user, all_users=True)
+    return render(request, 'game/play.html', context={"champions": champions})
 
 @login_required
 def users(request):

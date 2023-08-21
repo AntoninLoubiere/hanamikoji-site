@@ -1,9 +1,11 @@
 import asyncio
 from asyncio import subprocess
+from datetime import datetime, timedelta
 import json
 import os
 from pathlib import Path
 from random import shuffle, random
+import shutil
 import tempfile
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
@@ -12,9 +14,9 @@ import traceback
 from authentication.models import User
 from game.models import Champion
 from game.tasks import get_build_dir, isolate_cleanup, isolate_init, run_client, run_server
-from game.views import get_champions_per_user
 from website.settings import ISOLATE_TIMEOUT, MEDIA_ROOT, SERVER_TIMEOUT
 
+FORCE_STOP_TIMEOUT = 30
 USER_CHAMPION_PATH = (Path('game') / 'user_champion').absolute()
 USER_TIMEOUT = 300_000
 ISOLATE_USER_TIMEOUT = 3600
@@ -24,10 +26,6 @@ PLAY_MATCH_DIR.mkdir(parents=True, exist_ok=True)
 @database_sync_to_async
 def get_champion(name):
     return Champion.objects.filter(nom=name).first()
-
-@database_sync_to_async
-def get_names(user):
-    return get_champions_per_user(user, all_users=True)
 
 class Game:
     games: "dict[str, Game]" = {}
@@ -39,11 +37,12 @@ class Game:
         self.games[self.game_name] = self
         self.player1_proc = None
         self.player2_proc = None
+        self.server_task = None
         self.waiting_user = other_user
         self.forward_to_game = forward_to_game
         self.is_running = False
         assert self.waiting_user != self.game_name
-        # self.stopped = False
+        self.stopped = None
 
     @classmethod
     async def new_game(cls, channel: "PlayConsumer", msg):
@@ -153,10 +152,7 @@ class Game:
         if is_player2_user:
             await self.player2.send_json({"msg": "run", "status": "started", "joueur": 1, "user": player2_name, "champion": player1_name})
 
-        if is_player1_user:
-            match_dir = PLAY_MATCH_DIR / self.player1.username
-        else:
-            match_dir = PLAY_MATCH_DIR / self.player2.username
+        match_dir = PLAY_MATCH_DIR / self.game_name
         match_dir.mkdir(exist_ok=True)
 
         map_file = match_dir / 'map.txt'
@@ -175,7 +171,7 @@ class Game:
         s_reqrep = 'ipc://' + f_reqrep
         s_pubsub = 'ipc://' + f_pubsub
 
-        server_task = await run_server(match_dir, s_reqrep, s_pubsub, time=USER_TIMEOUT, socket_timeout=USER_TIMEOUT + 30000)
+        self.server_task = await run_server(match_dir, s_reqrep, s_pubsub, time=USER_TIMEOUT, socket_timeout=USER_TIMEOUT + 30000)
 
         # On initialise les boite isolate
         box_player1 = isolate_init(0)
@@ -195,9 +191,30 @@ class Game:
             if is_player2_user:
                 tasks.append(self.read_stdout(self.player2_proc, self.player2))
 
-            await asyncio.gather(*tasks, self.player1_proc.wait(), self.player2_proc.wait(), server_task.wait())
+            await asyncio.gather(*tasks, self.player1_proc.wait(), self.player2_proc.wait(), self.server_task.wait())
+
+            champ = None
+            proc = None
+            if isinstance(self.player1, Champion):
+                champ = self.player1
+                proc = self.player1_proc
+                user_channel = self.player2
+            elif isinstance(self.player2, Champion):
+                champ = self.player2
+                proc = self.player2_proc
+                user_channel = self.player1
+
+            if champ is not None:
+                content = "Vous n'avez pas accès à cette sortie.\n".encode()
+                if isinstance(user_channel, PlayConsumer) and user_channel.scope['user'].pk == champ.uploader_id:
+                    content = await proc.stdout.read()
+
+                with open(match_dir / 'out.txt', 'wb') as fiw:
+                    fiw.write(content)
+
             self.player1_proc = None
             self.player2_proc = None
+            self.server_task = None
             print("Fin match", player1_name, "vs", player2_name)
         finally:
             isolate_cleanup(box_player1)
@@ -220,6 +237,11 @@ class Game:
     def on_other_end(self):
         self.is_running = False
         del self.games[self.game_name]
+        match_dir = PLAY_MATCH_DIR / self.waiting_user
+        out_dir = PLAY_MATCH_DIR / self.game_name
+        out_dir.mkdir(exist_ok=True)
+        shutil.copy(match_dir / 'map.txt', out_dir / 'map.txt')
+        shutil.copy(match_dir / 'dump.json', out_dir / 'dump.json')
 
     async def actions(self, channel, data):
         if self.forward_to_game is not None:
@@ -276,12 +298,22 @@ class Game:
             await send_channel.send_json({"msg": "choix", "choix": data['choix']})
 
     def stop(self):
-        # self.stopped = True
         if not self.is_running and self.game_name in self.games:
             del self.games[self.game_name]
 
         if self.forward_to_game is not None:
             return self.forward_to_game.stop()
+
+        if self.stopped is None:
+            self.stopped = datetime.now()
+        elif datetime.now() - self.stopped > timedelta(seconds=FORCE_STOP_TIMEOUT):
+            if self.player1_proc is not None and self.player1_proc.returncode is None:
+                self.player1_proc.terminate()
+            if self.player2_proc is not None and self.player2_proc.returncode is None:
+                self.player2_proc.terminate()
+            if self.server_task is not None and self.server_task.returncode is None:
+                self.server_task.terminate()
+            self.stopped = None
 
         if self.player1_proc is not None and self.player1_proc.stdin is not None:
             self.player1_proc.stdin.close()
@@ -323,7 +355,6 @@ class PlayConsumer(AsyncJsonWebsocketConsumer):
         user: User = self.scope['user']
         self.username = ""
         if not user.is_authenticated:
-            await self.accept()
             await self.close(code=4003)
             return
         self.username = user.username
@@ -358,9 +389,5 @@ class PlayConsumer(AsyncJsonWebsocketConsumer):
                 await self.send_json({"msg": "err", "code": "no-game"})
                 return
             game.stop()
-        elif msg == 'champions':
-            champions = await get_names(self.scope['user'])
-            await self.send_json({"msg": "champions", "champions": [(u.username, [c.nom for c in cs]) for u, cs in champions],
-                                  "first_is_user": len(champions) > 0 and champions[0][0].username == self.username})
 
 
