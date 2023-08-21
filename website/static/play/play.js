@@ -13,7 +13,7 @@ function connect() {
             data = JSON.parse(e.data);
         } catch {
             console.error(e.data)
-            if (e.data.includes("Il perd donc.") || e.data.includes("socket.cc")) {
+            if (e.data.includes("Il perd donc.") || e.data.includes("socket.cc") || e.data.includes("Sandbox call exceeded the time limit")) {
                 setStatusMsg("err_eof");
             }
             return

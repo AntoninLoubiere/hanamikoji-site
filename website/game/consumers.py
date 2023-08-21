@@ -16,7 +16,7 @@ from game.views import get_champions_per_user
 from website.settings import ISOLATE_TIMEOUT, MEDIA_ROOT, SERVER_TIMEOUT
 
 USER_CHAMPION_PATH = (Path('game') / 'user_champion').absolute()
-USER_TIMEOUT = 30_000
+USER_TIMEOUT = 300_000
 ISOLATE_USER_TIMEOUT = 3600
 
 PLAY_MATCH_DIR = (MEDIA_ROOT / 'play').absolute()
