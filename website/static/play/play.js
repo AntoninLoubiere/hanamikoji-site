@@ -87,6 +87,8 @@ function onMessage(msg) {
                     opt.value = `user-${user}`;
                     opt.innerText = `Utilisateur ${user}`;
                     group.appendChild(opt)
+                } else if (champions.length <= 0) {
+                    continue;
                 }
                 for (let c of champions) {
                     let opt = document.createElement('option');

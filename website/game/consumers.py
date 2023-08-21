@@ -27,7 +27,7 @@ def get_champion(name):
 
 @database_sync_to_async
 def get_names(user):
-    return get_champions_per_user(user)
+    return get_champions_per_user(user, all_users=True)
 
 class Game:
     games: "dict[str, Game]" = {}
