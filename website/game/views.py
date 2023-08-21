@@ -387,3 +387,17 @@ def champion_detail(request, name):
                 return redirect('champion_detail', champion.nom)
 
     return render(request, 'game/champion_detail.html', context={'code': code, 'champion': champion, 'form': form})
+
+
+@login_required
+def users(request):
+    users = User.objects.all()
+    paginator = Paginator(users,15)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'game/utilisateurs.html',context={'utilisateurs':page_obj})
+
+@login_required
+def user_detail(request,name):
+    user = get_object_or_404(User,username=name)
+    return render(request, 'game/user_detail.html',context={'utilisateur':user})

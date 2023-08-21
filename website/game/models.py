@@ -33,6 +33,8 @@ class Champion(models.Model):
         EN_COURS = 'EC'
         FINI = 'FI'
         ERREUR = 'ER'
+
+
     code = models.FileField(validators = [FileExtensionValidator(allowed_extensions=["zip","tgz","tar.gz"])])
     nom = models.CharField(max_length=128, blank=False,unique=True, validators=[RegexValidator("^[a-zA-Z-_0-9]*$", "Les seuls caractères valides sont les lettres, les chiffres, - et _.")])
     uploader = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)

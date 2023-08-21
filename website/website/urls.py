@@ -55,7 +55,9 @@ urlpatterns = [
     path('tournois/<int:id>/',game.views.tournoi_detail,name='tournoi_detail'),
     path('tournois/<int:id>/change',game.views.update_tournoi,name='update_tournoi'),
     path('tournois/<int:id>/<str:nom>/delete',game.views.delete_champion_tournoi,name='delete_champion_tournoi'),
-    path('favicon.ico', RedirectView.as_view(url=staticfiles_storage.url('favicon.ico')))
+    path('favicon.ico', RedirectView.as_view(url=staticfiles_storage.url('favicon.ico'))),
+    path('utilisateurs/',game.views.users,name='utilisateurs'),
+    path('utilisateurs/<str:name>/',game.views.user_detail,name='user_detail'),
 ]
 if settings.DEBUG:
     urlpatterns += static(
