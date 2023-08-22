@@ -231,10 +231,10 @@ function moveToDefausser(joueur, o) {
 }
 
 const LAST_COLUMN = VALIDATE_LEFT_OFFSET + GEISHA_SPACE_BETWEEN;
-const CARD_HEIGHT = 175;
+const CHOIX_TROIS_CARTE_OFFSET = 190;
 function moveToChoixTrois(i) {
     return {
-        top: (i - 1) * CARD_HEIGHT,
+        top: (i - 1) * CHOIX_TROIS_CARTE_OFFSET,
         topAnchor: .5,
         left: LAST_COLUMN,
         zIndex: 80 + 4 * i,

@@ -188,8 +188,8 @@ function applyOnStatus(data) {
             } else {
                 validerCarte(c0, MAIN_USER);
                 validerCarte(c1, MAIN_USER);
-                validerCarte(c2, MAIN_ADV);
                 validerCarte(c3, MAIN_ADV);
+                validerCarte(c2, MAIN_ADV);
             }
             outlineElement(PLAY_CARTES[c0].el);
             outlineElement(PLAY_CARTES[c1].el);
@@ -267,7 +267,6 @@ function onChoix(data) {
     if (cartesEnAttenteAdv == 2) {
         for (let j = 0; j < 3; j++) {
             let cid = cartes_en_attente[j];
-            let g = PLAY_CARTES[cid].geisha;
             validerCarte(cid, data.choix == j ? MAIN_ADV : MAIN_USER);
             outlineElement(PLAY_CARTES[cid].el);
         }
@@ -285,8 +284,8 @@ function onChoix(data) {
         } else {
             validerCarte(c0, MAIN_USER);
             validerCarte(c1, MAIN_USER);
-            validerCarte(c2, MAIN_ADV);
             validerCarte(c3, MAIN_ADV);
+            validerCarte(c2, MAIN_ADV);
         }
         outlineElement(PLAY_CARTES[c0].el);
         outlineElement(PLAY_CARTES[c1].el);
@@ -415,9 +414,9 @@ function initGame(msg) {
     delayedEndMancheData = null;
     adv_name = msg?.champion ?? "Champion";
     TEXT_TITLES[MAIN_ADV].innerText = adv_name;
-    TEXT_TITLES[MAIN_USER].innerText = msg?.user ?? "Vous";
+    TEXT_TITLES[MAIN_USER].innerText = msg?.user ?? username;
     INFO_NAME[MAIN_ADV].innerText = adv_name;
-    INFO_NAME[MAIN_USER].innerText = msg?.user ?? "Vous";
+    INFO_NAME[MAIN_USER].innerText = msg?.user ?? username;
     TEXT_TITLES[0].classList.remove('hide');
     TEXT_TITLES[1].classList.remove('hide');
     gameRunning = true;
@@ -459,7 +458,7 @@ function onCarteClick(c) {
     if (!cartesEnAttenteAdv && ATTENTE_CHOIX_TROIS[0] <= status && status <= ATTENTE_CHOIX_TROIS[2]) {
         let choice = status - ATTENTE_CHOIX_TROIS[0];
         sendChoix(choice)
-        for (let i = 0; i < 3; i++) {
+        for (let i = 2; i >= 0; i--) {
             validerCarte(cartes_en_attente[i], choice == i ? MAIN_USER : MAIN_ADV);
         }
         cartes_en_attente.fill(-1);
@@ -467,8 +466,16 @@ function onCarteClick(c) {
     } else if (!cartesEnAttenteAdv && ATTENTE_CHOIX_PAQUETS[0] <= status && status <= ATTENTE_CHOIX_PAQUETS[1]) {
         let choice = status - ATTENTE_CHOIX_PAQUETS[0];
         sendChoix(choice)
-        for (let i = 0; i < 4; i++) {
-            validerCarte(cartes_en_attente[i], choice == Math.floor(i / 2) ? MAIN_USER : MAIN_ADV);
+        if (choice == 0) {
+            validerCarte(cartes_en_attente[0], MAIN_USER);
+            validerCarte(cartes_en_attente[1], MAIN_USER);
+            validerCarte(cartes_en_attente[3], MAIN_ADV);
+            validerCarte(cartes_en_attente[2], MAIN_ADV);
+        } else {
+            validerCarte(cartes_en_attente[1], MAIN_ADV);
+            validerCarte(cartes_en_attente[0], MAIN_ADV);
+            validerCarte(cartes_en_attente[2], MAIN_USER);
+            validerCarte(cartes_en_attente[3], MAIN_USER);
         }
         cartes_en_attente.fill(-1);
         onEndAction(false)
@@ -786,7 +793,7 @@ function _sendStartGame(name, isChampion, first) {
     } else {
         connection?.send(JSON.stringify({ msg: "run", user: name, first }))
     }
-    initGame({ joueur: first ? 0 : 1, user: 'Vous', champion: name })
+    initGame({ joueur: first ? 0 : 1, user: username, champion: name })
 }
 
 function stopGame() {
