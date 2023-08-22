@@ -220,7 +220,7 @@ class Game:
                 user_channel = self.player1
 
             if champ is not None:
-                content = "Vous n'avez pas accès à cette sortie.\n".encode()
+                content = "Vous n'avez pas acces à cette sortie.\n".encode()
                 if isinstance(user_channel, PlayConsumer) and user_channel.scope['user'].pk == champ.uploader_id:
                     content = await proc.stdout.read()
 
