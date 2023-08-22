@@ -37,11 +37,45 @@ function connect() {
     }
 }
 
+let defiUsername = null;
+let acceptedDefi = null;
+const defiModal = /** @type {HTMLElement} */ (document.getElementById('defi-popup'));
+const defiName = /** @type {HTMLSpanElement} */ (document.getElementById('defi-name'));
+function showDefi(username) {
+    defiModal.classList.remove('hide');
+    defiUsername = username;
+    defiName.innerText = username;
+}
+
+function hideDefi() {
+    defiModal.classList.add('hide');
+    acceptedDefi = null;
+    defiUsername = null;
+}
+
+function rejectDefi() {
+    connection?.send(JSON.stringify({ msg: "defi-reject", user: defiUsername }))
+    hideDefi();
+}
+
+function acceptDefi() {
+    acceptedDefi = defiUsername;
+    if (gameRunning) {
+        stopGame()
+    } else {
+        _sendStartGame(acceptedDefi, false);
+        acceptedDefi = null;
+    }
+}
+
 function onMessage(msg) {
     switch (msg.msg) {
         case 'run':
             if (msg.status == "started" || msg.status == "waiting") {
+                gameRunning = true;
                 initGame(msg);
+                if (msg.champion == defiUsername) hideDefi();
+
                 if (msg.status == "started") {
                     setStatusMsg('adv_turn');
                 } else {
@@ -50,9 +84,14 @@ function onMessage(msg) {
             } else if (msg.status == "ended") {
                 gameRunning = false;
                 setStatusMsg('ok_match_end');
-                if (modal?.classList.contains('hide')) {
-                    START_NEW_MANCHE_BUTTON.classList.remove('hide');
-                    START_NEW_MANCHE_BUTTON.innerText = "Terminer";
+                if (acceptedDefi != null) {
+                    _sendStartGame(acceptedDefi, false);
+                    acceptedDefi = null;
+                } else {
+                    if (modal?.classList.contains('hide')) {
+                        START_NEW_MANCHE_BUTTON.classList.remove('hide');
+                        START_NEW_MANCHE_BUTTON.innerText = "Terminer";
+                    }
                 }
             }
             break;
@@ -62,6 +101,9 @@ function onMessage(msg) {
         case 'choix':
             onChoix(msg)
             break;
+        case 'defi':
+            showDefi(msg.user);
+            break;
         case 'new-manche':
             onNewMancheMsg(msg);
             break;
@@ -69,8 +111,11 @@ function onMessage(msg) {
             if (msg.code != 'unk-champion' && msg.code != 'already-running' && msg.code != 'eof') {
                 console.error("ERR", msg.code);
             }
-            if (['already-running', 'unk-champion'].includes(msg.code)) {
+            if (['already-running', 'unk-champion', 'defi_reject'].includes(msg.code)) {
                 openNewGameModal();
+            }
+            if (msg.code == 'no-game' && acceptedDefi != null) {
+                _sendStartGame(acceptedDefi, false);
             }
             setStatusMsg(`err_${msg.code}${msg.nb || ''}`);
             break;
@@ -419,8 +464,9 @@ function initGame(msg) {
     INFO_NAME[MAIN_USER].innerText = msg?.user ?? username;
     TEXT_TITLES[0].classList.remove('hide');
     TEXT_TITLES[1].classList.remove('hide');
-    gameRunning = true;
     START_NEW_MANCHE_BUTTON.innerText = "Continuer";
+    START_NEW_MANCHE_BUTTON.classList.add('hide');
+    modal.classList.add('hide');
 
     resetNouvelleManche(true)
 
@@ -738,7 +784,6 @@ function play() {
             } else {
                 openNewGameModal();
             }
-            connection?.send(JSON.stringify({ msg: "champions" }))
         }
     }
 }
@@ -798,6 +843,7 @@ function _sendStartGame(name, isChampion, first) {
 
 function stopGame() {
     connection?.send(JSON.stringify({ msg: "stop" }))
+    gameRunning = false;
     openNewGameModal()
 }
 
@@ -882,6 +928,9 @@ const MESSAGES = {
     "err_action-err7": "Erreur: Erreur lors de l'action: action invalide",
     "err_cartes-value-error": "Erreur: Erreur lors de l'action: cartes invalides",
     "err_choix-value-error": "Erreur: Erreur lors de l'action: choix invalides",
+    get err_defi_reject() {
+        return `${adv_name} a rejeté votre défi.`
+    }
 }
 let currentStatusMsg = "connection";
 function setStatusMsg(id) {

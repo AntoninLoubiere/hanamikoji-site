@@ -151,3 +151,32 @@
     opacity: 0;
     pointer-events: none;
 }
+
+.defi-popup {
+    position: absolute;
+    z-index: 1000;
+    background-color: #000000aa;
+    color: white;
+
+    padding: .5rem 1rem;
+    border-radius: 0 0 1rem 0;
+
+    transition: 500ms ease-in-out transform, 500ms ease-in-out opacity;
+    opacity: 1;
+}
+
+.defi-popup.hide {
+    transform: translateY(-100%);
+    opacity: 0;
+}
+
+.defi-buttons-bar {
+    display: flex;
+    margin: .3rem 0;
+    gap: .5rem;
+    justify-content: flex-end;
+}
+
+.defi-buttons-bar button {
+    cursor: pointer;
+}
