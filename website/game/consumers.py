@@ -107,7 +107,6 @@ class Game:
             await channel.send_json({"msg": "err", "code": "request"})
 
     def del_game(self):
-        print("DEL game", self.game_name)
         del self.games[self.game_name]
         if self.waiting_user in self.waiting_defi and self.waiting_defi[self.waiting_user] == self.game_name:
             del self.waiting_defi[self.waiting_user]
