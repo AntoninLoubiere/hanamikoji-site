@@ -29,6 +29,7 @@ def get_champion(name):
 
 class Game:
     games: "dict[str, Game]" = {}
+    waiting_defi: "dict[str, str]" = {}
     def __init__(self, channel, player1, player2, other_user=None, forward_to_game=None) -> None:
         self.player1 = player1
         self.player2 = player2
@@ -51,8 +52,9 @@ class Game:
                 await channel.send_json({"msg": "err", "code": "already-running"})
                 return
             cls.games[channel.username].stop()
-            if channel.username in cls.games:
-                del cls.games[channel.username]
+            game = cls.games.get(channel.username, None)
+            if game is not None:
+                game.del_game()
 
         if 'first' in msg and not isinstance(msg['first'], bool):
             await channel.send_json({"msg": "err", "code": "request"})
@@ -78,14 +80,18 @@ class Game:
                 await channel.send_json({"msg": "err", "code": "self-match"})
                 return
 
-
             game = cls.games.get(other_user, None)
+            await channel.send_json({"msg": "run", "status": "waiting", "user": channel.username, "champion": other_user})
+            other_channel = PlayConsumer.channels.get(other_user, None)
+            if other_channel is not None:
+                await other_channel.send_json({"msg": "defi", "user": channel.username})
+            Game.waiting_defi[other_user] = channel.username
+
             if game is None or game.waiting_user != channel.username:
                 if first:
                     cls(channel, channel, None, other_user)
                 else:
                     cls(channel, None, channel, other_user)
-                await channel.send_json({"msg": "run", "status": "waiting", "user": channel.username, "champion": other_user})
 
             else:
                 assert (game is not None and game.waiting_user == channel.username)
@@ -95,11 +101,15 @@ class Game:
                 elif game.player2 is None:
                     game.player2 = channel
                     cls(channel, game.player1, channel, other_user, game)
-                await channel.send_json({"msg": "run", "status": "waiting", "user": channel.username, "champion": other_user})
                 await game.start()
 
         else:
             await channel.send_json({"msg": "err", "code": "request"})
+
+    def del_game(self):
+        del self.games[self.game_name]
+        if self.waiting_user in self.waiting_defi and self.waiting_defi[self.waiting_user] == self.game_name:
+            del self.waiting_defi[self.waiting_user]
 
     def is_player(self, player, username):
         return isinstance(player, PlayConsumer) and player.username == username
@@ -119,6 +129,11 @@ class Game:
                 game.is_running = True
             else:
                 return
+
+            if self.waiting_user in self.waiting_defi and self.waiting_defi[self.waiting_user] == self.game_name:
+                del self.waiting_defi[self.waiting_user]
+            if self.game_name in self.waiting_defi and self.waiting_defi[self.game_name] == self.waiting_user:
+                del self.waiting_defi[self.game_name]
         self.running_task = asyncio.create_task(self.run())
 
     async def run(self):
@@ -232,11 +247,12 @@ class Game:
             game = self.games[self.waiting_user]
             if game is not None:
                 game.on_other_end()
-        del self.games[self.game_name]
+        self.del_game()
 
     def on_other_end(self):
         self.is_running = False
-        del self.games[self.game_name]
+        self.del_game()
+
         match_dir = PLAY_MATCH_DIR / self.waiting_user
         out_dir = PLAY_MATCH_DIR / self.game_name
         out_dir.mkdir(exist_ok=True)
@@ -298,8 +314,9 @@ class Game:
             await send_channel.send_json({"msg": "choix", "choix": data['choix']})
 
     def stop(self):
+        print("Stopping", self.game_name)
         if not self.is_running and self.game_name in self.games:
-            del self.games[self.game_name]
+            self.del_game()
 
         if self.forward_to_game is not None:
             return self.forward_to_game.stop()
@@ -307,6 +324,7 @@ class Game:
         if self.stopped is None:
             self.stopped = datetime.now()
         elif datetime.now() - self.stopped > timedelta(seconds=FORCE_STOP_TIMEOUT):
+            print("FORCE STOP", self.game_name)
             if self.player1_proc is not None and self.player1_proc.returncode is None:
                 self.player1_proc.terminate()
             if self.player2_proc is not None and self.player2_proc.returncode is None:
@@ -351,6 +369,7 @@ class Game:
                 self.stop()
 
 class PlayConsumer(AsyncJsonWebsocketConsumer):
+    channels: "dict[str, PlayConsumer]" = {}
     async def connect(self):
         user: User = self.scope['user']
         self.username = ""
@@ -359,13 +378,22 @@ class PlayConsumer(AsyncJsonWebsocketConsumer):
             return
         self.username = user.username
         await self.accept()
+        self.channels[self.username] = self
+
         self.connected = True
+        defi_username = Game.waiting_defi.get(self.username, None)
+        if defi_username is not None:
+                await self.send_json({"msg": "defi", "user": defi_username})
 
     async def disconnect(self, code):
         self.connected = False
         game = Game.games.get(self.username, None)
         if game is not None and (game.player1 is self or game.player2 is self):
             game.stop()
+
+        channel = self.channels.get(self.username, None)
+        if channel is self:
+            self.channels[self.username] = None
 
     async def receive_json(self, content):
         msg = content.get('msg', '')
@@ -388,6 +416,17 @@ class PlayConsumer(AsyncJsonWebsocketConsumer):
             if game is None:
                 await self.send_json({"msg": "err", "code": "no-game"})
                 return
+            game.stop()
+        elif msg == 'defi-reject':
+            other_username = content.get('user', '')
+            game = Game.games.get(other_username, None)
+            if game is None or game.waiting_user != self.username:
+                await self.send_json({"msg": "err", "code": "no-game"})
+                return
+
+            channel = self.channels.get(other_username, None)
+            if channel is not None:
+                await channel.send_json({"msg": "err", "code": "defi_reject"})
             game.stop()
 
 

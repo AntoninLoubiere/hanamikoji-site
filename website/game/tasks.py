@@ -197,7 +197,8 @@ def isolate_init(client_id):
     tries = 0
     while True:
         r = subprocess.run(['isolate', '--init', '--box-id', str(box_id)], stderr=PIPE)
-        if r.returncode != 0 and b'Box already exists' in r.stderr:
+        if r.returncode != 0:
+            print("Box unusable ?", r.stderr.decode())
             tries += 1
             if tries >= MAX_ISOLATE_TRY:
                 raise Exception("Impossible to find free box")
