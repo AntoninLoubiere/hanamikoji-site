@@ -403,7 +403,7 @@ def play(request):
 
 @login_required
 def users(request):
-    users = User.objects.all()
+    users = User.objects.all().order_by("-last_login")
     paginator = Paginator(users,15)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
