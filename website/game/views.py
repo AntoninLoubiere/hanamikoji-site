@@ -2,7 +2,7 @@ from django.utils import timezone
 from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
-from game.tasks import MATCH_OUT_DIR, on_end_tournoi
+from game.tasks import MATCH_OUT_DIR, get_match_dir, on_end_tournoi
 
 from . import forms
 from game.models import Champion, Match, Tournoi, Inscrit
@@ -182,20 +182,31 @@ def add_match(request: HttpRequest):
 
     if request.method == 'POST':
         try:
-            m = Match()
-            m.champion1 = Champion.objects.get(id=int(request.POST.get('champion1')))
-            m.champion2 = Champion.objects.get(id=int(request.POST.get('champion2')))
-            m.lanceur = request.user
-            if m.is_correct():
-                if m.champion1.uploader != m.champion2.uploader:
-                    m.champion1.supprimer = False
-                    m.champion2.supprimer = False
-                    m.champion1.save(compile=False)
-                    m.champion2.save(compile=False)
-                m.save()
-                return redirect('match_detail', m.id_match)
+            map = request.POST.get('map', '')
+            mapParsed = parse_map(map)
+            mapOk = map.strip() == "" or mapParsed is not None
+            if mapOk:
+                m = Match()
+                m.champion1 = Champion.objects.get(id=int(request.POST.get('champion1')))
+                m.champion2 = Champion.objects.get(id=int(request.POST.get('champion2')))
+                m.lanceur = request.user
+                if m.is_correct():
+                    if m.champion1.uploader != m.champion2.uploader:
+                        m.champion1.supprimer = False
+                        m.champion2.supprimer = False
+                        m.champion1.save(compile=False)
+                        m.champion2.save(compile=False)
+                    m.save()
+                    if mapParsed is not None:
+                        dir = get_match_dir(m)
+                        dir.mkdir(exist_ok=True)
+                        with open(dir / 'map.txt', 'w') as fiw:
+                            write_map(fiw, mapParsed)
+                    return redirect('match_detail', m.id_match)
+                else:
+                    message = "Match invalide (vérifier que tous les champions ont bien terminé leur compilation)"
             else:
-                message = "Match invalide (vérifier que tous les champions ont bien terminé leur compilation)"
+                message = "Distribution des cartes invalide"
 
         except (ValueError, Champion.DoesNotExist):
             message = "Champion inexistants."
@@ -413,3 +424,33 @@ def users(request):
 def user_detail(request,name):
     user = get_object_or_404(User,username=name)
     return render(request, 'game/user_detail.html',context={'utilisateur':user})
+
+def parse_map(txt: "str"):
+    nbs = []
+    current_manche = []
+    for c in txt:
+        if c.isdecimal():
+            nb = int(c)
+            if nb < 0 or nb >= 7:
+                return None
+            current_manche.append(nb)
+            if len(current_manche) == 21:
+                nbs.append(current_manche)
+                current_manche = []
+
+    if len(nbs) != 3 or len(current_manche) > 0:
+        return None
+
+    for m in nbs:
+        target_count = [2, 2, 2, 3, 3, 4, 5]
+        for c in m:
+            target_count[c] -= 1
+        if any(target_count):
+            return None
+
+    return nbs
+
+def write_map(fiw, map_):
+    assert(len(map_) == 3)
+    for l in map_:
+        fiw.write(" ".join(map(str, l)) + "\n")
