@@ -14,6 +14,7 @@ import traceback
 from authentication.models import User
 from game.models import Champion
 from game.tasks import get_build_dir, isolate_cleanup, isolate_init, run_client, run_server
+from game.views import parse_map, write_map
 from website.settings import ISOLATE_TIMEOUT, MEDIA_ROOT, SERVER_TIMEOUT
 
 FORCE_STOP_TIMEOUT = 30
@@ -30,7 +31,7 @@ def get_champion(name):
 class Game:
     games: "dict[str, Game]" = {}
     waiting_defi: "dict[str, str]" = {}
-    def __init__(self, channel, player1, player2, other_user=None, forward_to_game=None) -> None:
+    def __init__(self, channel, player1, player2, other_user=None, forward_to_game=None, map=None) -> None:
         self.player1 = player1
         self.player2 = player2
         self.waiting_user = None
@@ -44,6 +45,14 @@ class Game:
         self.is_running = False
         assert self.waiting_user != self.game_name
         self.stopped = None
+        if map is None:
+            self.map = []
+            l = [0, 0, 1, 1, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 6]
+            for _ in range(3):
+                shuffle(l)
+                self.map.append(l.copy())
+        else:
+            self.map = map
 
     @classmethod
     async def new_game(cls, channel: "PlayConsumer", msg):
@@ -70,11 +79,21 @@ class Game:
                 await channel.send_json({"msg": "err", "code": "unk-champion"})
                 return
 
+            mapTxt = msg.get('map', '')
+            map = parse_map(mapTxt)
+            if map is None and mapTxt.strip():
+                await channel.send_json({"msg": "err", "code": "invalid_map"})
+                return
+
             if first:
-                await cls(channel, channel, champion).start()
+                await cls(channel, channel, champion, map=map).start()
             else:
-                await cls(channel, champion, channel).start()
+                await cls(channel, champion, channel, map=map).start()
         elif 'user' in msg and isinstance(msg['user'], str):
+            if 'map' in msg:
+                await channel.send_json({"msg": "err", "code": "map_defi_users"})
+                return
+
             other_user = msg['user']
             if other_user == channel.username:
                 await channel.send_json({"msg": "err", "code": "self-match"})
@@ -175,10 +194,7 @@ class Game:
 
         map_file = match_dir / 'map.txt'
         with open(map_file, 'w') as fiw:
-            cards = [0, 0, 1, 1, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 6]
-            for _ in range(3):
-                shuffle(cards)
-                fiw.write(" ".join(map(str, cards)) + "\n")
+            write_map(fiw, self.map)
 
         # Lancement du match
         # Build the domain sockets

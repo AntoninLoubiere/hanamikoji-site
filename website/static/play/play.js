@@ -115,7 +115,7 @@ function onMessage(msg) {
             if (msg.code != 'unk-champion' && msg.code != 'already-running' && msg.code != 'eof') {
                 console.error("ERR", msg.code);
             }
-            if (['already-running', 'unk-champion', 'defi_reject'].includes(msg.code)) {
+            if (['already-running', 'unk-champion', 'defi_reject', 'map_defi_users', 'invalid_map'].includes(msg.code)) {
                 openNewGameModal();
             }
             if (msg.code == 'no-game' && acceptedDefi != null) {
@@ -803,6 +803,7 @@ function play() {
 
 const modal = /** @type {HTMLElement} */ (document.getElementById('new-match'));
 const selectOpponent = /** @type {HTMLSelectElement} */ (document.getElementById('opponent-select'));
+const inputMap = /** @type {HTMLTextAreaElement} */ (document.getElementById('map-input'));
 const selectFirst = /** @type {HTMLSelectElement} */ (document.getElementById('first-select'));
 function openNewGameModal() {
     canSelect = false;
@@ -814,8 +815,8 @@ function openNewGameModal() {
 
 function lancerMatch() {
     if (connection?.readyState == WebSocket.OPEN) {
-        sendStartGame(selectOpponent.value, selectFirst.value)
-        closeNewGameModal();
+        if (sendStartGame(selectOpponent.value, selectFirst.value, inputMap.value.trim() ? inputMap.value : undefined))
+            closeNewGameModal();
     }
 }
 
@@ -823,7 +824,7 @@ function closeNewGameModal() {
     modal?.classList.add('hide');
 }
 
-function sendStartGame(value, firstTxt) {
+function sendStartGame(value, firstTxt, map) {
     const CHAMP = "champ-";
     const USER = "user-";
     let first = undefined;
@@ -834,22 +835,25 @@ function sendStartGame(value, firstTxt) {
         first = false;
     }
     if (value.startsWith(CHAMP)) {
-        _sendStartGame(value.slice(CHAMP.length), true, first);
+        _sendStartGame(value.slice(CHAMP.length), true, first, map);
     } else if (value.startsWith("user-")) {
-        _sendStartGame(value.slice(USER.length), false, first);
+        if (map == undefined) {
+            _sendStartGame(value.slice(USER.length), false, first);
+        } else {
+            setStatusMsg("err_map_defi_users");
+            return false;
+        }
     } else {
-        _sendStartGame(value, true, first);
+        _sendStartGame(value, true, first, map);
     }
+    return true;
 }
 
-function _sendStartGame(name, isChampion, first) {
-    if (first == undefined) {
-        first = Math.random() < 0.5
-    }
+function _sendStartGame(name, isChampion, first, map) {
     if (isChampion) {
-        connection?.send(JSON.stringify({ msg: "run", champion: name, first }))
+        connection?.send(JSON.stringify({ msg: "run", champion: name, first, map }))
     } else {
-        connection?.send(JSON.stringify({ msg: "run", user: name, first }))
+        connection?.send(JSON.stringify({ msg: "run", user: name, first, map }))
     }
     initGame({ joueur: first ? 0 : 1, user: username, champion: name })
 }
@@ -952,6 +956,8 @@ const MESSAGES = {
     "err_action-err7": "Erreur: Erreur lors de l'action: action invalide",
     "err_cartes-value-error": "Erreur: Erreur lors de l'action: cartes invalides",
     "err_choix-value-error": "Erreur: Erreur lors de l'action: choix invalides",
+    err_map_defi_users: "Erreur: vous ne pouvez pas définir de distributions de cartes lors d'un défi !",
+    err_invalid_map: "Erreur: Distribution des cartes invalide !",
     get err_defi_reject() {
         return `${adv_name} a rejeté votre défi.`
     }

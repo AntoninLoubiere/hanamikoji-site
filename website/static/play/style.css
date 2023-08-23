@@ -180,3 +180,9 @@
 .defi-buttons-bar button {
     cursor: pointer;
 }
+
+.cartes-input {
+    display: block;
+    width: 42ch;
+    height: 6em;
+}
