@@ -60,7 +60,7 @@ class Game:
             await channel.send_json({"msg": "err", "code": "request"})
             return
 
-        first = msg.get(msg['first'], None)
+        first = msg.get('first', None)
         if first is None:
             first = random() < 0.5
 
