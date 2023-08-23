@@ -7,8 +7,12 @@ Utilisation de django pour la création du site
 Dans un environnement virtuel (ou pas), dans un terminal, écrivez :
 
 ### Installation
+
+Il est nécessaire d'avoir préalablement installé [isolate](https://github.com/ioi/isolate) puis exécutez :
+
 ```
-pip install django django_q
+pip install django django_q daphne
+pip install -U 'channels[daphne]'
 git clone https://github.com/AntoninLoubiere/hanamikoji-site
 cd hanamikoji-site/website
 ```

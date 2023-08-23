@@ -104,6 +104,10 @@ function onMessage(msg) {
         case 'defi':
             showDefi(msg.user);
             break;
+        case 'defi-cancel':
+            if (defiUsername == msg.user)
+                hideDefi();
+            break;
         case 'new-manche':
             onNewMancheMsg(msg);
             break;
@@ -111,7 +115,7 @@ function onMessage(msg) {
             if (msg.code != 'unk-champion' && msg.code != 'already-running' && msg.code != 'eof') {
                 console.error("ERR", msg.code);
             }
-            if (['already-running', 'unk-champion', 'defi_reject'].includes(msg.code)) {
+            if (['already-running', 'unk-champion', 'defi_reject', 'map_defi_users', 'invalid_map'].includes(msg.code)) {
                 openNewGameModal();
             }
             if (msg.code == 'no-game' && acceptedDefi != null) {
@@ -127,6 +131,7 @@ function onMessage(msg) {
 function onNewMancheMsg(data) {
     MANCHE_STATUS.innerText = `${data.manche + 1}/${data.tour + 1}`
     updateScore(data);
+    delayedManche = data.manche;
     if (data.manche == 0) {
         startNewManche();
     } else {
@@ -136,9 +141,47 @@ function onNewMancheMsg(data) {
 }
 
 let delayedEndMancheData = null;
-
+let delayedManche = -1;
 function onStatus(data) {
-    if (manche != data.manche) {
+    if (cartesEnAttenteAdv) {
+        if (cartesEnAttenteAdv == 2) {
+            for (let j = 0; j < 3; j++) {
+                let cid = cartes_en_attente[j];
+                let g = PLAY_CARTES[cid].geisha;
+                validerCarte(cid, cartesValidees[MAIN_ADV][g] < data.cv_adv[g] ? MAIN_ADV : MAIN_USER);
+                outlineElement(PLAY_CARTES[cid].el);
+            }
+        } else if (cartesEnAttenteAdv == 3) {
+            let c0 = cartes_en_attente[0]
+            let g0 = PLAY_CARTES[c0].geisha;
+            let c1 = cartes_en_attente[1]
+            let g1 = PLAY_CARTES[c1].geisha;
+            let c2 = cartes_en_attente[2]
+            let c3 = cartes_en_attente[3]
+
+            if ((g0 == g1 && cartesValidees[MAIN_ADV][g0] < data.cv_adv[g0] - 1) ||
+                (cartesValidees[MAIN_ADV][g0] < data.cv_adv[g0] && cartesValidees[MAIN_ADV][g1] < data.cv_adv[g1])) {
+                validerCarte(c1, MAIN_ADV);
+                validerCarte(c0, MAIN_ADV);
+                validerCarte(c2, MAIN_USER);
+                validerCarte(c3, MAIN_USER);
+            } else {
+                validerCarte(c0, MAIN_USER);
+                validerCarte(c1, MAIN_USER);
+                validerCarte(c3, MAIN_ADV);
+                validerCarte(c2, MAIN_ADV);
+            }
+            outlineElement(PLAY_CARTES[c0].el);
+            outlineElement(PLAY_CARTES[c1].el);
+            outlineElement(PLAY_CARTES[c2].el);
+            outlineElement(PLAY_CARTES[c3].el);
+        }
+        cartesEnAttenteAdv = 0;
+        cartes_en_attente.fill(-1);
+    }
+
+    if (delayedManche != data.manche) {
+        delayedManche = data.manche;
         if (delayedEndMancheData != null) {
             console.log("DATA LOSS ?", { data, delayedEndData: delayedEndMancheData })
         }
@@ -208,44 +251,11 @@ function applyOnStatus(data) {
         ajouterALaMain(MAIN_USER, c);
     }
 
-    if (cartesEnAttenteAdv) {
-        if (cartesEnAttenteAdv == 2) {
-            for (let j = 0; j < 3; j++) {
-                let cid = cartes_en_attente[j];
-                let g = PLAY_CARTES[cid].geisha;
-                validerCarte(cid, cartesValidees[MAIN_ADV][g] < data.cv_adv[g] ? MAIN_ADV : MAIN_USER);
-                outlineElement(PLAY_CARTES[cid].el);
-            }
-        } else if (cartesEnAttenteAdv == 3) {
-            let c0 = cartes_en_attente[0]
-            let g0 = PLAY_CARTES[c0].geisha;
-            let c1 = cartes_en_attente[1]
-            let g1 = PLAY_CARTES[c1].geisha;
-            let c2 = cartes_en_attente[2]
-            let c3 = cartes_en_attente[3]
-
-            if ((g0 == g1 && cartesValidees[MAIN_ADV][g0] < data.cv_adv[g0] - 1) ||
-                (cartesValidees[MAIN_ADV][g0] < data.cv_adv[g0] && cartesValidees[MAIN_ADV][g1] < data.cv_adv[g1])) {
-                validerCarte(c1, MAIN_ADV);
-                validerCarte(c0, MAIN_ADV);
-                validerCarte(c2, MAIN_USER);
-                validerCarte(c3, MAIN_USER);
-            } else {
-                validerCarte(c0, MAIN_USER);
-                validerCarte(c1, MAIN_USER);
-                validerCarte(c3, MAIN_ADV);
-                validerCarte(c2, MAIN_ADV);
-            }
-            outlineElement(PLAY_CARTES[c0].el);
-            outlineElement(PLAY_CARTES[c1].el);
-            outlineElement(PLAY_CARTES[c2].el);
-            outlineElement(PLAY_CARTES[c3].el);
-        }
-        cartesEnAttenteAdv = 0;
-        cartes_en_attente.fill(-1);
-    }
-
     if (isLastStatus(data) || data.tour <= tour) return;
+    if (document.getElementById("song").value = "on") {
+        let audio = new Audio("/static/play/bell-me.mp3");
+        audio.play();
+    }
     setStatusMsg('user_turn');
     tour = data.tour;
 
@@ -292,6 +302,7 @@ function applyOnStatus(data) {
 
                 retournerGeisha(c, cartes[i]);
                 PLAY_CARTES[c].status = ATTENTE_CHOIX_PAQUETS[i < 2 ? 0 : 1];
+                PLAY_CARTES[c].statusPosition = i
                 outlineElement(PLAY_CARTES[c].el)
                 applyMove(PLAY_CARTES[c].el, moveToChoixPaquets(i))
             }
@@ -455,6 +466,7 @@ function initGame(msg) {
     MANCHE_STATUS.innerText = `1/1`
     joueur_user = msg?.joueur ?? 0;
     manche = -1;
+    delayedManche = -1;
     mains = [[], []]
     delayedEndMancheData = null;
     adv_name = msg?.champion ?? "Champion";
@@ -568,7 +580,7 @@ function onJetonClick(i) {
                 let cid = cartesSelectionnees[j];
                 let c = PLAY_CARTES[cid];
                 c.status = DEFAUSSER_SECRETEMENT;
-                c.statusPosition = i + 2;
+                c.statusPosition = j + 2;
                 c.selected = false;
                 cartes[j] = c.geisha;
                 applyMove(c.el, moveToDefausser(MAIN_USER));
@@ -603,6 +615,7 @@ function onJetonClick(i) {
                 let cid = cartesSelectionnees[j];
                 let c = PLAY_CARTES[cid];
                 c.status = ATTENTE_CHOIX_PAQUETS[Math.floor(j / 2)];
+                c.statusPosition = j;
                 c.selected = false;
                 cartes[j] = c.geisha;
 
@@ -790,6 +803,7 @@ function play() {
 
 const modal = /** @type {HTMLElement} */ (document.getElementById('new-match'));
 const selectOpponent = /** @type {HTMLSelectElement} */ (document.getElementById('opponent-select'));
+const inputMap = /** @type {HTMLTextAreaElement} */ (document.getElementById('map-input'));
 const selectFirst = /** @type {HTMLSelectElement} */ (document.getElementById('first-select'));
 function openNewGameModal() {
     canSelect = false;
@@ -801,8 +815,8 @@ function openNewGameModal() {
 
 function lancerMatch() {
     if (connection?.readyState == WebSocket.OPEN) {
-        sendStartGame(selectOpponent.value, selectFirst.value)
-        closeNewGameModal();
+        if (sendStartGame(selectOpponent.value, selectFirst.value, inputMap.value.trim() ? inputMap.value : undefined))
+            closeNewGameModal();
     }
 }
 
@@ -810,7 +824,7 @@ function closeNewGameModal() {
     modal?.classList.add('hide');
 }
 
-function sendStartGame(value, firstTxt) {
+function sendStartGame(value, firstTxt, map) {
     const CHAMP = "champ-";
     const USER = "user-";
     let first = undefined;
@@ -821,22 +835,25 @@ function sendStartGame(value, firstTxt) {
         first = false;
     }
     if (value.startsWith(CHAMP)) {
-        _sendStartGame(value.slice(CHAMP.length), true, first);
+        _sendStartGame(value.slice(CHAMP.length), true, first, map);
     } else if (value.startsWith("user-")) {
-        _sendStartGame(value.slice(USER.length), false, first);
+        if (map == undefined) {
+            _sendStartGame(value.slice(USER.length), false, first);
+        } else {
+            setStatusMsg("err_map_defi_users");
+            return false;
+        }
     } else {
-        _sendStartGame(value, true, first);
+        _sendStartGame(value, true, first, map);
     }
+    return true;
 }
 
-function _sendStartGame(name, isChampion, first) {
-    if (first == undefined) {
-        first = Math.random() < 0.5
-    }
+function _sendStartGame(name, isChampion, first, map) {
     if (isChampion) {
-        connection?.send(JSON.stringify({ msg: "run", champion: name, first }))
+        connection?.send(JSON.stringify({ msg: "run", champion: name, first, map }))
     } else {
-        connection?.send(JSON.stringify({ msg: "run", user: name, first }))
+        connection?.send(JSON.stringify({ msg: "run", user: name, first, map }))
     }
     initGame({ joueur: first ? 0 : 1, user: username, champion: name })
 }
@@ -854,6 +871,17 @@ function updatePlayPlaces() {
     STATUS_TITLE.style.left = `${GEISHAS_LEFT_OFFSET[3] * WIDTH_FACTOR}px`
     START_NEW_MANCHE_BUTTON.style.left = `${GEISHAS_LEFT_OFFSET[3] * WIDTH_FACTOR}px`;
     START_NEW_MANCHE_BUTTON.style.top = `${HEIGHT - 15}px`;
+}
+
+function song() {
+    currentvalue = document.getElementById('song').value;
+    if (currentvalue == "off") {
+        document.getElementById("logo-song").setAttribute("d", "M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z");
+        document.getElementById("song").value = "on";
+    } else {
+        document.getElementById("logo-song").setAttribute("d", "M17.25 9.75L19.5 12m0 0l2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-6l4.72-4.72a.75.75 0 011.28.531V19.94a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.506-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.395C2.806 8.757 3.63 8.25 4.51 8.25H6.75z");
+        document.getElementById("song").value = "off";
+    }
 }
 
 document.body.onresize = () => {
@@ -883,7 +911,7 @@ document.body.onresize = () => {
                 break;
             case ATTENTE_CHOIX_PAQUETS[0]:
             case ATTENTE_CHOIX_PAQUETS[1]:
-                applyMove(c.el, moveToChoixPaquets(c.status - ATTENTE_CHOIX_PAQUETS[0]));
+                applyMove(c.el, moveToChoixPaquets(c.statusPosition));
                 break;
             case VALIDER_ADV:
             case VALIDER_USER:
@@ -893,7 +921,7 @@ document.body.onresize = () => {
                 applyMove(c.el, moveToValidate(c.statusPosition));
                 break;
             case DEFAUSSER_SECRETEMENT:
-                applyMove(c.el, moveToDefausser(Math.floor(c.statusPosition / 2), c.statusPosition));
+                applyMove(c.el, moveToDefausser(Math.floor(c.statusPosition / 2), c.statusPosition % 2));
                 break;
         }
     }
@@ -928,6 +956,8 @@ const MESSAGES = {
     "err_action-err7": "Erreur: Erreur lors de l'action: action invalide",
     "err_cartes-value-error": "Erreur: Erreur lors de l'action: cartes invalides",
     "err_choix-value-error": "Erreur: Erreur lors de l'action: choix invalides",
+    err_map_defi_users: "Erreur: vous ne pouvez pas définir de distributions de cartes lors d'un défi !",
+    err_invalid_map: "Erreur: Distribution des cartes invalide !",
     get err_defi_reject() {
         return `${adv_name} a rejeté votre défi.`
     }

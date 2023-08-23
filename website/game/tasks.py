@@ -197,13 +197,14 @@ def isolate_init(client_id):
     tries = 0
     while True:
         r = subprocess.run(['isolate', '--init', '--box-id', str(box_id)], stderr=PIPE)
-        if r.returncode != 0:
-            print("Box unusable ?", r.stderr.decode())
-            tries += 1
-            if tries >= MAX_ISOLATE_TRY:
-                raise Exception("Impossible to find free box")
-            box_id = (box_id + 2) % MAX_ISOLATE
-        break
+        if r.returncode == 0:
+            break
+        print("Box unusable ?", r.stderr.decode())
+        tries += 1
+        if tries >= MAX_ISOLATE_TRY:
+            raise Exception("Impossible to find free box")
+        box_id = (box_id + 2) % MAX_ISOLATE
+        continue
     return box_id
 
 def isolate_cleanup(box_id):

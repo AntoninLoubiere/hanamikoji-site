@@ -14,6 +14,7 @@ import traceback
 from authentication.models import User
 from game.models import Champion
 from game.tasks import get_build_dir, isolate_cleanup, isolate_init, run_client, run_server
+from game.views import parse_map, write_map
 from website.settings import ISOLATE_TIMEOUT, MEDIA_ROOT, SERVER_TIMEOUT
 
 FORCE_STOP_TIMEOUT = 30
@@ -30,7 +31,7 @@ def get_champion(name):
 class Game:
     games: "dict[str, Game]" = {}
     waiting_defi: "dict[str, str]" = {}
-    def __init__(self, channel, player1, player2, other_user=None, forward_to_game=None) -> None:
+    def __init__(self, channel, player1, player2, other_user=None, forward_to_game=None, map=None) -> None:
         self.player1 = player1
         self.player2 = player2
         self.waiting_user = None
@@ -44,6 +45,14 @@ class Game:
         self.is_running = False
         assert self.waiting_user != self.game_name
         self.stopped = None
+        if map is None:
+            self.map = []
+            l = [0, 0, 1, 1, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 6]
+            for _ in range(3):
+                shuffle(l)
+                self.map.append(l.copy())
+        else:
+            self.map = map
 
     @classmethod
     async def new_game(cls, channel: "PlayConsumer", msg):
@@ -51,16 +60,16 @@ class Game:
             if cls.games[channel.username].is_running:
                 await channel.send_json({"msg": "err", "code": "already-running"})
                 return
-            cls.games[channel.username].stop()
+            await cls.games[channel.username].stop()
             game = cls.games.get(channel.username, None)
             if game is not None:
-                game.del_game()
+                await game.del_game()
 
         if 'first' in msg and not isinstance(msg['first'], bool):
             await channel.send_json({"msg": "err", "code": "request"})
             return
 
-        first = msg.get(msg['first'], None)
+        first = msg.get('first', None)
         if first is None:
             first = random() < 0.5
 
@@ -70,11 +79,21 @@ class Game:
                 await channel.send_json({"msg": "err", "code": "unk-champion"})
                 return
 
+            mapTxt = msg.get('map', '')
+            map = parse_map(mapTxt)
+            if map is None and mapTxt.strip():
+                await channel.send_json({"msg": "err", "code": "invalid_map"})
+                return
+
             if first:
-                await cls(channel, channel, champion).start()
+                await cls(channel, channel, champion, map=map).start()
             else:
-                await cls(channel, champion, channel).start()
+                await cls(channel, champion, channel, map=map).start()
         elif 'user' in msg and isinstance(msg['user'], str):
+            if 'map' in msg:
+                await channel.send_json({"msg": "err", "code": "map_defi_users"})
+                return
+
             other_user = msg['user']
             if other_user == channel.username:
                 await channel.send_json({"msg": "err", "code": "self-match"})
@@ -106,16 +125,19 @@ class Game:
         else:
             await channel.send_json({"msg": "err", "code": "request"})
 
-    def del_game(self):
+    async def del_game(self):
         del self.games[self.game_name]
         if self.waiting_user in self.waiting_defi and self.waiting_defi[self.waiting_user] == self.game_name:
             del self.waiting_defi[self.waiting_user]
+            channel = PlayConsumer.channels.get(self.waiting_user, None)
+            if channel is not None:
+                await channel.send_json({"msg": "defi-cancel", "user": self.game_name})
 
     def is_player(self, player, username):
         return isinstance(player, PlayConsumer) and player.username == username
 
     async def register_new_channel(self, channel: "PlayConsumer"):
-        self.stop()
+        await self.stop()
         if self.is_player(self.player1, channel.username):
             asyncio.create_task(self.player1.send_json({"msg": "err", "code": "new-channel"}))
         if self.is_player(self.player2, channel.username):
@@ -172,10 +194,7 @@ class Game:
 
         map_file = match_dir / 'map.txt'
         with open(map_file, 'w') as fiw:
-            cards = [0, 0, 1, 1, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 6]
-            for _ in range(3):
-                shuffle(cards)
-                fiw.write(" ".join(map(str, cards)) + "\n")
+            write_map(fiw, self.map)
 
         # Lancement du match
         # Build the domain sockets
@@ -220,7 +239,7 @@ class Game:
                 user_channel = self.player1
 
             if champ is not None:
-                content = "Vous n'avez pas accès à cette sortie.\n".encode()
+                content = "Vous n'avez pas acces à cette sortie.\n".encode()
                 if isinstance(user_channel, PlayConsumer) and user_channel.scope['user'].pk == champ.uploader_id:
                     content = await proc.stdout.read()
 
@@ -246,12 +265,12 @@ class Game:
         if self.waiting_user:
             game = self.games[self.waiting_user]
             if game is not None:
-                game.on_other_end()
-        self.del_game()
+                await game.on_other_end()
+        await self.del_game()
 
-    def on_other_end(self):
+    async def on_other_end(self):
         self.is_running = False
-        self.del_game()
+        await self.del_game()
 
         match_dir = PLAY_MATCH_DIR / self.waiting_user
         out_dir = PLAY_MATCH_DIR / self.game_name
@@ -313,13 +332,13 @@ class Game:
         if send_channel is not None:
             await send_channel.send_json({"msg": "choix", "choix": data['choix']})
 
-    def stop(self):
+    async def stop(self):
         print("Stopping", self.game_name)
         if not self.is_running and self.game_name in self.games:
-            self.del_game()
+            await self.del_game()
 
         if self.forward_to_game is not None:
-            return self.forward_to_game.stop()
+            return await self.forward_to_game.stop()
 
         if self.stopped is None:
             self.stopped = datetime.now()
@@ -366,7 +385,7 @@ class Game:
             if player.connected:
                 await player.send(line)
             else:
-                self.stop()
+                await self.stop()
 
 class PlayConsumer(AsyncJsonWebsocketConsumer):
     channels: "dict[str, PlayConsumer]" = {}
@@ -389,7 +408,7 @@ class PlayConsumer(AsyncJsonWebsocketConsumer):
         self.connected = False
         game = Game.games.get(self.username, None)
         if game is not None and (game.player1 is self or game.player2 is self):
-            game.stop()
+            await game.stop()
 
         channel = self.channels.get(self.username, None)
         if channel is self:
@@ -416,7 +435,7 @@ class PlayConsumer(AsyncJsonWebsocketConsumer):
             if game is None:
                 await self.send_json({"msg": "err", "code": "no-game"})
                 return
-            game.stop()
+            await game.stop()
         elif msg == 'defi-reject':
             other_username = content.get('user', '')
             game = Game.games.get(other_username, None)
@@ -427,6 +446,6 @@ class PlayConsumer(AsyncJsonWebsocketConsumer):
             channel = self.channels.get(other_username, None)
             if channel is not None:
                 await channel.send_json({"msg": "err", "code": "defi_reject"})
-            game.stop()
+            await game.stop()
 
 

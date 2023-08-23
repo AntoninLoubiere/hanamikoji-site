@@ -500,3 +500,9 @@ iframe {
 #red {
     color: red
 }
+
+.cartes-input {
+    display: block;
+    width: 42ch;
+    height: 6em;
+}

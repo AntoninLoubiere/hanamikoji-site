@@ -162,10 +162,11 @@ body, #game-parent {
     padding: .5rem;
     width: max-content;
     z-index: 1000;
+    transform: translateX(-100%);
 }
 
 #info-section-1 {
-    transform: translate(0, -100%);
+    transform: translate(-100%, -100%);
 }
 
 .info-name {
