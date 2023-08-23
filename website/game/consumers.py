@@ -51,10 +51,10 @@ class Game:
             if cls.games[channel.username].is_running:
                 await channel.send_json({"msg": "err", "code": "already-running"})
                 return
-            cls.games[channel.username].stop()
+            await cls.games[channel.username].stop()
             game = cls.games.get(channel.username, None)
             if game is not None:
-                game.del_game()
+                await game.del_game()
 
         if 'first' in msg and not isinstance(msg['first'], bool):
             await channel.send_json({"msg": "err", "code": "request"})
@@ -106,16 +106,19 @@ class Game:
         else:
             await channel.send_json({"msg": "err", "code": "request"})
 
-    def del_game(self):
+    async def del_game(self):
         del self.games[self.game_name]
         if self.waiting_user in self.waiting_defi and self.waiting_defi[self.waiting_user] == self.game_name:
             del self.waiting_defi[self.waiting_user]
+            channel = PlayConsumer.channels.get(self.waiting_user, None)
+            if channel is not None:
+                await channel.send_json({"msg": "defi-cancel", "user": self.game_name})
 
     def is_player(self, player, username):
         return isinstance(player, PlayConsumer) and player.username == username
 
     async def register_new_channel(self, channel: "PlayConsumer"):
-        self.stop()
+        await self.stop()
         if self.is_player(self.player1, channel.username):
             asyncio.create_task(self.player1.send_json({"msg": "err", "code": "new-channel"}))
         if self.is_player(self.player2, channel.username):
@@ -246,12 +249,12 @@ class Game:
         if self.waiting_user:
             game = self.games[self.waiting_user]
             if game is not None:
-                game.on_other_end()
-        self.del_game()
+                await game.on_other_end()
+        await self.del_game()
 
-    def on_other_end(self):
+    async def on_other_end(self):
         self.is_running = False
-        self.del_game()
+        await self.del_game()
 
         match_dir = PLAY_MATCH_DIR / self.waiting_user
         out_dir = PLAY_MATCH_DIR / self.game_name
@@ -313,13 +316,13 @@ class Game:
         if send_channel is not None:
             await send_channel.send_json({"msg": "choix", "choix": data['choix']})
 
-    def stop(self):
+    async def stop(self):
         print("Stopping", self.game_name)
         if not self.is_running and self.game_name in self.games:
-            self.del_game()
+            await self.del_game()
 
         if self.forward_to_game is not None:
-            return self.forward_to_game.stop()
+            return await self.forward_to_game.stop()
 
         if self.stopped is None:
             self.stopped = datetime.now()
@@ -366,7 +369,7 @@ class Game:
             if player.connected:
                 await player.send(line)
             else:
-                self.stop()
+                await self.stop()
 
 class PlayConsumer(AsyncJsonWebsocketConsumer):
     channels: "dict[str, PlayConsumer]" = {}
@@ -389,7 +392,7 @@ class PlayConsumer(AsyncJsonWebsocketConsumer):
         self.connected = False
         game = Game.games.get(self.username, None)
         if game is not None and (game.player1 is self or game.player2 is self):
-            game.stop()
+            await game.stop()
 
         channel = self.channels.get(self.username, None)
         if channel is self:
@@ -416,7 +419,7 @@ class PlayConsumer(AsyncJsonWebsocketConsumer):
             if game is None:
                 await self.send_json({"msg": "err", "code": "no-game"})
                 return
-            game.stop()
+            await game.stop()
         elif msg == 'defi-reject':
             other_username = content.get('user', '')
             game = Game.games.get(other_username, None)
@@ -427,6 +430,6 @@ class PlayConsumer(AsyncJsonWebsocketConsumer):
             channel = self.channels.get(other_username, None)
             if channel is not None:
                 await channel.send_json({"msg": "err", "code": "defi_reject"})
-            game.stop()
+            await game.stop()
 
 

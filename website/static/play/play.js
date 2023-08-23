@@ -104,6 +104,10 @@ function onMessage(msg) {
         case 'defi':
             showDefi(msg.user);
             break;
+        case 'defi-cancel':
+            if (defiUsername == msg.user)
+                hideDefi();
+            break;
         case 'new-manche':
             onNewMancheMsg(msg);
             break;
