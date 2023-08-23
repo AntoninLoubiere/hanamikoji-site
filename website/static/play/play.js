@@ -246,7 +246,7 @@ function applyOnStatus(data) {
     }
 
     if (isLastStatus(data) || data.tour <= tour) return;
-    let audio = new Audio("bell-me.mp3");
+    let audio = new Audio("/static/play/bell-me.mp3");
     audio.play();
     setStatusMsg('user_turn');
     tour = data.tour;
