@@ -252,7 +252,7 @@ function applyOnStatus(data) {
     }
 
     if (isLastStatus(data) || data.tour <= tour) return;
-    if (document.getElementById("song").value = "on") {
+    if (document.getElementById("song").value == "on") {
         let audio = new Audio("/static/play/bell-me.mp3");
         audio.play();
     }
