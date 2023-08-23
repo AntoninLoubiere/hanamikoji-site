@@ -135,12 +135,10 @@ function place_texts() {
 
     t = /** @type{HTMLElement} */ (document.getElementById('info-section-0'));
     t.style.top = '0';
-    t.style.left = `${(LAST_COLUMN - GEISHA_SPACE_BETWEEN / 2) * WIDTH_FACTOR}px`;
-    t.style.maxWidth = `${(GEISHA_SPACE_BETWEEN * 1.2) * WIDTH_FACTOR}px`
+    t.style.left = `${BASE_WIDTH * WIDTH_FACTOR}px`;
     t = /** @type{HTMLElement} */ (document.getElementById('info-section-1'));
     t.style.top = `${HEIGHT}px`;
-    t.style.left = `${(LAST_COLUMN - GEISHA_SPACE_BETWEEN / 2) * WIDTH_FACTOR}px`;
-    t.style.maxWidth = `${(GEISHA_SPACE_BETWEEN * 1.2) * WIDTH_FACTOR}px`
+    t.style.left = `${BASE_WIDTH * WIDTH_FACTOR}px`;
 }
 
 const CARTE_HEIGHT_OFFSET = 35;

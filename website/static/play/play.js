@@ -138,6 +138,43 @@ function onNewMancheMsg(data) {
 let delayedEndMancheData = null;
 
 function onStatus(data) {
+    if (cartesEnAttenteAdv) {
+        if (cartesEnAttenteAdv == 2) {
+            for (let j = 0; j < 3; j++) {
+                let cid = cartes_en_attente[j];
+                let g = PLAY_CARTES[cid].geisha;
+                validerCarte(cid, cartesValidees[MAIN_ADV][g] < data.cv_adv[g] ? MAIN_ADV : MAIN_USER);
+                outlineElement(PLAY_CARTES[cid].el);
+            }
+        } else if (cartesEnAttenteAdv == 3) {
+            let c0 = cartes_en_attente[0]
+            let g0 = PLAY_CARTES[c0].geisha;
+            let c1 = cartes_en_attente[1]
+            let g1 = PLAY_CARTES[c1].geisha;
+            let c2 = cartes_en_attente[2]
+            let c3 = cartes_en_attente[3]
+
+            if ((g0 == g1 && cartesValidees[MAIN_ADV][g0] < data.cv_adv[g0] - 1) ||
+                (cartesValidees[MAIN_ADV][g0] < data.cv_adv[g0] && cartesValidees[MAIN_ADV][g1] < data.cv_adv[g1])) {
+                validerCarte(c1, MAIN_ADV);
+                validerCarte(c0, MAIN_ADV);
+                validerCarte(c2, MAIN_USER);
+                validerCarte(c3, MAIN_USER);
+            } else {
+                validerCarte(c0, MAIN_USER);
+                validerCarte(c1, MAIN_USER);
+                validerCarte(c3, MAIN_ADV);
+                validerCarte(c2, MAIN_ADV);
+            }
+            outlineElement(PLAY_CARTES[c0].el);
+            outlineElement(PLAY_CARTES[c1].el);
+            outlineElement(PLAY_CARTES[c2].el);
+            outlineElement(PLAY_CARTES[c3].el);
+        }
+        cartesEnAttenteAdv = 0;
+        cartes_en_attente.fill(-1);
+    }
+
     if (manche != data.manche) {
         if (delayedEndMancheData != null) {
             console.log("DATA LOSS ?", { data, delayedEndData: delayedEndMancheData })
@@ -208,43 +245,6 @@ function applyOnStatus(data) {
         ajouterALaMain(MAIN_USER, c);
     }
 
-    if (cartesEnAttenteAdv) {
-        if (cartesEnAttenteAdv == 2) {
-            for (let j = 0; j < 3; j++) {
-                let cid = cartes_en_attente[j];
-                let g = PLAY_CARTES[cid].geisha;
-                validerCarte(cid, cartesValidees[MAIN_ADV][g] < data.cv_adv[g] ? MAIN_ADV : MAIN_USER);
-                outlineElement(PLAY_CARTES[cid].el);
-            }
-        } else if (cartesEnAttenteAdv == 3) {
-            let c0 = cartes_en_attente[0]
-            let g0 = PLAY_CARTES[c0].geisha;
-            let c1 = cartes_en_attente[1]
-            let g1 = PLAY_CARTES[c1].geisha;
-            let c2 = cartes_en_attente[2]
-            let c3 = cartes_en_attente[3]
-
-            if ((g0 == g1 && cartesValidees[MAIN_ADV][g0] < data.cv_adv[g0] - 1) ||
-                (cartesValidees[MAIN_ADV][g0] < data.cv_adv[g0] && cartesValidees[MAIN_ADV][g1] < data.cv_adv[g1])) {
-                validerCarte(c1, MAIN_ADV);
-                validerCarte(c0, MAIN_ADV);
-                validerCarte(c2, MAIN_USER);
-                validerCarte(c3, MAIN_USER);
-            } else {
-                validerCarte(c0, MAIN_USER);
-                validerCarte(c1, MAIN_USER);
-                validerCarte(c3, MAIN_ADV);
-                validerCarte(c2, MAIN_ADV);
-            }
-            outlineElement(PLAY_CARTES[c0].el);
-            outlineElement(PLAY_CARTES[c1].el);
-            outlineElement(PLAY_CARTES[c2].el);
-            outlineElement(PLAY_CARTES[c3].el);
-        }
-        cartesEnAttenteAdv = 0;
-        cartes_en_attente.fill(-1);
-    }
-
     if (isLastStatus(data) || data.tour <= tour) return;
     setStatusMsg('user_turn');
     tour = data.tour;
@@ -292,6 +292,7 @@ function applyOnStatus(data) {
 
                 retournerGeisha(c, cartes[i]);
                 PLAY_CARTES[c].status = ATTENTE_CHOIX_PAQUETS[i < 2 ? 0 : 1];
+                PLAY_CARTES[c].statusPosition = i
                 outlineElement(PLAY_CARTES[c].el)
                 applyMove(PLAY_CARTES[c].el, moveToChoixPaquets(i))
             }
@@ -568,7 +569,7 @@ function onJetonClick(i) {
                 let cid = cartesSelectionnees[j];
                 let c = PLAY_CARTES[cid];
                 c.status = DEFAUSSER_SECRETEMENT;
-                c.statusPosition = i + 2;
+                c.statusPosition = j + 2;
                 c.selected = false;
                 cartes[j] = c.geisha;
                 applyMove(c.el, moveToDefausser(MAIN_USER));
@@ -603,6 +604,7 @@ function onJetonClick(i) {
                 let cid = cartesSelectionnees[j];
                 let c = PLAY_CARTES[cid];
                 c.status = ATTENTE_CHOIX_PAQUETS[Math.floor(j / 2)];
+                c.statusPosition = j;
                 c.selected = false;
                 cartes[j] = c.geisha;
 
@@ -883,7 +885,7 @@ document.body.onresize = () => {
                 break;
             case ATTENTE_CHOIX_PAQUETS[0]:
             case ATTENTE_CHOIX_PAQUETS[1]:
-                applyMove(c.el, moveToChoixPaquets(c.status - ATTENTE_CHOIX_PAQUETS[0]));
+                applyMove(c.el, moveToChoixPaquets(c.statusPosition));
                 break;
             case VALIDER_ADV:
             case VALIDER_USER:
@@ -893,7 +895,7 @@ document.body.onresize = () => {
                 applyMove(c.el, moveToValidate(c.statusPosition));
                 break;
             case DEFAUSSER_SECRETEMENT:
-                applyMove(c.el, moveToDefausser(Math.floor(c.statusPosition / 2), c.statusPosition));
+                applyMove(c.el, moveToDefausser(Math.floor(c.statusPosition / 2), c.statusPosition % 2));
                 break;
         }
     }
