@@ -127,6 +127,7 @@ function onMessage(msg) {
 function onNewMancheMsg(data) {
     MANCHE_STATUS.innerText = `${data.manche + 1}/${data.tour + 1}`
     updateScore(data);
+    delayedManche = data.manche;
     if (data.manche == 0) {
         startNewManche();
     } else {
@@ -136,7 +137,7 @@ function onNewMancheMsg(data) {
 }
 
 let delayedEndMancheData = null;
-
+let delayedManche = -1;
 function onStatus(data) {
     if (cartesEnAttenteAdv) {
         if (cartesEnAttenteAdv == 2) {
@@ -175,7 +176,8 @@ function onStatus(data) {
         cartes_en_attente.fill(-1);
     }
 
-    if (manche != data.manche) {
+    if (delayedManche != data.manche) {
+        delayedManche = data.manche;
         if (delayedEndMancheData != null) {
             console.log("DATA LOSS ?", { data, delayedEndData: delayedEndMancheData })
         }
@@ -456,6 +458,7 @@ function initGame(msg) {
     MANCHE_STATUS.innerText = `1/1`
     joueur_user = msg?.joueur ?? 0;
     manche = -1;
+    delayedManche = -1;
     mains = [[], []]
     delayedEndMancheData = null;
     adv_name = msg?.champion ?? "Champion";
