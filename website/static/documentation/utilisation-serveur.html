@@ -56,6 +56,24 @@ l’archive des patrons de code).</p>
 terminé de compiler votre code, il suffit de se rendre sur la <a class="reference external" href="/add_match/">page lancer
 un match</a>.</p>
 </section>
+<section id="distribution-des-cartes">
+<h2>Distribution des cartes<a class="headerlink" href="#distribution-des-cartes" title="Lien permanent vers cette rubrique">¶</a></h2>
+<p>Sur chaque ligne les cartes sont représentées par des entiers de 0 à 6 séparés par des espaces, et
+représentent dans l’ordre, les 6 cartes distribuées au premier joueur au début de la manche, les 6
+suivantes sont les 6 cartes de début de manche du second joueur. Ensuite les cartes représentent les
+cartes piochées à chaque tour, la dernière carte n’est donc pas utilisé.</p>
+<p>Exemple :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">3</span> <span class="mi">3</span> <span class="mi">4</span> <span class="mi">4</span> <span class="mi">4</span> <span class="mi">6</span> <span class="mi">5</span> <span class="mi">6</span> <span class="mi">5</span> <span class="mi">6</span> <span class="mi">5</span> <span class="mi">6</span> <span class="mi">5</span> <span class="mi">6</span>
+<span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">3</span> <span class="mi">3</span> <span class="mi">4</span> <span class="mi">4</span> <span class="mi">4</span> <span class="mi">5</span> <span class="mi">6</span> <span class="mi">5</span> <span class="mi">6</span> <span class="mi">5</span> <span class="mi">6</span> <span class="mi">5</span> <span class="mi">6</span> <span class="mi">6</span>
+<span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">3</span> <span class="mi">3</span> <span class="mi">4</span> <span class="mi">4</span> <span class="mi">4</span> <span class="mi">6</span> <span class="mi">5</span> <span class="mi">6</span> <span class="mi">5</span> <span class="mi">6</span> <span class="mi">5</span> <span class="mi">6</span> <span class="mi">5</span> <span class="mi">6</span>
+</pre></div>
+</div>
+<p>Ici, lors des trois manches, le premier joueur reçoit les cartes Geisha de valeur 2 (0, 1, 2) et les
+cartes de valeur 4 (5). Le second joueur reçoit les cartes Geisha de valeur 3 (3, 4) et quatre
+cartes de valeur 5 (6). Une carte de valeur 5 est défaussée.</p>
+<p>Vous pouvez utiliser <a class="reference external" href="_static/random_map.py">ce script python</a> pour générer une distribution de
+cartes aléatoire.</p>
+</section>
 <section id="langages-supportes">
 <h2>Langages supportés<a class="headerlink" href="#langages-supportes" title="Lien permanent vers cette rubrique">¶</a></h2>
 <p>Langages supportés :</p>
@@ -100,6 +118,7 @@ un match</a>.</p>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Utilisation avec le serveur</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#televerser-un-champion-sur-le-serveur">Téléverser un champion sur le serveur</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#lancer-un-match">Lancer un match</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#distribution-des-cartes">Distribution des cartes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#langages-supportes">Langages supportés</a></li>
 </ul>
 </li>

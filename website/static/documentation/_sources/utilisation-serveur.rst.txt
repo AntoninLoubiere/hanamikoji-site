@@ -27,6 +27,29 @@ Une fois que les champions ont été téléversés et que le serveur a
 terminé de compiler votre code, il suffit de se rendre sur la `page lancer
 un match </add_match/>`_.
 
+Distribution des cartes
+=======================
+
+Sur chaque ligne les cartes sont représentées par des entiers de 0 à 6 séparés par des espaces, et
+représentent dans l'ordre, les 6 cartes distribuées au premier joueur au début de la manche, les 6
+suivantes sont les 6 cartes de début de manche du second joueur. Ensuite les cartes représentent les
+cartes piochées à chaque tour, la dernière carte n'est donc pas utilisé.
+
+Exemple :
+
+.. code::
+
+   0 0 1 1 2 2 3 3 3 4 4 4 6 5 6 5 6 5 6 5 6
+   0 0 1 1 2 2 3 3 3 4 4 4 5 6 5 6 5 6 5 6 6
+   0 0 1 1 2 2 3 3 3 4 4 4 6 5 6 5 6 5 6 5 6
+
+Ici, lors des trois manches, le premier joueur reçoit les cartes Geisha de valeur 2 (0, 1, 2) et les
+cartes de valeur 4 (5). Le second joueur reçoit les cartes Geisha de valeur 3 (3, 4) et quatre
+cartes de valeur 5 (6). Une carte de valeur 5 est défaussée.
+
+Vous pouvez utiliser `ce script python <_static/random_map.py>`_ pour générer une distribution de
+cartes aléatoire.
+
 
 Langages supportés
 ==================
