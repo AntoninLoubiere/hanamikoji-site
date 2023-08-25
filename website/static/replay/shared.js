@@ -173,7 +173,7 @@ function moveToPioche(position, overrideZIndex) {
         topAnchor: .5,
         left: PIOCHE_LEFT_OFFSET,
         leftFixed: true,
-        zIndex: overrideZIndex ?? 10 + position
+        zIndex: overrideZIndex ?? position
     }
 }
 

@@ -26,11 +26,6 @@ function processDump(dump) {
     let cartes_positions = new Array(NB_CARTES_TOTALES);
     /** @type {(JOUEUR1|JOUEUR2|EGALITE)[]} */
     let cartes_main = new Array(NB_CARTES_TOTALES).fill(EGALITE);
-    /** @type {number[]} */
-    let cartes_main_position = new Array(NB_CARTES_TOTALES).fill(-1);
-    /** @type {boolean[]} */
-    let cartes_invalidated_main = new Array(NB_CARTES_TOTALES).fill(false);
-    let cartes_main_length = [0, 0]
     /** @type {number[][]} */
     let cartes_geisha = [
         new Array(NB_GEISHAS).fill(0),
@@ -48,27 +43,14 @@ function processDump(dump) {
     /**
      * @param {number} c
      * @param {moveAction} t
-     * @param {boolean} [bypassPiocheCheck]
+     * @param {boolean} [moveToMain]
      */
-    function moveCard(c, t, bypassPiocheCheck) {
+    function moveCard(c, t, moveToMain) {
         let act = { a: applyMoveTransition, f: cartes_positions[c], t, el: CARTES[c] }
         cartes_positions[c] = t;
-
-        if (!bypassPiocheCheck && cartes_main[c] != EGALITE) {
-            let p = cartes_main_position[c];
-            let j = cartes_main[c];
-            cartes_main_length[j]--;
+        if (!moveToMain) {
             cartes_main[c] = EGALITE;
-            cartes_main_position[c] = -1;
-
-            for (let cd = 0; cd < NB_CARTES_TOTALES; cd++) {
-                if (cartes_main[cd] == j && cartes_main_position[cd] > p) {
-                    cartes_main_position[cd]--;
-                    cartes_invalidated_main[cd] = true;
-                }
-            }
         }
-
         return act;
     }
 
@@ -82,11 +64,8 @@ function processDump(dump) {
     }
 
     function addToMain(p, c) {
-        let act = moveCard(c, moveToMain(p, cartes_main_length[p]))
         cartes_main[c] = p;
-        cartes_main_position[c] = cartes_main_length[p];
-        cartes_main_length[p]++;
-        return act;
+        console.log("Move to main", p, c)
     }
 
     function addToGeisha(j, c) {
@@ -100,16 +79,17 @@ function processDump(dump) {
 
     function refreshMain() {
         let acts = []
+        let idx = [0, 0]
         for (let c = 0; c < NB_CARTES_TOTALES; c++) {
-            if (cartes_invalidated_main[c]) {
-                cartes_invalidated_main[c] = false;
-                if (cartes_main[c] != EGALITE) {
-                    acts.push(moveCard(c, moveToMain(cartes_main[c], cartes_main_position[c]), true))
-                }
+            let j = cartes_main[c];
+            if (j != EGALITE) {
+                acts.push(moveCard(c, moveToMain(j, idx[j]++), true))
+                console.log("REFRESH", c, j, idx[j] - 1)
             }
         }
         return acts;
     }
+
 
     function bougerMarker(j, g) {
         let act = {
@@ -219,11 +199,8 @@ function processDump(dump) {
         }
 
         cartes_main.fill(EGALITE);
-        cartes_main_position.fill(-1);
-        cartes_main_length = [0, 0]
         cartes_geisha[0].fill(0);
         cartes_geisha[1].fill(0);
-        cartes_invalidated_main.fill(false);
         cartes_validees.fill(-1);
         cartes_choix_3.fill(-1);
         cartes_choix_paquets.fill(-1);
@@ -254,7 +231,8 @@ function processDump(dump) {
                 c,
                 moveToPioche(PIOCHE_CENTRAL_POSITION, 10 + 2 * j)
             )
-            acts[10 - 2 * j] = addToMain(JOUEUR1, c);
+            addToMain(JOUEUR1, c)
+            acts[10 - 2 * j] = moveCard(c, moveToMain(JOUEUR1, j), true);
         }
 
         for (let j = 0; j < 6; j++) {
@@ -263,7 +241,8 @@ function processDump(dump) {
                 c,
                 moveToPioche(PIOCHE_CENTRAL_POSITION, 9 + 2 * j)
             )
-            acts[11 - 2 * j] = addToMain(JOUEUR2, c);
+            addToMain(JOUEUR2, c)
+            acts[11 - 2 * j] = moveCard(c, moveToMain(JOUEUR2, j), true);
         }
 
         pioche = [];
@@ -387,6 +366,7 @@ function processDump(dump) {
 
     for (let currentLine = 0; currentLine < dump.length; currentLine++) {
         const dumpData = dump[currentLine];
+        console.info(`${dumpData.manche}/${dumpData.tour}`)
         let joueur_courant = (dumpData.manche + dumpData.tour) % 2 == 0 ? JOUEUR1 : JOUEUR2;
         if (manche != dumpData.manche) {
             if (dumpData.manche > 0) {
@@ -401,7 +381,8 @@ function processDump(dump) {
         }
 
         if (!attente_reponse) {
-            actions.push({ acts: [addToMain(joueur_courant, pioche.pop()), updateManche(dumpData)] });
+            addToMain(joueur_courant, pioche.pop())
+            actions.push({ acts: [updateManche(dumpData), ...refreshMain()] });
         }
 
         if (dumpData.attente_reponse) {
