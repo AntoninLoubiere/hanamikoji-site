@@ -65,7 +65,6 @@ function processDump(dump) {
 
     function addToMain(p, c) {
         cartes_main[c] = p;
-        console.log("Move to main", p, c)
     }
 
     function addToGeisha(j, c) {
@@ -84,7 +83,6 @@ function processDump(dump) {
             let j = cartes_main[c];
             if (j != EGALITE) {
                 acts.push(moveCard(c, moveToMain(j, idx[j]++), true))
-                console.log("REFRESH", c, j, idx[j] - 1)
             }
         }
         return acts;

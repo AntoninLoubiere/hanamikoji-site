@@ -365,7 +365,6 @@ function ajouterALaMain(j, c) {
     let pos;
     let geisha = PLAY_CARTES[c].geisha;
     for (pos = 0; pos < mains[j].length && PLAY_CARTES[mains[j][pos]].geisha <= geisha; pos++) { }
-    console.log(pos, mains[j], c);
     mains[j].splice(pos, 0, c);
     PLAY_CARTES[c].status = j;
     PLAY_CARTES[c].statusPosition = -1;
