@@ -362,11 +362,15 @@ function adversairePiocherEndAction() {
 }
 
 function ajouterALaMain(j, c) {
-    let pos = mains[j].push(c) - 1;
+    let pos;
+    let geisha = PLAY_CARTES[c].geisha;
+    for (pos = 0; pos < mains[j].length && PLAY_CARTES[mains[j][pos]].geisha <= geisha; pos++) { }
+    mains[j].splice(pos, 0, c);
     PLAY_CARTES[c].status = j;
-    PLAY_CARTES[c].statusPosition = pos;
+    PLAY_CARTES[c].statusPosition = -1;
     PLAY_CARTES[c].selected = false;
-    applyMove(PLAY_CARTES[c].el, moveToMain(j, pos));
+    updateMain(j)
+    // applyMove(PLAY_CARTES[c].el, moveToMain(j, pos));
 }
 
 function popCardFromAdv() {
@@ -653,7 +657,7 @@ function updateMain(j) {
         let c = PLAY_CARTES[mains[j][i]]
         if (i != c.statusPosition) {
             c.statusPosition = i;
-            applyMove(c.el, moveToMain(MAIN_USER, i));
+            applyMove(c.el, moveToMain(j, i));
         }
     }
 }
