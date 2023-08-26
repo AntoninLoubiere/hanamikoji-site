@@ -43,8 +43,9 @@ Exemple :
    0 0 1 1 2 2 3 3 3 4 4 4 5 6 5 6 5 6 5 6 6
    0 0 1 1 2 2 3 3 3 4 4 4 6 5 6 5 6 5 6 5 6
 
-Ici, lors des trois manches, le premier joueur reçoit les cartes Geisha de valeur 2 (0, 1, 2) et les
-cartes de valeur 4 (5). Le second joueur reçoit les cartes Geisha de valeur 3 (3, 4) et quatre
+Ici, lors des trois manches, le premier joueur reçoit les cartes Geisha de valeur 2 (0, 1, 2) puis
+piochera au fur et à mesure les cartes de valeur 4 (5).
+Le second joueur reçoit les cartes Geisha de valeur 3 (3, 4) puis piochera au fur et à mesure quatre
 cartes de valeur 5 (6). Une carte de valeur 5 est défaussée.
 
 Vous pouvez utiliser `ce script python <_static/random_map.py>`_ pour générer une distribution de
