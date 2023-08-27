@@ -45,6 +45,10 @@ function showDefi(username) {
     defiModal.classList.remove('hide');
     defiUsername = username;
     defiName.innerText = username;
+    if (document.getElementById("song").value == "on") {
+        let audio_s = new Audio("/static/play/bell-start.wav");
+        audio_s.play();
+    }
 }
 
 function hideDefi() {
