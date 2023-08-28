@@ -8,7 +8,7 @@
     {% else %}
     Début
     {% endif %}
-    <h1>Match N°{{ tournoi.id_tournoi }}</h1>
+    <h1>Tournoi N°{{ tournoi.id_tournoi }}</h1>
     {% if suivant != None %}
     <a href="{% url 'tournoi_detail' suivant.id_tournoi %}">Suivant</a>
     {% else %}
