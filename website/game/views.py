@@ -35,7 +35,10 @@ def home(request):
         Q(champion1__in=champions) |
         Q(champion2__in=champions)
     ).order_by("-date")[:5]
-    return render(request, 'game/home.html',context={'champions':champions,'matchs':matchs})
+    paginator = Paginator(champions,7)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'game/home.html',context={'champions':page_obj,'matchs':matchs})
 
 @login_required
 def champion_upload(request):
@@ -128,7 +131,7 @@ def champions(request):
 
     if champions is None:
         champions =  Champion.objects.all().order_by("-date")
-    paginator = Paginator(champions,15)
+    paginator = Paginator(champions,10)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
     return render(request,'game/champions.html',context={'champions':page_obj, 'users': users, 'message':message, 'filter_id': filter_id})
