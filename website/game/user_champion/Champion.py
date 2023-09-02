@@ -43,7 +43,8 @@ class Context:
                 "c3": self.derniere_action.c3,
                 "c4": self.derniere_action.c4
             },
-            "attente_reponse": attente_reponse, "joueur": self.moi, "nb_cartes_adv": nb_cartes(self.adv)
+            "attente_reponse": attente_reponse, "joueur": self.moi, "nb_cartes_adv": nb_cartes(self.adv),
+            "is_end": is_end,
         })
 
     def jouer_tour(self):
