@@ -381,6 +381,7 @@ class Game:
                         "possession": data["possession"],
                         "manche": data["manche"],
                         "tour": data["tour"],
+                        "derniere_action": data["derniere_action"],
                     })
             if player.connected:
                 await player.send(line)

@@ -73,7 +73,7 @@
     </form>
     {% endif %}
     {% elif tournoi.status == 'EC' %}
-    Nombres de matchs terminés : {{ termine }} sur {{ nb_matchs }}. Date de fin estimée : {% if temps_restant >= 0 %}{{ temps_restant }} minute{{ temps_restant|pluralize }} ({{ fin_date|date:"H:i" }}){% else %} bientôt {% endif %}
+    Nombres de matchs terminés : {{ termine }} sur {{ nb_matchs }}. Date de fin estimée : {% if fin_date %}dans {{ fin_date|timeuntil }} ({{ fin_date|date:"H:i" }}){% else %} bientôt {% endif %}
     {% elif tournoi.status == 'FI' %}
     <table>
         <caption>Classement</caption>

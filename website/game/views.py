@@ -315,7 +315,6 @@ def tournoi_detail(request,id):
     termine = 0
     match_matrix = None
     nb_matchs = matchs.count()
-    temps_restant = -1
     fin_date = None
     if tournoi.status == Tournoi.Status.EN_COURS:
         termine = Match.objects.filter(Q(tournoi=tournoi) & (Q(status=Match.Status.FINI) | Q(status=Match.Status.ERREUR))).count()
@@ -323,8 +322,7 @@ def tournoi_detail(request,id):
             on_end_tournoi(tournoi)
         elif termine > 0:
             delta = (timezone.now() - tournoi.date_lancement) * nb_matchs / termine
-            fin_date = delta + timezone.now()
-            temps_restant = int(delta.total_seconds() // 60)
+            fin_date = delta + tournoi.date_lancement
 
     if tournoi.status == Tournoi.Status.FINI:
         nb_ins = inscrits.count()
@@ -347,7 +345,7 @@ def tournoi_detail(request,id):
         'match_matrix': match_matrix, 'champions_select': champions_select,
         'champions_non_select': champions_non_select, 'nb_select': champions_select.count(),
         'message': message, 'timer': tournoi.date_lancement.isoformat() if tournoi.status == Tournoi.Status.LANCEMENT_PROGRAMMÉ else '',
-        'temps_restant': temps_restant, 'fin_date': fin_date, 'suivant':suiv, 'precedent':prec})
+        'fin_date': fin_date, 'suivant':suiv, 'precedent':prec})
 
 @login_required
 def update_tournoi(request,id):

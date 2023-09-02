@@ -147,7 +147,7 @@ function onNewMancheMsg(data) {
 let delayedEndMancheData = null;
 let delayedManche = -1;
 function onStatus(data) {
-    if (cartesEnAttenteAdv) {
+    if (cartesEnAttenteAdv && data.tour > 0) {
         if (cartesEnAttenteAdv == 2) {
             for (let j = 0; j < 3; j++) {
                 let cid = cartes_en_attente[j];
@@ -182,6 +182,30 @@ function onStatus(data) {
         }
         cartesEnAttenteAdv = 0;
         cartes_en_attente.fill(-1);
+    }
+
+    let last_act = data.derniere_action.act;
+    if (last_act < NB_ACTIONS && actionsAvailable[0][last_act]) {
+        JETONS[MAIN_ADV][last_act].classList.add('jeton-off');
+        actionsAvailable[MAIN_ADV][last_act] = false;
+
+        if (last_act == 0) {
+            let c = PLAY_CARTES[popCardFromAdv()]
+            c.status = VALIDER_SECRETEMENT;
+            c.statusPosition = MAIN_ADV;
+            applyMove(c.el, moveToValidate(MAIN_ADV));
+            applyMove(JETONS[MAIN_ADV][0], moveToValidate(MAIN_ADV));
+            outlineElement(c.el);
+        } else if (last_act == 1) {
+            for (let i = 0; i < 2; i++) {
+                let c = PLAY_CARTES[popCardFromAdv()];
+                c.status = DEFAUSSER_SECRETEMENT;
+                c.statusPosition = i;
+                applyMove(c.el, moveToDefausser(MAIN_ADV, i));
+                outlineElement(c.el);
+            }
+            applyMove(JETONS[MAIN_ADV][1], moveToDefausser(MAIN_ADV, 0));
+        }
     }
 
     if (delayedManche != data.manche) {
@@ -240,13 +264,16 @@ function applyOnStatus(data) {
             TEXT_TITLES[1].classList.add('hide');
         }
 
-        for (let j = mains[MAIN_USER].length; j < data.cartes.length; j++) {
-            ajouterALaMain(MAIN_USER, piocherCarte());
-        }
+        if (!data.is_end) {
+            for (let j = mains[MAIN_USER].length; j < data.cartes.length; j++) {
+                ajouterALaMain(MAIN_USER, piocherCarte());
+            }
 
-        for (let i = 0; i < data.cartes.length; i++) {
-            let c = mains[MAIN_USER][i];
-            retournerGeisha(c, data.cartes[i]);
+            for (let i = 0; i < data.cartes.length; i++) {
+                let c = mains[MAIN_USER][i];
+                retournerGeisha(c, data.cartes[i]);
+            }
+
         }
 
     } else if (data.carte_piochee >= 0 && data.tour > tour) {
@@ -262,30 +289,7 @@ function applyOnStatus(data) {
     }
     setStatusMsg('user_turn');
     tour = data.tour;
-
     let last_act = data.derniere_action.act;
-    if (tour > 0 && last_act < NB_ACTIONS && actionsAvailable[0][last_act]) {
-        JETONS[MAIN_ADV][last_act].classList.add('jeton-off');
-        actionsAvailable[MAIN_ADV][last_act] = false;
-
-        if (last_act == 0) {
-            let c = PLAY_CARTES[popCardFromAdv()]
-            c.status = VALIDER_SECRETEMENT;
-            c.statusPosition = MAIN_ADV;
-            applyMove(c.el, moveToValidate(MAIN_ADV));
-            applyMove(JETONS[MAIN_ADV][0], moveToValidate(MAIN_ADV));
-            outlineElement(c.el);
-        } else if (last_act == 1) {
-            for (let i = 0; i < 2; i++) {
-                let c = PLAY_CARTES[popCardFromAdv()];
-                c.status = DEFAUSSER_SECRETEMENT;
-                c.statusPosition = i;
-                applyMove(c.el, moveToDefausser(MAIN_ADV, i));
-                outlineElement(c.el);
-            }
-            applyMove(JETONS[MAIN_ADV][1], moveToDefausser(MAIN_ADV, 0));
-        }
-    }
 
     if (data.attente_reponse) {
         if (last_act == 2) {
@@ -881,14 +885,14 @@ function updatePlayPlaces() {
     START_NEW_MANCHE_BUTTON.style.top = `${HEIGHT - 15}px`;
 }
 
-const SONG_BUTTON = document.getElementById('song')
+const SONG_BUTTON = /** @type {HTMLButtonElement & {value: string}} */ (document.getElementById('song'));
 function song() {
-    currentvalue = SONG_BUTTON.value;
+    let currentvalue = SONG_BUTTON.value;
     if (currentvalue == "off") {
-        document.getElementById("logo-song").setAttribute("d", "M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z");
+        document.getElementById("logo-song")?.setAttribute("d", "M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z");
         SONG_BUTTON.value = "on";
     } else {
-        document.getElementById("logo-song").setAttribute("d", "M17.25 9.75L19.5 12m0 0l2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-6l4.72-4.72a.75.75 0 011.28.531V19.94a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.506-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.395C2.806 8.757 3.63 8.25 4.51 8.25H6.75z");
+        document.getElementById("logo-song")?.setAttribute("d", "M17.25 9.75L19.5 12m0 0l2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-6l4.72-4.72a.75.75 0 011.28.531V19.94a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.506-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.395C2.806 8.757 3.63 8.25 4.51 8.25H6.75z");
         SONG_BUTTON.value = "off";
     }
 }
