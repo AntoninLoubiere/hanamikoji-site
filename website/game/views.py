@@ -284,8 +284,6 @@ def add_tournoi(request):
 @login_required
 def tournoi_detail(request,id):
     tournoi = get_object_or_404(Tournoi,id_tournoi=id)
-    suiv = Tournoi.objects.filter(date_lancement__gt=tournoi.date_lancement).order_by('date_lancement').first()
-    prec = Tournoi.objects.filter(date_lancement__lt=tournoi.date_lancement).order_by('-date_lancement').first()
     message = ''
     if request.method == 'POST':
         nb_inscrits = Inscrit.objects.filter(tournoi=tournoi,champion__uploader=request.user).count()
@@ -314,6 +312,12 @@ def tournoi_detail(request,id):
     if tournoi.status == Tournoi.Status.LANCEMENT_PROGRAMMÉ or tournoi.status == Tournoi.Status.EN_ATTENTE:
         champions_selected_ids = champions_select.values_list('champion', flat=True).all()
         champions_non_select = Champion.objects.filter(uploader=request.user, compilation_status=Champion.Status.FINI).exclude(id__in=champions_selected_ids).order_by("-date")
+
+    suiv = None
+    prec = None
+    if tournoi.date_lancement is not None:
+        suiv = Tournoi.objects.filter(date_lancement__gt=tournoi.date_lancement).order_by('date_lancement').first()
+        prec = Tournoi.objects.filter(date_lancement__lt=tournoi.date_lancement).order_by('-date_lancement').first()
 
     termine = 0
     match_matrix = None
