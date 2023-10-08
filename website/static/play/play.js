@@ -135,7 +135,6 @@ function onMessage(msg) {
 function onNewMancheMsg(data) {
     MANCHE_STATUS.innerText = `${data.manche + 1}/${data.tour + 1}`
     updateScore(data);
-    delayedManche = data.manche;
     if (data.manche == 0) {
         startNewManche();
     } else {
@@ -145,7 +144,6 @@ function onNewMancheMsg(data) {
 }
 
 let delayedEndMancheData = null;
-let delayedManche = -1;
 function onStatus(data) {
     if (cartesEnAttenteAdv && data.tour > 0) {
         if (cartesEnAttenteAdv == 2) {
@@ -184,32 +182,7 @@ function onStatus(data) {
         cartes_en_attente.fill(-1);
     }
 
-    let last_act = data.derniere_action.act;
-    if (last_act < NB_ACTIONS && actionsAvailable[0][last_act]) {
-        JETONS[MAIN_ADV][last_act].classList.add('jeton-off');
-        actionsAvailable[MAIN_ADV][last_act] = false;
-
-        if (last_act == 0) {
-            let c = PLAY_CARTES[popCardFromAdv()]
-            c.status = VALIDER_SECRETEMENT;
-            c.statusPosition = MAIN_ADV;
-            applyMove(c.el, moveToValidate(MAIN_ADV));
-            applyMove(JETONS[MAIN_ADV][0], moveToValidate(MAIN_ADV));
-            outlineElement(c.el);
-        } else if (last_act == 1) {
-            for (let i = 0; i < 2; i++) {
-                let c = PLAY_CARTES[popCardFromAdv()];
-                c.status = DEFAUSSER_SECRETEMENT;
-                c.statusPosition = i;
-                applyMove(c.el, moveToDefausser(MAIN_ADV, i));
-                outlineElement(c.el);
-            }
-            applyMove(JETONS[MAIN_ADV][1], moveToDefausser(MAIN_ADV, 0));
-        }
-    }
-
-    if (delayedManche != data.manche) {
-        delayedManche = data.manche;
+    if (manche != data.manche) {
         if (delayedEndMancheData != null) {
             console.log("DATA LOSS ?", { data, delayedEndData: delayedEndMancheData })
         }
@@ -257,6 +230,31 @@ function isLastStatus(data) {
 
 function applyOnStatus(data) {
     MANCHE_STATUS.innerText = `${data.manche + 1}/${data.tour + 1}`
+
+    let last_act = data.derniere_action.act;
+    if (last_act < NB_ACTIONS && actionsAvailable[0][last_act]) {
+        JETONS[MAIN_ADV][last_act].classList.add('jeton-off');
+        actionsAvailable[MAIN_ADV][last_act] = false;
+
+        if (last_act == 0) {
+            let c = PLAY_CARTES[popCardFromAdv()]
+            c.status = VALIDER_SECRETEMENT;
+            c.statusPosition = MAIN_ADV;
+            applyMove(c.el, moveToValidate(MAIN_ADV));
+            applyMove(JETONS[MAIN_ADV][0], moveToValidate(MAIN_ADV));
+            outlineElement(c.el);
+        } else if (last_act == 1) {
+            for (let i = 0; i < 2; i++) {
+                let c = PLAY_CARTES[popCardFromAdv()];
+                c.status = DEFAUSSER_SECRETEMENT;
+                c.statusPosition = i;
+                applyMove(c.el, moveToDefausser(MAIN_ADV, i));
+                outlineElement(c.el);
+            }
+            applyMove(JETONS[MAIN_ADV][1], moveToDefausser(MAIN_ADV, 0));
+        }
+    }
+
     if (manche != data.manche) {
         manche = data.manche;
         if (manche == 0) {
@@ -289,7 +287,6 @@ function applyOnStatus(data) {
     }
     setStatusMsg('user_turn');
     tour = data.tour;
-    let last_act = data.derniere_action.act;
 
     if (data.attente_reponse) {
         if (last_act == 2) {
@@ -478,7 +475,6 @@ function initGame(msg) {
     MANCHE_STATUS.innerText = `1/1`
     joueur_user = msg?.joueur ?? 0;
     manche = -1;
-    delayedManche = -1;
     mains = [[], []]
     delayedEndMancheData = null;
     adv_name = msg?.champion ?? "Champion";
