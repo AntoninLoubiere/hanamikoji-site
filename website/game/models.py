@@ -36,7 +36,7 @@ class Champion(models.Model):
 
 
     code = models.FileField(validators = [FileExtensionValidator(allowed_extensions=["zip","tgz","tar.gz"])])
-    nom = models.CharField(max_length=128, blank=False,unique=True, validators=[RegexValidator("^[a-zA-Z-_0-9]*$", "Les seuls caractères valides sont les lettres, les chiffres, - et _.")])
+    nom = models.CharField(max_length=32, blank=False,unique=True, validators=[RegexValidator("^[a-zA-Z-_0-9]*$", "Les seuls caractères valides sont les lettres, les chiffres, - et _.")])
     uploader = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     date = models.DateTimeField(auto_now_add=True, editable = False)
     compilation_status = models.CharField(choices=Status.choices, max_length=2, editable=False, default=Status.EN_ATTENTE)
@@ -75,19 +75,21 @@ class Tournoi(models.Model):
     class Status(models.TextChoices):
         EN_ATTENTE = 'EA'
         EN_COURS = 'EC'
+        CREATION_DES_MATCHS = 'CM'
         FINI = 'FI'
         ERREUR = 'ER'
         LANCEMENT_PROGRAMMÉ = 'LP'
 
+    # La fonction ne peut pas être supprimée car utilisée dans d'anciennes migrations
     def valide_date(date):
         if date.timestamp() < datetime.datetime.now().timestamp():
-                raise ValidationError("Vous ne pouvez pas lancer le tournoi avant qu'il soit créé !")
+            raise ValidationError("Vous ne pouvez pas lancer le tournoi avant qu'il soit créé !")
 
     id_tournoi = models.AutoField(primary_key=True, unique=True)
     status = models.CharField(choices=Status.choices,max_length=2, default=Status.EN_ATTENTE,)
     max_champions = models.IntegerField(default=3)
     nb_matchs = models.IntegerField(default=10, validators=[even])
-    date_lancement = models.DateTimeField(validators=[valide_date], null=True, blank=True)
+    date_lancement = models.DateTimeField(null=True, blank=True)
     schedule = models.ForeignKey(Schedule, blank=True, null=True, default=None, on_delete=models.SET_NULL)
 
     class Meta:
@@ -115,6 +117,14 @@ class Tournoi(models.Model):
             if self.schedule is not None:
                 self.schedule.delete()
                 self.schedule = None
+
+    def clean(self):
+        super().clean()
+        if self.status == self.Status.LANCEMENT_PROGRAMMÉ and self.date_lancement is not None:
+            if self.date_lancement <= timezone.now():
+                raise ValidationError({
+                    'date_lancement': "La date de lancement doit être dans le futur pour un tournoi programmé."
+                })
 
 
     def nb_champions(self):

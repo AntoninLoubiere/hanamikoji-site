@@ -20,6 +20,8 @@
     <span class="content-center">{{ tournoi.get_status_display }}</span>
     {% if tournoi.status == 'LP' %}
         <span class="content-center">Le {{ tournoi.date_lancement|date:"l d F Y à H:i" }}</span>
+    {% elif tournoi.status == 'CM' %}
+        <span class="content-center">Création des matchs le {{ tournoi.date_lancement|date:"l d F Y à H:i" }}</span>
     {% elif tournoi.status != 'EA' %}
         <span class="content-center">Lancé le {{ tournoi.date_lancement|date:"l d F Y à H:i" }}</span>
     {% endif %}
@@ -72,6 +74,8 @@
         </select>
     </form>
     {% endif %}
+    {% elif tournoi.status == 'CM' %}
+    Création des matchs en cours.
     {% elif tournoi.status == 'EC' %}
     Nombres de matchs terminés : {{ termine }} sur {{ nb_matchs }}. Date de fin estimée : {% if fin_date %}dans {{ fin_date|timeuntil }} ({{ fin_date|date:"H:i" }}){% else %} bientôt {% endif %}
     {% elif tournoi.status == 'FI' %}

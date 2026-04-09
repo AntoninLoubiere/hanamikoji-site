@@ -32,7 +32,7 @@
     </form>
     {% endif %}
     <a class="content-center" href="{% url 'play' %}?adv=champ-{{ champion.nom }}" target="_blank">Défier</a>
-    {% if champion.compile_task and champion.status == 'FI' or champion.compile_task and champion.status == 'ER' %}
+    {% if champion.compile_task and champion.compilation_status == 'FI' or champion.compile_task and champion.compilation_status == 'ER' %}
         <div class="content-center">Sortie de la compilation :</div>
         <div class="command-output">{{ champion.compile_task.result }}</div>
     {% endif%}

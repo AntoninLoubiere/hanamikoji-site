@@ -3,8 +3,16 @@ from django.contrib.auth.models import AbstractUser
 import datetime
 from django.core.cache import cache
 from django.conf import settings
+import django.contrib.auth.validators
 
 class User(AbstractUser):
+    username = models.CharField(
+        max_length=32,
+        unique=True,
+        help_text='Required. 32 characters or fewer. Letters, digits and @/./+/-/_ only.',
+        validators=[django.contrib.auth.validators.UnicodeUsernameValidator()],
+        error_messages={'unique': 'A user with that username already exists.'},
+    )
     first_name = None
     last_name = None
     create_tournament = models.BooleanField(default=False)

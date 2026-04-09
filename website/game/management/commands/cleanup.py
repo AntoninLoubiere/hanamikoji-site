@@ -2,13 +2,22 @@ from pathlib import Path
 import shutil
 from django.core.management.base import BaseCommand
 
-from game.tasks import MATCH_OUT_DIR, PATH_BUILD_DIR
+from game.tasks import MATCH_OUT_DIR, PATH_BUILD_DIR, get_build_dir
 from game.models import Champion, Match
 from website.settings import MEDIA_ROOT
 from django_q.tasks import Task
 
-def get_champion_build_dir_name(c):
-    return Path(c.code.path).with_suffix('')
+def get_used_build_top_levels():
+    top_levels = set()
+    for champion in Champion.objects.all():
+        try:
+            rel = get_build_dir(champion).relative_to(PATH_BUILD_DIR)
+        except ValueError:
+            # Defensive fallback in case a custom storage returns an unexpected path
+            continue
+        if len(rel.parts) > 0:
+            top_levels.add(rel.parts[0])
+    return top_levels
 
 def get_files(actual_dirs, used):
     ad_idx = 0
@@ -74,9 +83,9 @@ class Command(BaseCommand):
         delete_files = not options['dry']
 
         print("# Delete build dir :")
-        actual_dirs = sorted(PATH_BUILD_DIR.iterdir(), key=lambda d: d.name)
-        used_champions = sorted(map(get_champion_build_dir_name, Champion.objects.all()))
-        to_delete_build = get_files(actual_dirs, used_champions)
+        actual_dirs = sorted((d for d in PATH_BUILD_DIR.iterdir() if d.is_dir()), key=lambda d: d.name)
+        used_top_levels = get_used_build_top_levels()
+        to_delete_build = [d for d in actual_dirs if d.name not in used_top_levels]
 
         for d in to_delete_build:
             print("Delete build champion:", d.name)

@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -20,12 +21,39 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-lekz6(#zrsb6xw@t5g9cs3excx(+o&75p)g$go)_8x3z)@y3th'
+SECRET_KEY = os.environ.get(
+    'DJANGO_SECRET_KEY',
+    'django-insecure-lekz6(#zrsb6xw@t5g9cs3excx(+o&75p)g$go)_8x3z)@y3th'
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DJANGO_ENV = os.environ.get('DJANGO_ENV', 'developpement').strip().lower()
+if DJANGO_ENV not in ('developpement', 'production'):
+    DJANGO_ENV = 'developpement'
 
-ALLOWED_HOSTS = []
+default_debug = 'False' if DJANGO_ENV == 'production' else 'True'
+DEBUG = os.environ.get('DJANGO_DEBUG', default_debug).strip() == 'True'
+
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.environ.get('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
+    if host.strip()
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get(
+        'DJANGO_CSRF_TRUSTED_ORIGINS',
+        'http://127.0.0.1:8000,http://localhost:8000',
+    ).split(',')
+    if origin.strip()
+]
+
+if DJANGO_ENV == 'production':
+    # Nginx termine TLS et informe Django via X-Forwarded-Proto.
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 
 # Application definition
@@ -88,18 +116,24 @@ WSGI_APPLICATION = 'website.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-        # "timeout": 120,
-        # "ENGINE": "django.db.backends.postgresql",
-        # "OPTIONS": {
-        #     "service": "hanamikoji",
-        #     "passfile": ".pg_hanamikoji_pass",
-        # },
+if DJANGO_ENV == 'production':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('DB_NAME', 'hanamikoji'),
+            'USER': os.environ.get('DB_USER', 'hanamikoji'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+            'HOST': os.environ.get('DB_HOST', 'db'),
+            'PORT': os.environ.get('DB_PORT', '5432'),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
@@ -138,10 +172,10 @@ DATE_FORMAT = "l d F y"
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [
-    BASE_DIR / "static",
-    "static/",
+    BASE_DIR / 'static',
 ]
 
 # Default primary key field type
@@ -181,6 +215,6 @@ MAX_ISOLATE = 1000
 SERVER_TIMEOUT = 1500
 MATCH_SERVER_TIMEOUT = 4000
 ISOLATE_TIMEOUT = 90
-MATCH_RULES = '/usr/lib/libhanamikoji.so'
+MATCH_RULES = os.environ.get('MATCH_RULES', '/usr/lib64/libhanamikoji.so')
 STECHEC_SERVER = '/usr/bin/stechec2-server'
 STECHEC_CLIENT = '/usr/bin/stechec2-client'

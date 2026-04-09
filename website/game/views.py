@@ -250,7 +250,6 @@ def redirection_code(request, name):
     champion = get_object_or_404(Champion,nom=name)
     if champion.uploader_id == request.user.id or request.user.is_superuser:
         response = HttpResponse()
-
         for ext, mime in MIMES_TYPES.items():
             if champion.code.name.endswith(ext):
                 response["Content-Type"] = mime
